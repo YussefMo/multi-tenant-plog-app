@@ -22,6 +22,8 @@ Create the databases and point `.env` at them:
 ```sql
 CREATE DATABASE multi_tenant_plog_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE multi_tenant_plog_app_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE multi_tenant_plog_owner CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE multi_tenant_plog_owner_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ```dotenv
@@ -31,12 +33,26 @@ DB_PORT=3306
 DB_DATABASE=multi_tenant_plog_app
 DB_USERNAME=root
 DB_PASSWORD=
+
+OWNER_DB_CONNECTION=mysql
+OWNER_DB_HOST=127.0.0.1
+OWNER_DB_PORT=3306
+OWNER_DB_DATABASE=multi_tenant_plog_owner
+OWNER_DB_USERNAME=root
+OWNER_DB_PASSWORD=
 ```
 
-Then migrate:
+Then migrate both databases:
 
 ```bash
 php artisan migrate
+php artisan migrate --database=owner --path=database/migrations/owner
+```
+
+Create the initial owner:
+
+```bash
+php artisan owner:create
 ```
 
 ## Run
@@ -57,18 +73,22 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint                   | Auth           | Description                 |
-| ------ | -------------------------- | -------------- | --------------------------- |
-| GET    | `/api/v1/csrf-token`       | Public         | Tenant CSRF token + session |
-| GET    | `/api/v1/owner/csrf-token` | Public         | Owner CSRF token + session  |
-| GET    | `/api/v1/health`           | Public         | Health check                |
-| GET    | `/api/v1/user`             | Tenant session | Current authenticated user  |
+| Method | Endpoint                    | Auth           | Description                 |
+| ------ | --------------------------- | -------------- | --------------------------- |
+| GET    | `/api/v1/csrf-token`        | Public         | Tenant CSRF token + session |
+| GET    | `/api/v1/owner/csrf-token`  | Public         | Owner CSRF token + session  |
+| POST   | `/api/v1/owner/auth/login`  | Public (CSRF)  | Owner login                 |
+| POST   | `/api/v1/owner/auth/logout` | Owner session  | Owner logout                |
+| GET    | `/api/v1/owner/auth/me`     | Owner session  | Current owner               |
+| GET    | `/api/v1/health`            | Public         | Health check                |
+| GET    | `/api/v1/user`              | Tenant session | Current authenticated user  |
 
 Tenant and owner sessions use separate cookies: `tenant_session` and `owner_session`. Authentication is session + CSRF, not JWT or Bearer tokens.
 
 1. `GET /api/v1/csrf-token` (or `/api/v1/owner/csrf-token`) to start the realm session and get the token.
 2. Send `X-CSRF-TOKEN: <csrf_token>` on every POST/PUT/PATCH/DELETE.
-3. The built-in `XSRF-TOKEN` cookie is not used.
+3. Login regenerates the session and rotates the CSRF token; use the new `csrf_token` returned in the login response.
+4. The built-in `XSRF-TOKEN` cookie is not used.
 
 ```bash
 curl http://multi-tenant-plog.test/api/v1/health
