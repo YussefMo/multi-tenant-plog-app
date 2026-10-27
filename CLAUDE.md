@@ -152,4 +152,12 @@ Before relying on a package's API, confirm its installed version:
 - Property/PHPDoc comments and short heading comments that explain something important are allowed.
 - Do not comment obvious code; keep comments minimal.
 
+=== project type-check rules ===
+
+# Type checking
+
+- Run `composer type-check` after PHP changes.
+- Use `composer type-check:files` to list only the files with type errors.
+- Fix undefined types/classes instead of ignoring them.
+
 </laravel-boost-guidelines>

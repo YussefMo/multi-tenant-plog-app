@@ -1,0 +1,18 @@
+includes:
+  - vendor/larastan/larastan/extension.neon
+
+parameters:
+  level: 5
+  paths:
+    - app
+    - bin
+    - bootstrap/app.php
+    - bootstrap/providers.php
+    - config
+    - database
+    - public
+    - routes
+    - tests
+    - artisan
+    - .php-cs-fixer.dist.php
+  treatPhpDocTypesAsCertain: false

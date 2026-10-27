@@ -114,6 +114,13 @@ composer format:check
 
 PHP CS Fixer formats PHP (`app/`, `bootstrap/`, `config/`, `database/`, `public/`, `routes/`, `tests/`, `artisan`); Prettier handles JSON, Markdown, YAML, and other supported files. Laravel Pint is not used.
 
+## Type checking
+
+```bash
+composer type-check        # full PHPStan + Larastan report
+composer type-check:files  # only files containing type errors
+```
+
 ## Structure
 
 - `routes/api.php` — all application routes (API only)

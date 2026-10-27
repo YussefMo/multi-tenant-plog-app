@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Owner\OwnerAuthController;
+use App\Http\Controllers\Api\Owner\TenantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,14 @@ Route::prefix('v1')->group(function () {
 
       Route::get('/auth/me', [OwnerAuthController::class, 'me'])
         ->name('api.v1.owner.me');
+
+      Route::apiResource('tenants', TenantController::class)
+        ->except(['create', 'edit'])
+        ->names('api.v1.owner.tenants');
+
+      Route::post('/tenants/{tenant}/restore', [TenantController::class, 'restore'])
+        ->withTrashed()
+        ->name('api.v1.owner.tenants.restore');
     });
   });
 

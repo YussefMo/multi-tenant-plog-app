@@ -16,6 +16,7 @@
   "require-dev": {
     "fakerphp/faker": "^1.23",
     "friendsofphp/php-cs-fixer": "^3.95",
+    "larastan/larastan": "^3.13",
     "laravel/boost": "^2.10",
     "laravel/pail": "^1.2.5",
     "laravel/pao": "^1.0.6",
@@ -58,6 +59,8 @@
       "@php vendor/bin/php-cs-fixer fix --dry-run --diff",
       "npm run format:check"
     ],
+    "type-check": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
+    "type-check:files": "@php bin/type-check.php",
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover --ansi"
