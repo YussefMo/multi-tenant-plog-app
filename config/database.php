@@ -64,6 +64,26 @@ return [
       ]) : [],
     ],
 
+    'owner' => [
+      'driver' => env('OWNER_DB_CONNECTION', 'mysql'),
+      'url' => env('OWNER_DB_URL'),
+      'host' => env('OWNER_DB_HOST', '127.0.0.1'),
+      'port' => env('OWNER_DB_PORT', '3306'),
+      'database' => env('OWNER_DB_DATABASE', 'multi_tenant_plog_owner'),
+      'username' => env('OWNER_DB_USERNAME', 'root'),
+      'password' => env('OWNER_DB_PASSWORD', ''),
+      'unix_socket' => env('OWNER_DB_SOCKET', ''),
+      'charset' => env('OWNER_DB_CHARSET', 'utf8mb4'),
+      'collation' => env('OWNER_DB_COLLATION', 'utf8mb4_unicode_ci'),
+      'prefix' => '',
+      'prefix_indexes' => true,
+      'strict' => true,
+      'engine' => null,
+      'options' => extension_loaded('pdo_mysql') ? array_filter([
+        Mysql::ATTR_SSL_CA => env('OWNER_MYSQL_ATTR_SSL_CA'),
+      ]) : [],
+    ],
+
     'mariadb' => [
       'driver' => 'mariadb',
       'url' => env('DB_URL'),

@@ -132,6 +132,15 @@ return [
     Str::slug((string) env('APP_NAME', 'laravel')).'-session',
   ),
 
+  'tenant_cookie' => env(
+    'SESSION_COOKIE',
+    Str::slug((string) env('APP_NAME', 'laravel')).'-session',
+  ),
+
+  'owner_cookie' => env('OWNER_SESSION_COOKIE', 'owner_session'),
+
+  'owner_lifetime' => (int) env('OWNER_SESSION_LIFETIME', 120),
+
   /*
   |--------------------------------------------------------------------------
   | Session Cookie Path

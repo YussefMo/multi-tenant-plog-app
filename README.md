@@ -57,15 +57,21 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint         | Auth          | Description                |
-| ------ | ---------------- | ------------- | -------------------------- |
-| GET    | `/api/v1/health` | Public        | Health check               |
-| GET    | `/api/v1/user`   | Sanctum token | Current authenticated user |
+| Method | Endpoint                   | Auth           | Description                 |
+| ------ | -------------------------- | -------------- | --------------------------- |
+| GET    | `/api/v1/csrf-token`       | Public         | Tenant CSRF token + session |
+| GET    | `/api/v1/owner/csrf-token` | Public         | Owner CSRF token + session  |
+| GET    | `/api/v1/health`           | Public         | Health check                |
+| GET    | `/api/v1/user`             | Tenant session | Current authenticated user  |
 
-Authentication uses Laravel Sanctum personal access tokens (Bearer tokens), not session/SPA auth.
+Tenant and owner sessions use separate cookies: `tenant_session` and `owner_session`. Authentication is session + CSRF, not JWT or Bearer tokens.
+
+1. `GET /api/v1/csrf-token` (or `/api/v1/owner/csrf-token`) to start the realm session and get the token.
+2. Send `X-CSRF-TOKEN: <csrf_token>` on every POST/PUT/PATCH/DELETE.
+3. The built-in `XSRF-TOKEN` cookie is not used.
 
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://multi-tenant-plog.test/api/v1/health
 ```
 
 ## Tests

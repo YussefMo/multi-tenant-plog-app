@@ -143,4 +143,13 @@ Before relying on a package's API, confirm its installed version:
 - Run `composer format` after making changes, and `composer format:check` before finalizing.
 - Laravel Pint is not installed and must not be used.
 
+=== project comment rules ===
+
+# Comments
+
+- Only add comments for technical debt, unfinished features, or non-obvious intent.
+- Do not write large explanatory comment blocks.
+- Property/PHPDoc comments and short heading comments that explain something important are allowed.
+- Do not comment obvious code; keep comments minimal.
+
 </laravel-boost-guidelines>
