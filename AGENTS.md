@@ -8,6 +8,7 @@
 This application is a Laravel application running on PHP 8.3. Always use the APIs that match the installed major version of each package — do not assume a version.
 
 Before relying on a package's API, confirm its installed version:
+
 - PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
 - JS packages: check `package.json` for the installed versions.
 
@@ -119,13 +120,6 @@ Before relying on a package's API, confirm its installed version:
 - Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
 - When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
 
-=== pint/core rules ===
-
-# Laravel Pint Code Formatter
-
-- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
-
 === phpunit/core rules ===
 
 # PHPUnit
@@ -139,5 +133,14 @@ Before relying on a package's API, confirm its installed version:
 - Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
 - Rerun a test after each change to it.
 - Run `vendor/bin/phpunit` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
+
+=== project formatting rules ===
+
+# Formatting
+
+- Every file in this project uses 2-space indentation (`.editorconfig`).
+- PHP is formatted with PHP CS Fixer (`.php-cs-fixer.dist.php`); JSON, Markdown, YAML, and other Prettier-supported files are formatted with Prettier.
+- Run `composer format` after making changes, and `composer format:check` before finalizing.
+- Laravel Pint is not installed and must not be used.
 
 </laravel-boost-guidelines>

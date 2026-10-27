@@ -1,0 +1,9 @@
+/vendor
+/node_modules
+/storage
+/bootstrap/cache
+/public
+/composer.lock
+/package-lock.json
+/.php-cs-fixer.cache
+*.php

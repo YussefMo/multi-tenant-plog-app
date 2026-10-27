@@ -6,6 +6,7 @@ Backend-only Laravel 13 API application. No Blade views, no frontend assets, no 
 
 - PHP 8.3+
 - Composer 2
+- Node.js 24+ and npm (for Prettier)
 - MySQL / MariaDB
 
 ## Setup
@@ -56,10 +57,10 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint          | Auth          | Description           |
-| ------ | ----------------- | ------------- | --------------------- |
-| GET    | `/api/v1/health`  | Public        | Health check          |
-| GET    | `/api/v1/user`    | Sanctum token | Current authenticated user |
+| Method | Endpoint         | Auth          | Description                |
+| ------ | ---------------- | ------------- | -------------------------- |
+| GET    | `/api/v1/health` | Public        | Health check               |
+| GET    | `/api/v1/user`   | Sanctum token | Current authenticated user |
 
 Authentication uses Laravel Sanctum personal access tokens (Bearer tokens), not session/SPA auth.
 
@@ -74,6 +75,18 @@ Tests run against the MySQL test database configured in `phpunit.xml`.
 ```bash
 php artisan test
 ```
+
+## Formatting
+
+The project uses 2-space indentation everywhere.
+
+```bash
+npm install        # first time only
+composer format    # PHP CS Fixer + Prettier
+composer format:check
+```
+
+PHP CS Fixer formats PHP (`app/`, `bootstrap/`, `config/`, `database/`, `public/`, `routes/`, `tests/`, `artisan`); Prettier handles JSON, Markdown, YAML, and other supported files. Laravel Pint is not used.
 
 ## Structure
 

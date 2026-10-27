@@ -181,6 +181,7 @@ server {
 ```
 
 **Important:**
+
 - Nginx `root` must point to Laravel's `public/` directory, not the project root.
 - `fastcgi_pass` must match a real socket shown by `ls -la /run/php/`.
 - Never expose the whole Laravel project as the web root.
@@ -358,6 +359,7 @@ Make sure the FPM service is running and Nginx uses its actual socket.
 ### 404 Not Found
 
 Check that:
+
 1. Nginx points to `/home/youssef/projects/laravel-api/public`.
 2. The route exists.
 3. API routes are registered.
