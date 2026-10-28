@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePermission;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\ResolveSessionRealm;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
     $middleware->api(prepend: [
       ForceJsonResponse::class,
+    ]);
+
+    $middleware->alias([
+      'permission' => EnsurePermission::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions): void {
