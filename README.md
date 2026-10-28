@@ -75,27 +75,35 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint                     | Auth              | Description                 |
-| ------ | ---------------------------- | ----------------- | --------------------------- |
-| GET    | `/api/v1/csrf-token`         | Public            | Tenant CSRF token + session |
-| GET    | `/api/v1/owner/csrf-token`   | Public            | Owner CSRF token + session  |
-| POST   | `/api/v1/owner/auth/login`   | Public (CSRF)     | Owner login                 |
-| POST   | `/api/v1/owner/auth/logout`  | Owner session     | Owner logout                |
-| GET    | `/api/v1/owner/auth/me`      | Owner session     | Current owner               |
-| GET    | `/api/v1/health`             | Public            | Health check                |
-| GET    | `/api/v1/user`               | Tenant session    | Current authenticated user  |
-| GET    | `/api/v1/users`              | `users.view`      | List tenant users           |
-| POST   | `/api/v1/users`              | `users.create`    | Create tenant user          |
-| GET    | `/api/v1/users/{user}`       | `users.view`      | Show tenant user            |
-| PATCH  | `/api/v1/users/{user}`       | `users.update`    | Update tenant user          |
-| DELETE | `/api/v1/users/{user}`       | `users.delete`    | Delete tenant user          |
-| GET    | `/api/v1/profiles`           | `profiles.view`   | List permission profiles    |
-| POST   | `/api/v1/profiles`           | `profiles.create` | Create profile              |
-| GET    | `/api/v1/profiles/{profile}` | `profiles.view`   | Show profile                |
-| PATCH  | `/api/v1/profiles/{profile}` | `profiles.update` | Update profile              |
-| DELETE | `/api/v1/profiles/{profile}` | `profiles.delete` | Delete profile              |
+| Method | Endpoint                         | Auth                     | Description                 |
+| ------ | -------------------------------- | ------------------------ | --------------------------- |
+| GET    | `/api/v1/csrf-token`             | Public                   | Tenant CSRF token + session |
+| GET    | `/api/v1/owner/csrf-token`       | Public                   | Owner CSRF token + session  |
+| POST   | `/api/v1/owner/auth/login`       | Public (CSRF)            | Owner login                 |
+| POST   | `/api/v1/owner/auth/logout`      | Owner session            | Owner logout                |
+| GET    | `/api/v1/owner/auth/me`          | Owner session            | Current owner               |
+| GET    | `/api/v1/health`                 | Public                   | Health check                |
+| GET    | `/api/v1/user`                   | Tenant session           | Current authenticated user  |
+| POST   | `/api/v1/auth/login`             | Public (CSRF)            | Tenant login (email only)   |
+| POST   | `/api/v1/auth/accept-invitation` | Public (CSRF)            | Accept tenant invitation    |
+| POST   | `/api/v1/auth/logout`            | Tenant session           | Tenant logout               |
+| GET    | `/api/v1/auth/me`                | Tenant session           | Current tenant user         |
+| GET    | `/api/v1/tenant`                 | `tenant.settings.view`   | Tenant settings             |
+| PATCH  | `/api/v1/tenant`                 | `tenant.settings.update` | Update tenant settings      |
+| GET    | `/api/v1/users`                  | `users.view`             | List tenant users           |
+| POST   | `/api/v1/users`                  | `users.create`           | Create tenant user          |
+| GET    | `/api/v1/users/{user}`           | `users.view`             | Show tenant user            |
+| PATCH  | `/api/v1/users/{user}`           | `users.update`           | Update tenant user          |
+| DELETE | `/api/v1/users/{user}`           | `users.delete`           | Delete tenant user          |
+| GET    | `/api/v1/profiles`               | `profiles.view`          | List permission profiles    |
+| POST   | `/api/v1/profiles`               | `profiles.create`        | Create profile              |
+| GET    | `/api/v1/profiles/{profile}`     | `profiles.view`          | Show profile                |
+| PATCH  | `/api/v1/profiles/{profile}`     | `profiles.update`        | Update profile              |
+| DELETE | `/api/v1/profiles/{profile}`     | `profiles.delete`        | Delete profile              |
 
 All tenant endpoints require the tenant session. The `admin` role has `["*"]`; other roles use the presets in `config/permissions.php` plus their tenant-scoped profile and direct extras.
+
+Tenant login is **email + password only** — the tenant is resolved from the globally unique email. Login and `/auth/me` return a fresh `csrf_token`. Owner tenant creation provisions the first admin with a null password and a 7-day invitation; accepting it sets the password.
 
 Tenant and owner sessions use separate cookies: `tenant_session` and `owner_session`. Authentication is session + CSRF, not JWT or Bearer tokens.
 

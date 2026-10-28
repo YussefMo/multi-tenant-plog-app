@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\UserRole;
+use App\Models\Owner;
+use App\Models\Tenant;
+use App\Models\TenantInvitation;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+class TenantProvisioningService
+{
+  /**
+   * @return array{tenant: Tenant, admin: User, invitation: TenantInvitation, token: string}
+   */
+  public function provision(Owner $owner, array $data): array
+  {
+    return DB::transaction(function () use ($owner, $data): array {
+      $tenant = new Tenant([
+        'name' => $data['name'],
+        'category' => $data['category'] ?? null,
+      ]);
+      $tenant->owner_id = $owner->id;
+      $tenant->save();
+
+      $admin = new User([
+        'name' => $data['admin_name'],
+        'email' => $data['admin_email'],
+        'password' => null,
+        'role' => UserRole::Admin,
+        'extra_permissions' => [],
+      ]);
+      $admin->tenant_id = $tenant->id;
+      $admin->is_support = false;
+      $admin->permissions = ['*'];
+      $admin->save();
+
+      $token = Str::random(64);
+      $invitation = new TenantInvitation([
+        'email' => $admin->email,
+        'role' => UserRole::Admin,
+        'permissions' => ['*'],
+        'token_hash' => hash('sha256', $token),
+        'expires_at' => now()->addDays(7),
+      ]);
+      $invitation->tenant_id = $tenant->id;
+      $invitation->save();
+
+      return compact('tenant', 'admin', 'invitation', 'token');
+    });
+  }
+}

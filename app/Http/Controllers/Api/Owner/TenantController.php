@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\StoreTenantRequest;
 use App\Http\Requests\Owner\UpdateTenantRequest;
 use App\Http\Resources\TenantResource;
+use App\Http\Resources\UserResource;
+use App\Models\Owner;
 use App\Models\Tenant;
+use App\Notifications\TenantInvitationNotification;
+use App\Services\TenantProvisioningService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Notification;
 
 class TenantController extends Controller
 {
@@ -24,13 +29,31 @@ class TenantController extends Controller
     return TenantResource::collection($tenants);
   }
 
-  public function store(StoreTenantRequest $request): JsonResponse
+  public function store(StoreTenantRequest $request, TenantProvisioningService $provisioning): JsonResponse
   {
-    $tenant = new Tenant($request->validated());
-    $tenant->owner_id = $request->user('owner')->id;
-    $tenant->save();
+    $owner = $request->user('owner');
+    abort_unless($owner instanceof Owner, 401);
 
-    return (new TenantResource($tenant))->response()->setStatusCode(201);
+    $result = $provisioning->provision($owner, $request->validated());
+
+    Notification::route('mail', $result['admin']->email)
+      ->notify(new TenantInvitationNotification($result['invitation'], $result['token']));
+
+    $additional = [
+      'admin' => new UserResource($result['admin']->load('profile')),
+      'invitation' => [
+        'expires_at' => $result['invitation']->expires_at?->toIso8601String(),
+      ],
+    ];
+
+    if (app()->environment(['local', 'testing'])) {
+      $additional['invitation']['token'] = $result['token'];
+    }
+
+    return (new TenantResource($result['tenant']))
+      ->additional($additional)
+      ->response()
+      ->setStatusCode(201);
   }
 
   public function show(Request $request, Tenant $tenant): TenantResource

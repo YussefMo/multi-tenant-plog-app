@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\Owner\TenantController;
+use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
+use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -36,6 +38,22 @@ Route::prefix('v1')->group(function () {
     });
   });
 
+  Route::prefix('auth')->middleware('web')->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])
+      ->name('api.v1.auth.login');
+
+    Route::post('/accept-invitation', [AuthController::class, 'acceptInvitation'])
+      ->name('api.v1.auth.accept-invitation');
+
+    Route::middleware('auth:web')->group(function () {
+      Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('api.v1.auth.logout');
+
+      Route::get('/me', [AuthController::class, 'me'])
+        ->name('api.v1.auth.me');
+    });
+  });
+
   Route::get('/health', function () {
     return response()->json([
       'status' => 'ok',
@@ -46,8 +64,15 @@ Route::prefix('v1')->group(function () {
   })->name('api.v1.health');
 
   Route::middleware(['web', 'auth:web'])->group(function () {
-    Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('profile')))
+    Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
+
+    Route::get('/tenant', [TenantSettingsController::class, 'show'])
+      ->middleware('permission:tenant.settings.view')
+      ->name('api.v1.tenant.show');
+    Route::patch('/tenant', [TenantSettingsController::class, 'update'])
+      ->middleware('permission:tenant.settings.update')
+      ->name('api.v1.tenant.update');
 
     Route::get('/users', [UserController::class, 'index'])
       ->middleware('permission:users.view')

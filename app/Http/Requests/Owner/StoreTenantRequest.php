@@ -16,6 +16,8 @@ class StoreTenantRequest extends FormRequest
     return [
       'name' => ['required', 'string', 'max:255'],
       'category' => ['nullable', 'string', 'max:100'],
+      'admin_name' => ['required', 'string', 'max:255'],
+      'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
     ];
   }
 }

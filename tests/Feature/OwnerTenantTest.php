@@ -26,17 +26,30 @@ class OwnerTenantTest extends TestCase
       ->postJson('/api/v1/owner/tenants', [
         'name' => 'Acme Inc',
         'category' => 'Technology',
+        'admin_name' => 'Acme Admin',
+        'admin_email' => 'admin@example.com',
         'allow_support' => true,
       ])
       ->assertCreated()
       ->assertJsonPath('data.name', 'Acme Inc')
       ->assertJsonPath('data.slug', 'acme-inc')
       ->assertJsonPath('data.category', 'Technology')
-      ->assertJsonPath('data.allow_support', false);
+      ->assertJsonPath('data.allow_support', false)
+      ->assertJsonPath('admin.email', 'admin@example.com')
+      ->assertJsonStructure(['invitation' => ['expires_at', 'token']]);
 
     $this->assertDatabaseHas('tenants', [
       'owner_id' => $owner->id,
       'slug' => 'acme-inc',
+    ]);
+    $this->assertDatabaseHas('users', [
+      'email' => 'admin@example.com',
+      'role' => 'admin',
+      'password' => null,
+    ]);
+    $this->assertDatabaseHas('tenant_invitations', [
+      'email' => 'admin@example.com',
+      'accepted_at' => null,
     ]);
   }
 

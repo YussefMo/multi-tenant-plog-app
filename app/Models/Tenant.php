@@ -47,6 +47,11 @@ class Tenant extends Model
     return $this->hasMany(PermissionProfile::class);
   }
 
+  public function invitations(): HasMany
+  {
+    return $this->hasMany(TenantInvitation::class);
+  }
+
   private function uniqueSlug(): string
   {
     $base = Str::limit(Str::slug($this->name), 200, '') ?: 'tenant';
