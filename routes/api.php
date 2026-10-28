@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Owner\OwnerAuthController;
+use App\Http\Controllers\Api\Owner\SupportAccessController;
 use App\Http\Controllers\Api\Owner\TenantController;
 use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
@@ -33,6 +34,10 @@ Route::prefix('v1')->group(function () {
         ->except(['create', 'edit'])
         ->names('api.v1.owner.tenants');
 
+      Route::post('/tenants/{tenant}/access', [SupportAccessController::class, 'store'])
+        ->withTrashed()
+        ->name('api.v1.owner.tenants.access');
+
       Route::post('/tenants/{tenant}/restore', [TenantController::class, 'restore'])
         ->withTrashed()
         ->name('api.v1.owner.tenants.restore');
@@ -46,11 +51,18 @@ Route::prefix('v1')->group(function () {
     Route::post('/accept-invitation', [AuthController::class, 'acceptInvitation'])
       ->name('api.v1.auth.accept-invitation');
 
+    Route::post('/support-login', [AuthController::class, 'supportLogin'])
+      ->name('api.v1.auth.support-login');
+
     Route::middleware('auth:web')->group(function () {
       Route::post('/logout', [AuthController::class, 'logout'])
         ->name('api.v1.auth.logout');
 
+      Route::post('/support/end', [AuthController::class, 'supportEnd'])
+        ->name('api.v1.auth.support-end');
+
       Route::get('/me', [AuthController::class, 'me'])
+        ->middleware('support')
         ->name('api.v1.auth.me');
     });
   });
@@ -64,7 +76,7 @@ Route::prefix('v1')->group(function () {
     ]);
   })->name('api.v1.health');
 
-  Route::middleware(['web', 'auth:web'])->group(function () {
+  Route::middleware(['web', 'auth:web', 'support'])->group(function () {
     Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Owner;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\LoginRequest;
 use App\Http\Resources\OwnerResource;
+use App\Services\FrontendUrlService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class OwnerAuthController extends Controller
 {
+  public function __construct(private readonly FrontendUrlService $frontends)
+  {
+  }
+
   public function login(LoginRequest $request): OwnerResource
   {
     $key = 'owner-login|'.Str::lower((string) $request->input('email')).'|'.$request->ip();
@@ -39,7 +44,10 @@ class OwnerAuthController extends Controller
     RateLimiter::clear($key);
 
     return (new OwnerResource(Auth::guard('owner')->user()))
-      ->additional(['csrf_token' => csrf_token()]);
+      ->additional([
+        'csrf_token' => csrf_token(),
+        'redirect_url' => $this->frontends->owner(),
+      ]);
   }
 
   public function logout(Request $request): JsonResponse
@@ -53,6 +61,7 @@ class OwnerAuthController extends Controller
 
   public function me(Request $request): OwnerResource
   {
-    return new OwnerResource($request->user('owner'));
+    return (new OwnerResource($request->user('owner')))
+      ->additional(['redirect_url' => $this->frontends->owner()]);
   }
 }

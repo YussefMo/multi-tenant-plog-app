@@ -27,7 +27,7 @@ class TenantAuthTest extends TestCase
       'password' => 'password123',
     ]);
 
-    $this->postJson('/api/v1/auth/login', [
+    $response = $this->postJson('/api/v1/auth/login', [
       'email' => 'admin@example.com',
       'password' => 'password123',
     ])
@@ -35,9 +35,28 @@ class TenantAuthTest extends TestCase
       ->assertJsonPath('data.email', 'admin@example.com')
       ->assertJsonPath('data.role', 'admin')
       ->assertJsonPath('data.tenant.id', $tenant->id)
-      ->assertJsonStructure(['data', 'csrf_token']);
+      ->assertJsonStructure(['data', 'csrf_token', 'redirect_url']);
 
+    $this->assertStringContainsString($tenant->slug.'.tenant.', $response->json('redirect_url'));
     $this->assertAuthenticatedAs($admin, 'web');
+  }
+
+  public function test_viewer_login_redirects_to_user_frontend(): void
+  {
+    $tenant = Tenant::factory()->create();
+    User::factory()->forTenant($tenant)->create([
+      'email' => 'viewer@example.com',
+      'password' => 'password123',
+    ]);
+
+    $response = $this->postJson('/api/v1/auth/login', [
+      'email' => 'viewer@example.com',
+      'password' => 'password123',
+    ])
+      ->assertOk()
+      ->assertJsonPath('data.role', 'user');
+
+    $this->assertStringContainsString($tenant->slug.'.user.', $response->json('redirect_url'));
   }
 
   public function test_invalid_credentials_are_rejected(): void
@@ -139,7 +158,7 @@ class TenantAuthTest extends TestCase
       ->assertOk()
       ->assertJsonPath('data.email', $admin->email)
       ->assertJsonPath('data.tenant.id', $tenant->id)
-      ->assertJsonStructure(['data', 'csrf_token']);
+      ->assertJsonStructure(['data', 'csrf_token', 'redirect_url']);
 
     $this->actingAs($admin)
       ->postJson('/api/v1/auth/logout')

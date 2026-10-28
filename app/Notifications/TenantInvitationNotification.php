@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\TenantInvitation;
+use App\Services\FrontendUrlService;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,6 +12,7 @@ class TenantInvitationNotification extends Notification
   public function __construct(
     public TenantInvitation $invitation,
     public string $token,
+    public FrontendUrlService $frontends,
   ) {
   }
 
@@ -21,7 +23,8 @@ class TenantInvitationNotification extends Notification
 
   public function toMail(object $notifiable): MailMessage
   {
-    $url = rtrim((string) config('app.url'), '/').'/accept-invitation?'.http_build_query([
+    $path = (string) config('frontends.accept_invitation_path', '/accept-invitation');
+    $url = $this->frontends->tenant($this->invitation->tenant, $path).'?'.http_build_query([
       'email' => $this->invitation->email,
       'token' => $this->token,
     ]);

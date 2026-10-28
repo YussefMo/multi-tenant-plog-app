@@ -75,44 +75,49 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint                         | Auth                     | Description                 |
-| ------ | -------------------------------- | ------------------------ | --------------------------- |
-| GET    | `/api/v1/csrf-token`             | Public                   | Tenant CSRF token + session |
-| GET    | `/api/v1/owner/csrf-token`       | Public                   | Owner CSRF token + session  |
-| POST   | `/api/v1/owner/auth/login`       | Public (CSRF)            | Owner login                 |
-| POST   | `/api/v1/owner/auth/logout`      | Owner session            | Owner logout                |
-| GET    | `/api/v1/owner/auth/me`          | Owner session            | Current owner               |
-| GET    | `/api/v1/health`                 | Public                   | Health check                |
-| GET    | `/api/v1/user`                   | Tenant session           | Current authenticated user  |
-| POST   | `/api/v1/auth/login`             | Public (CSRF)            | Tenant login (email only)   |
-| POST   | `/api/v1/auth/accept-invitation` | Public (CSRF)            | Accept tenant invitation    |
-| POST   | `/api/v1/auth/logout`            | Tenant session           | Tenant logout               |
-| GET    | `/api/v1/auth/me`                | Tenant session           | Current tenant user         |
-| GET    | `/api/v1/tenant`                 | `tenant.settings.view`   | Tenant settings             |
-| PATCH  | `/api/v1/tenant`                 | `tenant.settings.update` | Update tenant settings      |
-| GET    | `/api/v1/posts`                  | `posts.view.*`           | List visible posts          |
-| POST   | `/api/v1/posts`                  | `posts.create`           | Create a draft post         |
-| GET    | `/api/v1/posts/{post}`           | `posts.view.*`           | Show a visible post         |
-| PATCH  | `/api/v1/posts/{post}`           | `posts.update.*`         | Update a post               |
-| DELETE | `/api/v1/posts/{post}`           | `posts.delete.*`         | Soft-delete a post          |
-| POST   | `/api/v1/posts/{post}/publish`   | `posts.publish`          | Publish a post              |
-| POST   | `/api/v1/posts/{post}/unpublish` | `posts.publish`          | Unpublish a post            |
-| GET    | `/api/v1/users`                  | `users.view`             | List tenant users           |
-| POST   | `/api/v1/users`                  | `users.create`           | Create tenant user          |
-| GET    | `/api/v1/users/{user}`           | `users.view`             | Show tenant user            |
-| PATCH  | `/api/v1/users/{user}`           | `users.update`           | Update tenant user          |
-| DELETE | `/api/v1/users/{user}`           | `users.delete`           | Delete tenant user          |
-| GET    | `/api/v1/profiles`               | `profiles.view`          | List permission profiles    |
-| POST   | `/api/v1/profiles`               | `profiles.create`        | Create profile              |
-| GET    | `/api/v1/profiles/{profile}`     | `profiles.view`          | Show profile                |
-| PATCH  | `/api/v1/profiles/{profile}`     | `profiles.update`        | Update profile              |
-| DELETE | `/api/v1/profiles/{profile}`     | `profiles.delete`        | Delete profile              |
+| Method | Endpoint                                | Auth                     | Description                 |
+| ------ | --------------------------------------- | ------------------------ | --------------------------- |
+| GET    | `/api/v1/csrf-token`                    | Public                   | Tenant CSRF token + session |
+| GET    | `/api/v1/owner/csrf-token`              | Public                   | Owner CSRF token + session  |
+| POST   | `/api/v1/owner/auth/login`              | Public (CSRF)            | Owner login                 |
+| POST   | `/api/v1/owner/auth/logout`             | Owner session            | Owner logout                |
+| GET    | `/api/v1/owner/auth/me`                 | Owner session            | Current owner               |
+| POST   | `/api/v1/owner/tenants/{tenant}/access` | Owner session            | Request support ticket      |
+| GET    | `/api/v1/health`                        | Public                   | Health check                |
+| GET    | `/api/v1/user`                          | Tenant session           | Current authenticated user  |
+| POST   | `/api/v1/auth/login`                    | Public (CSRF)            | Tenant login (email only)   |
+| POST   | `/api/v1/auth/accept-invitation`        | Public (CSRF)            | Accept tenant invitation    |
+| POST   | `/api/v1/auth/logout`                   | Tenant session           | Tenant logout               |
+| GET    | `/api/v1/auth/me`                       | Tenant session           | Current tenant user         |
+| POST   | `/api/v1/auth/support-login`            | Ticket                   | Exchange support ticket     |
+| POST   | `/api/v1/auth/support/end`              | Tenant session           | End support session         |
+| GET    | `/api/v1/tenant`                        | `tenant.settings.view`   | Tenant settings             |
+| PATCH  | `/api/v1/tenant`                        | `tenant.settings.update` | Update tenant settings      |
+| GET    | `/api/v1/posts`                         | `posts.view.*`           | List visible posts          |
+| POST   | `/api/v1/posts`                         | `posts.create`           | Create a draft post         |
+| GET    | `/api/v1/posts/{post}`                  | `posts.view.*`           | Show a visible post         |
+| PATCH  | `/api/v1/posts/{post}`                  | `posts.update.*`         | Update a post               |
+| DELETE | `/api/v1/posts/{post}`                  | `posts.delete.*`         | Soft-delete a post          |
+| POST   | `/api/v1/posts/{post}/publish`          | `posts.publish`          | Publish a post              |
+| POST   | `/api/v1/posts/{post}/unpublish`        | `posts.publish`          | Unpublish a post            |
+| GET    | `/api/v1/users`                         | `users.view`             | List tenant users           |
+| POST   | `/api/v1/users`                         | `users.create`           | Create tenant user          |
+| GET    | `/api/v1/users/{user}`                  | `users.view`             | Show tenant user            |
+| PATCH  | `/api/v1/users/{user}`                  | `users.update`           | Update tenant user          |
+| DELETE | `/api/v1/users/{user}`                  | `users.delete`           | Delete tenant user          |
+| GET    | `/api/v1/profiles`                      | `profiles.view`          | List permission profiles    |
+| POST   | `/api/v1/profiles`                      | `profiles.create`        | Create profile              |
+| GET    | `/api/v1/profiles/{profile}`            | `profiles.view`          | Show profile                |
+| PATCH  | `/api/v1/profiles/{profile}`            | `profiles.update`        | Update profile              |
+| DELETE | `/api/v1/profiles/{profile}`            | `profiles.delete`        | Delete profile              |
 
 All tenant endpoints require the tenant session. The `admin` role has `["*"]`; other roles use the presets in `config/permissions.php` plus their tenant-scoped profile and direct extras.
 
 Tenant login is **email + password only** — the tenant is resolved from the globally unique email. Login and `/auth/me` return a fresh `csrf_token`. Owner tenant creation provisions the first admin with a null password and a 7-day invitation; accepting it sets the password.
 
 Post visibility is permission-driven: admins see all tenant posts, authors see their own posts, and viewers see published posts. Every post query is tenant-scoped; cross-tenant IDs return 404.
+
+Owner support access requires the tenant’s `allow_support` flag. The owner receives a single-use 5-minute ticket, exchanges it for a tenant support session, and acts as the hidden “Owner Support” user (`is_support`, admin, `["*"]`). Every support session is audited, and disabling `allow_support` revokes the tenant session on the next request.
 
 Tenant and owner sessions use separate cookies: `tenant_session` and `owner_session`. Authentication is session + CSRF, not JWT or Bearer tokens.
 
@@ -151,6 +156,14 @@ PHP CS Fixer formats PHP (`app/`, `bootstrap/`, `config/`, `database/`, `public/
 composer type-check        # full PHPStan + Larastan report
 composer type-check:files  # only files containing type errors
 ```
+
+## Frontends
+
+The owner dashboard, tenant dashboard, and user web are separate frontends on separate domains. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
+
+- Frontend URLs: `config/frontends.php` / `OWNER_FRONTEND_URL`, `TENANT_FRONTEND_URL`, `USER_FRONTEND_URL`
+- CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS`, `CORS_ALLOWED_ORIGIN_PATTERNS`
+- Support ticket TTL and session idle timeout: `config/support.php`
 
 ## IDE support
 

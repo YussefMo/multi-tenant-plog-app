@@ -10,6 +10,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Owner;
 use App\Models\Tenant;
 use App\Notifications\TenantInvitationNotification;
+use App\Services\FrontendUrlService;
 use App\Services\TenantProvisioningService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class TenantController extends Controller
     return TenantResource::collection($tenants);
   }
 
-  public function store(StoreTenantRequest $request, TenantProvisioningService $provisioning): JsonResponse
+  public function store(StoreTenantRequest $request, TenantProvisioningService $provisioning, FrontendUrlService $frontends): JsonResponse
   {
     $owner = $request->user('owner');
     abort_unless($owner instanceof Owner, 401);
@@ -37,7 +38,7 @@ class TenantController extends Controller
     $result = $provisioning->provision($owner, $request->validated());
 
     Notification::route('mail', $result['admin']->email)
-      ->notify(new TenantInvitationNotification($result['invitation'], $result['token']));
+      ->notify(new TenantInvitationNotification($result['invitation'], $result['token'], $frontends));
 
     $additional = [
       'admin' => new UserResource($result['admin']->load('profile')),
