@@ -160,4 +160,12 @@ Before relying on a package's API, confirm its installed version:
 - Use `composer type-check:files` to list only the files with type errors.
 - Fix undefined types/classes instead of ignoring them.
 
+=== project CI rules ===
+
+# CI
+
+- `.github/workflows/ci.yml` runs on every push to `master`.
+- It checks formatting, types, tests against MariaDB, and a production build.
+- Keep CI green before merging.
+
 </laravel-boost-guidelines>

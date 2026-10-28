@@ -1,5 +1,7 @@
 # Multi Tenant Plog App
 
+[![CI](https://github.com/YussefMo/multi-tenant-plog-app/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/YussefMo/multi-tenant-plog-app/actions/workflows/ci.yml)
+
 Backend-only Laravel 13 API application. No Blade views, no frontend assets, no web routes — JSON in, JSON out.
 
 ## Requirements
@@ -120,6 +122,17 @@ PHP CS Fixer formats PHP (`app/`, `bootstrap/`, `config/`, `database/`, `public/
 composer type-check        # full PHPStan + Larastan report
 composer type-check:files  # only files containing type errors
 ```
+
+## CI
+
+GitHub Actions runs on every push to `master`:
+
+- `composer format:check`
+- `composer type-check`
+- `php artisan test` against MariaDB
+- Production build (`composer install --no-dev`, `php artisan config:cache`, boot checks)
+
+The workflow is `.github/workflows/ci.yml`.
 
 ## Structure
 

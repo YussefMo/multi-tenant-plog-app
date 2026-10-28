@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Format & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.36'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Check formatting
+        run: composer format:check
+
+      - name: Type check
+        run: composer type-check
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_ROOT_HOST: '%'
+          MARIADB_DATABASE: multi_tenant_plog_app_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: multi_tenant_plog_app_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      OWNER_DB_CONNECTION: mysql
+      OWNER_DB_HOST: 127.0.0.1
+      OWNER_DB_PORT: 3306
+      OWNER_DB_DATABASE: multi_tenant_plog_owner_test
+      OWNER_DB_USERNAME: root
+      OWNER_DB_PASSWORD: root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.36'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
+          coverage: none
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Create owner test database
+        run: |
+          php -r '$pdo = new PDO("mysql:host=127.0.0.1;port=3306", "root", "root"); $pdo->exec("CREATE DATABASE IF NOT EXISTS multi_tenant_plog_owner_test");'
+
+      - name: Run tests
+        run: php artisan test --compact
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.36'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
+          coverage: none
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Cache configuration
+        run: php artisan config:cache
+
+      - name: Verify routes boot
+        run: php artisan route:list --except-vendor
+
+      - name: Verify application boots
+        run: php artisan about

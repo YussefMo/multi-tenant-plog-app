@@ -27,15 +27,11 @@
         <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="3306"/>
         <env name="DB_DATABASE" value="multi_tenant_plog_app_test"/>
-        <env name="DB_USERNAME" value="youssef"/>
-        <env name="DB_PASSWORD" value="1234"/>
         <env name="DB_URL" value=""/>
         <env name="OWNER_DB_CONNECTION" value="mysql"/>
         <env name="OWNER_DB_HOST" value="127.0.0.1"/>
         <env name="OWNER_DB_PORT" value="3306"/>
         <env name="OWNER_DB_DATABASE" value="multi_tenant_plog_owner_test"/>
-        <env name="OWNER_DB_USERNAME" value="youssef"/>
-        <env name="OWNER_DB_PASSWORD" value="1234"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
