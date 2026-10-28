@@ -90,6 +90,13 @@ Base URL: `http://multi-tenant-plog.test/api`
 | GET    | `/api/v1/auth/me`                | Tenant session           | Current tenant user         |
 | GET    | `/api/v1/tenant`                 | `tenant.settings.view`   | Tenant settings             |
 | PATCH  | `/api/v1/tenant`                 | `tenant.settings.update` | Update tenant settings      |
+| GET    | `/api/v1/posts`                  | `posts.view.*`           | List visible posts          |
+| POST   | `/api/v1/posts`                  | `posts.create`           | Create a draft post         |
+| GET    | `/api/v1/posts/{post}`           | `posts.view.*`           | Show a visible post         |
+| PATCH  | `/api/v1/posts/{post}`           | `posts.update.*`         | Update a post               |
+| DELETE | `/api/v1/posts/{post}`           | `posts.delete.*`         | Soft-delete a post          |
+| POST   | `/api/v1/posts/{post}/publish`   | `posts.publish`          | Publish a post              |
+| POST   | `/api/v1/posts/{post}/unpublish` | `posts.publish`          | Unpublish a post            |
 | GET    | `/api/v1/users`                  | `users.view`             | List tenant users           |
 | POST   | `/api/v1/users`                  | `users.create`           | Create tenant user          |
 | GET    | `/api/v1/users/{user}`           | `users.view`             | Show tenant user            |
@@ -104,6 +111,8 @@ Base URL: `http://multi-tenant-plog.test/api`
 All tenant endpoints require the tenant session. The `admin` role has `["*"]`; other roles use the presets in `config/permissions.php` plus their tenant-scoped profile and direct extras.
 
 Tenant login is **email + password only** — the tenant is resolved from the globally unique email. Login and `/auth/me` return a fresh `csrf_token`. Owner tenant creation provisions the first admin with a null password and a 7-day invitation; accepting it sets the password.
+
+Post visibility is permission-driven: admins see all tenant posts, authors see their own posts, and viewers see published posts. Every post query is tenant-scoped; cross-tenant IDs return 404.
 
 Tenant and owner sessions use separate cookies: `tenant_session` and `owner_session`. Authentication is session + CSRF, not JWT or Bearer tokens.
 
@@ -142,6 +151,14 @@ PHP CS Fixer formats PHP (`app/`, `bootstrap/`, `config/`, `database/`, `public/
 composer type-check        # full PHPStan + Larastan report
 composer type-check:files  # only files containing type errors
 ```
+
+## IDE support
+
+```bash
+composer ide-helper
+```
+
+Generates `_ide_helper.php`, `_ide_helper_models.php`, and `.phpstorm.meta.php` for Laravel-aware autocompletion. The files are gitignored and should be regenerated after model or schema changes. VS Code Intelephense settings live in `.vscode/settings.json`; restart the language server after regenerating.
 
 ## CI
 

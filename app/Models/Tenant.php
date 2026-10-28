@@ -47,6 +47,11 @@ class Tenant extends Model
     return $this->hasMany(PermissionProfile::class);
   }
 
+  public function posts(): HasMany
+  {
+    return $this->hasMany(Post::class);
+  }
+
   public function invitations(): HasMany
   {
     return $this->hasMany(TenantInvitation::class);

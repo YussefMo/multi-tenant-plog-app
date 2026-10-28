@@ -168,4 +168,12 @@ Before relying on a package's API, confirm its installed version:
 - It checks formatting, types, tests against MariaDB, and a production build.
 - Keep CI green before merging.
 
+=== project IDE rules ===
+
+# IDE
+
+- Run `composer ide-helper` after model or schema changes.
+- Intelephense settings live in `.vscode/settings.json`.
+- Generated `_ide_helper*` and `.phpstorm.meta.php` files are gitignored.
+
 </laravel-boost-guidelines>

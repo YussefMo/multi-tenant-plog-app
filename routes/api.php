@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\Owner\TenantController;
 use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
+use App\Http\Controllers\Api\Tenant\PostController;
 use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
 use App\Http\Resources\UserResource;
@@ -73,6 +74,28 @@ Route::prefix('v1')->group(function () {
     Route::patch('/tenant', [TenantSettingsController::class, 'update'])
       ->middleware('permission:tenant.settings.update')
       ->name('api.v1.tenant.update');
+
+    Route::get('/posts', [PostController::class, 'index'])
+      ->middleware('permission:posts.view.any,posts.view.own,posts.view.published')
+      ->name('api.v1.posts.index');
+    Route::post('/posts', [PostController::class, 'store'])
+      ->middleware('permission:posts.create')
+      ->name('api.v1.posts.store');
+    Route::get('/posts/{post}', [PostController::class, 'show'])
+      ->middleware('permission:posts.view.any,posts.view.own,posts.view.published')
+      ->name('api.v1.posts.show');
+    Route::patch('/posts/{post}', [PostController::class, 'update'])
+      ->middleware('permission:posts.update.any,posts.update.own')
+      ->name('api.v1.posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])
+      ->middleware('permission:posts.delete.any,posts.delete.own')
+      ->name('api.v1.posts.destroy');
+    Route::post('/posts/{post}/publish', [PostController::class, 'publish'])
+      ->middleware('permission:posts.publish')
+      ->name('api.v1.posts.publish');
+    Route::post('/posts/{post}/unpublish', [PostController::class, 'unpublish'])
+      ->middleware('permission:posts.publish')
+      ->name('api.v1.posts.unpublish');
 
     Route::get('/users', [UserController::class, 'index'])
       ->middleware('permission:users.view')

@@ -1,0 +1,15 @@
+{
+  "intelephense.environment.phpVersion": "8.3.0",
+  "intelephense.files.maxSize": 5000000,
+  "intelephense.format.enable": false,
+  "intelephense.completion.insertUseDeclaration": true,
+  "intelephense.diagnostics.undefinedTypes": true,
+  "intelephense.diagnostics.undefinedFunctions": true,
+  "intelephense.diagnostics.undefinedMethods": true,
+  "intelephense.diagnostics.undefinedProperties": true,
+  "intelephense.diagnostics.undefinedConstants": true,
+  "intelephense.diagnostics.undefinedClassConstants": true,
+  "[php]": {
+    "editor.formatOnSave": false
+  }
+}
