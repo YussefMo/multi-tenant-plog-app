@@ -6,14 +6,15 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\AcceptInvitationRequest;
 use App\Http\Requests\Tenant\LoginRequest;
+use App\Http\Requests\Tenant\RegisterRequest;
 use App\Http\Requests\Tenant\SupportLoginRequest;
 use App\Http\Resources\UserResource;
-use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\TenantSupportAccess;
 use App\Models\TenantSupportTicket;
 use App\Models\User;
 use App\Services\FrontendUrlService;
+use App\Services\PermissionSyncService;
 use App\Services\SupportUserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,7 +43,7 @@ class AuthController extends Controller
       ! $candidate
       || $candidate->isSupport()
       || $candidate->password === null
-      || $candidate->tenant === null
+      || ($candidate->role !== UserRole::User && $candidate->tenant === null)
     ) {
       RateLimiter::hit($key, 60);
 
@@ -64,6 +65,29 @@ class AuthController extends Controller
       'csrf_token' => csrf_token(),
       'redirect_url' => $this->redirectUrlFor($user),
     ]);
+  }
+
+  public function register(RegisterRequest $request, PermissionSyncService $permissions): JsonResponse
+  {
+    $user = new User($request->safe()->only(['name', 'email', 'password']));
+    $user->tenant_id = null;
+    $user->role = UserRole::User;
+    $user->is_support = false;
+    $user->permissions = [];
+    $user->email_verified_at = now();
+    $user->save();
+
+    $permissions->sync($user);
+
+    Auth::guard('web')->login($user);
+    $request->session()->regenerate();
+
+    $user->load('tenant', 'profile');
+
+    return (new UserResource($user))->additional([
+      'csrf_token' => csrf_token(),
+      'redirect_url' => $this->redirectUrlFor($user),
+    ])->response()->setStatusCode(201);
   }
 
   public function logout(Request $request): JsonResponse
@@ -118,7 +142,7 @@ class AuthController extends Controller
     return (new UserResource($support))->additional([
       'csrf_token' => csrf_token(),
       'support' => true,
-      'redirect_url' => $this->frontends->tenant($tenant),
+      'redirect_url' => $this->frontends->tenant(),
     ])->response()->setStatusCode(200);
   }
 
@@ -204,14 +228,8 @@ class AuthController extends Controller
 
   private function redirectUrlFor(User $user): string
   {
-    $tenant = $user->tenant;
-
-    if (! $tenant instanceof Tenant) {
-      return $this->frontends->owner();
-    }
-
     return $user->role === UserRole::User
-      ? $this->frontends->user($tenant)
-      : $this->frontends->tenant($tenant);
+      ? $this->frontends->user()
+      : $this->frontends->tenant();
   }
 }

@@ -159,10 +159,12 @@ composer type-check:files  # only files containing type errors
 
 ## Frontends
 
-The owner dashboard, tenant dashboard, and user web are separate frontends on separate domains. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
+The owner dashboard, tenant dashboard, and user web are separate frontends on fixed domains. Tenant scope comes from the authenticated user's email and `tenant_id`, never from a slug. Viewers have no tenant and browse the tenant directory. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
 
 - Frontend URLs: `config/frontends.php` / `OWNER_FRONTEND_URL`, `TENANT_FRONTEND_URL`, `USER_FRONTEND_URL`
-- CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS`, `CORS_ALLOWED_ORIGIN_PATTERNS`
+- CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS`
+- Viewer signup: `POST /api/v1/auth/register`
+- Viewer directory: `GET /api/v1/tenants`, `GET /api/v1/tenants/{tenant}/posts`
 - Support ticket TTL and session idle timeout: `config/support.php`
 
 ## IDE support

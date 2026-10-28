@@ -2,14 +2,14 @@
 
 Three separate frontends use this API. Each has its own domain.
 
-| Frontend         | Env var               | Local default                                 |
-| ---------------- | --------------------- | --------------------------------------------- |
-| Owner dashboard  | `OWNER_FRONTEND_URL`  | `http://owner.multi-tenant-plog.test`         |
-| Tenant dashboard | `TENANT_FRONTEND_URL` | `http://{slug}.tenant.multi-tenant-plog.test` |
-| User web         | `USER_FRONTEND_URL`   | `http://{slug}.user.multi-tenant-plog.test`   |
-| API              | `APP_URL`             | `http://multi-tenant-plog.test/api`           |
+| Frontend         | Env var               | Local default                          |
+| ---------------- | --------------------- | -------------------------------------- |
+| Owner dashboard  | `OWNER_FRONTEND_URL`  | `http://owner.multi-tenant-plog.test`  |
+| Tenant dashboard | `TENANT_FRONTEND_URL` | `http://tenant.multi-tenant-plog.test` |
+| User web         | `USER_FRONTEND_URL`   | `http://user.multi-tenant-plog.test`   |
+| API              | `APP_URL`             | `http://multi-tenant-plog.test/api`    |
 
-`{slug}` is replaced with the tenant slug. For real custom tenant domains, set the env values to your real URLs or add per-tenant domain columns later.
+Tenant resolution never uses a slug. Admin/author scope comes from the globally unique email plus `users.tenant_id`. Viewers have no tenant and browse all tenants through the directory.
 
 ## Backend-provided redirect URLs
 
@@ -21,6 +21,7 @@ The API returns `redirect_url` so the frontend never has to hardcode domain rule
 | `GET /api/v1/owner/auth/me`                  | `redirect_url` | Owner dashboard                                          |
 | `POST /api/v1/owner/tenants/{tenant}/access` | `redirect_url` | Tenant frontend `/support/accept?ticket=...`             |
 | `POST /api/v1/auth/login`                    | `redirect_url` | Tenant dashboard for admin/author, user web for viewer   |
+| `POST /api/v1/auth/register`                 | `redirect_url` | User web dashboard                                       |
 | `GET /api/v1/auth/me`                        | `redirect_url` | Same role-based destination                              |
 | `POST /api/v1/auth/support-login`            | `redirect_url` | Tenant dashboard                                         |
 | `POST /api/v1/auth/support/end`              | `redirect_url` | Owner dashboard                                          |
@@ -54,7 +55,6 @@ Requirements:
 
 - HTTPS on both API and frontends
 - `CORS_ALLOWED_ORIGINS` lists the exact frontend origins
-- `CORS_ALLOWED_ORIGIN_PATTERNS` covers per-tenant subdomains
 - frontend fetches use `credentials: 'include'`
 
 ## CSRF flow
@@ -100,6 +100,18 @@ Tenant /login
   → redirect_url = tenant dashboard
 ```
 
+### Viewer signup
+
+```
+User web /signup
+  → GET /api/v1/csrf-token
+  → POST /api/v1/auth/register { name, email, password, password_confirmation }
+  ← 201 { data, csrf_token, redirect_url }
+  → window.location.assign(redirect_url)   // user web dashboard
+```
+
+The viewer is created with `role = user`, `tenant_id = null`, and the viewer preset (`posts.view.published`, `tenants.view`).
+
 ### Viewer login
 
 ```
@@ -109,6 +121,20 @@ User web /login
 ```
 
 If a viewer logs in on the tenant login page, still use `redirect_url`; it will point to the user web.
+
+### Viewer tenant directory
+
+```
+User web /tenants
+  → GET /api/v1/tenants?name=&category=
+  ← paginated { id, name, category, published_posts_count }
+
+User web /tenants/{id}
+  → GET /api/v1/tenants/{id}/posts
+  ← paginated published posts for that tenant
+```
+
+Only published posts are returned. Admin/author accounts cannot use the directory (403); their post access stays tenant-scoped.
 
 ### Invitation acceptance
 
@@ -178,7 +204,10 @@ This is the important cross-frontend flow.
 
 ### User web
 
+- `/signup`
 - `/login`
+- `/tenants`
+- `/tenants/{id}`
 - `/`
 
 ## Example fetch
@@ -202,3 +231,4 @@ await fetch('http://multi-tenant-plog.test/api/v1/auth/login', {
 - Never put the Stripe secret or webhook secret in any frontend.
 - The support ticket is an opaque one-time credential; do not log it.
 - Generated invitation/support links use the frontend URL config, not the API URL.
+- Tenant directory endpoints bypass the global tenant scope on purpose so viewers can read published posts across tenants. Draft and unpublished posts remain tenant-scoped.

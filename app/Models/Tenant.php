@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 #[Fillable(['name', 'category', 'allow_support'])]
 class Tenant extends Model
@@ -26,15 +25,6 @@ class Tenant extends Model
     return [
       'allow_support' => 'boolean',
     ];
-  }
-
-  protected static function booted(): void
-  {
-    static::creating(function (Tenant $tenant): void {
-      if (blank($tenant->slug)) {
-        $tenant->slug = $tenant->uniqueSlug();
-      }
-    });
   }
 
   public function users(): HasMany
@@ -55,19 +45,5 @@ class Tenant extends Model
   public function invitations(): HasMany
   {
     return $this->hasMany(TenantInvitation::class);
-  }
-
-  private function uniqueSlug(): string
-  {
-    $base = Str::limit(Str::slug($this->name), 200, '') ?: 'tenant';
-    $slug = $base;
-    $suffix = 2;
-
-    while (static::withTrashed()->where('slug', $slug)->exists()) {
-      $slug = "{$base}-{$suffix}";
-      $suffix++;
-    }
-
-    return $slug;
   }
 }

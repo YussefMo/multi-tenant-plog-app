@@ -11,7 +11,6 @@ return new class () extends Migration {
       $table->id();
       $table->unsignedBigInteger('owner_id')->index();
       $table->string('name');
-      $table->string('slug')->unique();
       $table->string('category')->nullable();
       $table->boolean('allow_support')->default(false);
       $table->string('stripe_customer_id')->nullable()->unique();

@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
- * @property int $tenant_id
+ * @property int|null $tenant_id
  * @property string $name
  * @property string $email
  * @property \App\Enums\UserRole $role
@@ -22,7 +22,7 @@ use Illuminate\Notifications\Notifiable;
  * @property array<int, string> $extra_permissions
  * @property bool $is_support
  * @property \App\Models\PermissionProfile|null $profile
- * @property \App\Models\Tenant $tenant
+ * @property \App\Models\Tenant|null $tenant
  */
 #[Fillable(['name', 'email', 'password', 'role', 'permission_profile_id', 'extra_permissions'])]
 #[Hidden(['password', 'remember_token'])]

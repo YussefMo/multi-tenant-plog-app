@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Owner\TenantController;
 use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
 use App\Http\Controllers\Api\Tenant\PostController;
+use App\Http\Controllers\Api\Tenant\TenantDirectoryController;
 use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
 use App\Http\Resources\UserResource;
@@ -48,6 +49,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])
       ->name('api.v1.auth.login');
 
+    Route::post('/register', [AuthController::class, 'register'])
+      ->middleware('throttle:10,1')
+      ->name('api.v1.auth.register');
+
     Route::post('/accept-invitation', [AuthController::class, 'acceptInvitation'])
       ->name('api.v1.auth.accept-invitation');
 
@@ -79,6 +84,13 @@ Route::prefix('v1')->group(function () {
   Route::middleware(['web', 'auth:web', 'support'])->group(function () {
     Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
+
+    Route::get('/tenants', [TenantDirectoryController::class, 'index'])
+      ->middleware('permission:tenants.view')
+      ->name('api.v1.tenants.index');
+    Route::get('/tenants/{tenant}/posts', [TenantDirectoryController::class, 'posts'])
+      ->middleware('permission:tenants.view')
+      ->name('api.v1.tenants.posts');
 
     Route::get('/tenant', [TenantSettingsController::class, 'show'])
       ->middleware('permission:tenant.settings.view')

@@ -9,7 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read int $id
- * @property-read int $tenant_id
+ * @property-read int|null $tenant_id
  * @property-read string $name
  * @property-read string $email
  * @property-read UserRole $role

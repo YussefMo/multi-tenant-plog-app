@@ -35,12 +35,18 @@ class UserController extends Controller
   public function store(StoreUserRequest $request, PermissionSyncService $permissions): JsonResponse
   {
     $data = $request->validated();
-    $rolePermissions = UserRole::from($data['role'])->permissions();
+    $role = UserRole::from($data['role']);
+    $rolePermissions = $role->permissions();
     $this->ensureCanGrant($request, [...$rolePermissions, ...($data['extra_permissions'] ?? [])]);
     $this->ensureCanAssignProfile($request, $data['permission_profile_id'] ?? null);
 
     $user = new User($data);
-    $user->tenant_id = $request->user()->tenant_id;
+    $user->tenant_id = $role === UserRole::User ? null : $request->user()->tenant_id;
+
+    if ($role === UserRole::User) {
+      $user->permission_profile_id = null;
+    }
+
     $user->is_support = false;
     $user->permissions = [];
     $user->save();

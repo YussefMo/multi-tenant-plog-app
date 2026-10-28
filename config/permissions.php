@@ -11,6 +11,7 @@ return [
     'posts.delete.any',
     'posts.delete.own',
     'posts.publish',
+    'tenants.view',
     'users.view',
     'users.create',
     'users.update',
@@ -35,6 +36,7 @@ return [
     ],
     'user' => [
       'posts.view.published',
+      'tenants.view',
     ],
   ],
 ];

@@ -18,7 +18,7 @@ class OwnerTenantTest extends TestCase
     $this->refreshOwnerDatabase();
   }
 
-  public function test_owner_can_create_tenant_with_generated_slug(): void
+  public function test_owner_can_create_tenant(): void
   {
     $owner = Owner::factory()->create();
 
@@ -32,7 +32,6 @@ class OwnerTenantTest extends TestCase
       ])
       ->assertCreated()
       ->assertJsonPath('data.name', 'Acme Inc')
-      ->assertJsonPath('data.slug', 'acme-inc')
       ->assertJsonPath('data.category', 'Technology')
       ->assertJsonPath('data.allow_support', false)
       ->assertJsonPath('admin.email', 'admin@example.com')
@@ -40,7 +39,7 @@ class OwnerTenantTest extends TestCase
 
     $this->assertDatabaseHas('tenants', [
       'owner_id' => $owner->id,
-      'slug' => 'acme-inc',
+      'name' => 'Acme Inc',
     ]);
     $this->assertDatabaseHas('users', [
       'email' => 'admin@example.com',
@@ -53,15 +52,16 @@ class OwnerTenantTest extends TestCase
     ]);
   }
 
-  public function test_duplicate_names_get_unique_slugs(): void
+  public function test_duplicate_tenant_names_are_allowed(): void
   {
     $owner = Owner::factory()->create();
 
     $first = Tenant::factory()->forOwner($owner)->create(['name' => 'Acme']);
     $second = Tenant::factory()->forOwner($owner)->create(['name' => 'Acme']);
 
-    $this->assertSame('acme', $first->slug);
-    $this->assertSame('acme-2', $second->slug);
+    $this->assertSame('Acme', $first->name);
+    $this->assertSame('Acme', $second->name);
+    $this->assertNotSame($first->id, $second->id);
   }
 
   public function test_owner_only_lists_their_own_tenants(): void
@@ -79,7 +79,7 @@ class OwnerTenantTest extends TestCase
       ->assertJsonPath('data.0.id', $tenant->id);
   }
 
-  public function test_owner_can_update_tenant_without_changing_slug(): void
+  public function test_owner_can_update_tenant(): void
   {
     $owner = Owner::factory()->create();
     $tenant = Tenant::factory()->forOwner($owner)->create(['name' => 'Acme']);
@@ -91,7 +91,6 @@ class OwnerTenantTest extends TestCase
       ])
       ->assertOk()
       ->assertJsonPath('data.name', 'Acme Renamed')
-      ->assertJsonPath('data.slug', 'acme')
       ->assertJsonPath('data.category', 'Finance');
   }
 

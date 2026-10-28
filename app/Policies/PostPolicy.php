@@ -19,16 +19,16 @@ class PostPolicy
 
   public function view(User $user, Post $post): bool
   {
-    if ($post->tenant_id !== $user->tenant_id) {
-      return false;
-    }
+    $isSameTenant = $user->tenant_id === null || $post->tenant_id === $user->tenant_id;
 
-    if ($user->hasPermission('posts.view.any')) {
-      return true;
-    }
+    if ($isSameTenant) {
+      if ($user->hasPermission('posts.view.any')) {
+        return true;
+      }
 
-    if ($user->hasPermission('posts.view.own') && $post->user_id === $user->id) {
-      return true;
+      if ($user->hasPermission('posts.view.own') && $post->user_id === $user->id) {
+        return true;
+      }
     }
 
     return $user->hasPermission('posts.view.published')

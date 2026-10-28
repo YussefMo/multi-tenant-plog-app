@@ -91,6 +91,25 @@ class UserManagementTest extends TestCase
     $this->assertContains('posts.publish', $fresh->permissions);
   }
 
+  public function test_admin_created_viewers_are_not_tenant_scoped(): void
+  {
+    $this->actingAs($this->admin)
+      ->postJson('/api/v1/users', [
+        'name' => 'Viewer',
+        'email' => 'viewer@example.com',
+        'role' => 'user',
+      ])
+      ->assertCreated()
+      ->assertJsonPath('data.role', 'user')
+      ->assertJsonPath('data.tenant_id', null);
+
+    $this->assertDatabaseHas('users', [
+      'email' => 'viewer@example.com',
+      'role' => 'user',
+      'tenant_id' => null,
+    ]);
+  }
+
   public function test_admin_cannot_change_their_own_role(): void
   {
     $this->actingAs($this->admin)

@@ -24,7 +24,7 @@ class TenantInvitationNotification extends Notification
   public function toMail(object $notifiable): MailMessage
   {
     $path = (string) config('frontends.accept_invitation_path', '/accept-invitation');
-    $url = $this->frontends->tenant($this->invitation->tenant, $path).'?'.http_build_query([
+    $url = $this->frontends->tenant($path).'?'.http_build_query([
       'email' => $this->invitation->email,
       'token' => $this->token,
     ]);

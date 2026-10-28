@@ -32,7 +32,7 @@ class SupportAccessController extends Controller
     return response()->json([
       'ticket' => $token,
       'expires_at' => $ticket->expires_at?->toIso8601String(),
-      'redirect_url' => $frontends->support($tenant, $token),
+      'redirect_url' => $frontends->support($token),
     ], 201);
   }
 }

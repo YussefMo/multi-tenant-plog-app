@@ -37,14 +37,13 @@ class TenantAuthTest extends TestCase
       ->assertJsonPath('data.tenant.id', $tenant->id)
       ->assertJsonStructure(['data', 'csrf_token', 'redirect_url']);
 
-    $this->assertStringContainsString($tenant->slug.'.tenant.', $response->json('redirect_url'));
+    $this->assertSame(rtrim(config('frontends.tenant'), '/').'/', $response->json('redirect_url'));
     $this->assertAuthenticatedAs($admin, 'web');
   }
 
-  public function test_viewer_login_redirects_to_user_frontend(): void
+  public function test_viewer_can_login_without_a_tenant(): void
   {
-    $tenant = Tenant::factory()->create();
-    User::factory()->forTenant($tenant)->create([
+    $viewer = User::factory()->create([
       'email' => 'viewer@example.com',
       'password' => 'password123',
     ]);
@@ -54,9 +53,80 @@ class TenantAuthTest extends TestCase
       'password' => 'password123',
     ])
       ->assertOk()
-      ->assertJsonPath('data.role', 'user');
+      ->assertJsonPath('data.role', 'user')
+      ->assertJsonPath('data.tenant_id', null)
+      ->assertJsonPath('data.tenant', null);
 
-    $this->assertStringContainsString($tenant->slug.'.user.', $response->json('redirect_url'));
+    $this->assertSame(rtrim(config('frontends.user'), '/').'/', $response->json('redirect_url'));
+    $this->assertAuthenticatedAs($viewer, 'web');
+  }
+
+  public function test_tenant_admin_without_a_tenant_cannot_login(): void
+  {
+    User::factory()->admin()->create([
+      'tenant_id' => null,
+      'email' => 'admin@example.com',
+      'password' => 'password123',
+    ]);
+
+    $this->postJson('/api/v1/auth/login', [
+      'email' => 'admin@example.com',
+      'password' => 'password123',
+    ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('email');
+
+    $this->assertGuest('web');
+  }
+
+  public function test_viewer_can_register_without_a_tenant(): void
+  {
+    $response = $this->postJson('/api/v1/auth/register', [
+      'name' => 'Viewer',
+      'email' => 'viewer@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'password123',
+    ])
+      ->assertCreated()
+      ->assertJsonPath('data.email', 'viewer@example.com')
+      ->assertJsonPath('data.role', 'user')
+      ->assertJsonPath('data.tenant_id', null)
+      ->assertJsonPath('data.tenant', null)
+      ->assertJsonStructure(['data', 'csrf_token', 'redirect_url']);
+
+    $user = User::query()->where('email', 'viewer@example.com')->firstOrFail();
+
+    $this->assertNull($user->tenant_id);
+    $this->assertContains('posts.view.published', $user->permissions);
+    $this->assertContains('tenants.view', $user->permissions);
+    $this->assertSame(rtrim(config('frontends.user'), '/').'/', $response->json('redirect_url'));
+    $this->assertAuthenticatedAs($user, 'web');
+  }
+
+  public function test_registration_rejects_an_existing_email(): void
+  {
+    User::factory()->create(['email' => 'viewer@example.com']);
+
+    $this->postJson('/api/v1/auth/register', [
+      'name' => 'Viewer',
+      'email' => 'viewer@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'password123',
+    ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('email');
+  }
+
+  public function test_registration_requires_matching_passwords(): void
+  {
+    $this->postJson('/api/v1/auth/register', [
+      'name' => 'Viewer',
+      'email' => 'viewer@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'different-password',
+    ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('password');
   }
 
   public function test_invalid_credentials_are_rejected(): void

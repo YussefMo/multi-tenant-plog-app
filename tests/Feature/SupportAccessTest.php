@@ -63,8 +63,10 @@ class SupportAccessTest extends TestCase
       ->assertCreated()
       ->assertJsonStructure(['ticket', 'expires_at', 'redirect_url']);
 
-    $this->assertStringContainsString($tenant->slug, $response->json('redirect_url'));
-    $this->assertStringContainsString('/support/accept?ticket=', $response->json('redirect_url'));
+    $this->assertStringStartsWith(
+      rtrim(config('frontends.tenant'), '/').'/support/accept?ticket=',
+      $response->json('redirect_url'),
+    );
   }
 
   public function test_ticket_can_be_exchanged_for_a_support_session(): void
