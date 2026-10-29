@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import ThemeToggle from '@/components/ThemeToggle';
 import { files, journeys, models, requestsDocument } from '@/data';
 import { usePathname } from '@/lib/router';
 
@@ -74,7 +75,7 @@ export default function AtlasLayout() {
             <span>Catalogued files</span>
             <strong>{files.length}</strong>
           </div>
-          <p>Public locally · dark blueprint mode</p>
+          <p>Public locally · blueprint mode</p>
         </div>
       </aside>
 
@@ -90,6 +91,7 @@ export default function AtlasLayout() {
           </div>
           <div className="topbar-actions">
             <span className="status-chip">API · /api/v1</span>
+            <ThemeToggle />
             <NavLink className="status-chip amber" to="/present">
               Presenter →
             </NavLink>

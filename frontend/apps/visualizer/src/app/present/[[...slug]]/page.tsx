@@ -4,6 +4,7 @@ import CommandDetail from '@/components/CommandDetail';
 import JourneyPlayer from '@/components/JourneyPlayer';
 import ModelDetail from '@/components/ModelDetail';
 import RequestDetail from '@/components/RequestDetail';
+import ThemeToggle from '@/components/ThemeToggle';
 import { commands, journeys, journeysById, models, modelsByName, requestsDocument } from '@/data';
 
 type Collection = 'journeys' | 'models' | 'commands' | 'requests';
@@ -230,6 +231,7 @@ export default function PresentPage() {
         </nav>
 
         <div className="presenter-actions">
+          <ThemeToggle compact />
           <button
             type="button"
             className="ghost-button"

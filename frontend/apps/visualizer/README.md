@@ -135,6 +135,7 @@ Journey steps show speaker notes. Switching collections keeps the current journe
 ## Accessibility and layout
 
 - Responsive down to 320px: the journey index and table index stack, and detail grids collapse.
+- Light/dark theme toggle in the top bar and presenter header, persisted in `localStorage` as `atlas-theme`.
 - Presenter controls are keyboard-driven and the focus mode hides chrome.
 - `prefers-reduced-motion` disables animations and transitions.
 - Links expose the destination in text; request and file deep links are plain anchors.

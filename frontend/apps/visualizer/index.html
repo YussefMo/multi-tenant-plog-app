@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#050b12" />
+    <script>
+      try {
+        var storedTheme = localStorage.getItem('atlas-theme');
+        document.documentElement.dataset.theme = storedTheme === 'light' ? 'light' : 'dark';
+      } catch (error) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
     <meta
       name="description"
       content="Interactive architecture and request atlas for the Multi Tenant Plog Laravel API."
