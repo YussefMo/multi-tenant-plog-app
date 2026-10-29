@@ -2,8 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BillingInvoice;
+use App\Models\BillingPayment;
 use App\Models\PermissionProfile;
 use App\Models\Post;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\TenantSupportAccess;
@@ -61,6 +64,10 @@ class PurgeTenantsCommand extends Command
       Post::withTrashed()
         ->where('tenant_id', $tenant->id)
         ->forceDelete();
+
+      BillingInvoice::query()->where('tenant_id', $tenant->id)->delete();
+      BillingPayment::query()->where('tenant_id', $tenant->id)->delete();
+      Subscription::query()->where('tenant_id', $tenant->id)->delete();
 
       User::query()->where('tenant_id', $tenant->id)->delete();
       PermissionProfile::query()->where('tenant_id', $tenant->id)->delete();

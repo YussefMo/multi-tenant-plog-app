@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read string $name
  * @property-read string|null $category
  * @property-read bool $allow_support
+ * @property-read bool $is_due
  * @property-read \Illuminate\Support\Carbon|null $created_at
  */
 class TenantResource extends JsonResource
@@ -21,6 +22,7 @@ class TenantResource extends JsonResource
       'name' => $this->name,
       'category' => $this->category,
       'allow_support' => $this->allow_support,
+      'is_due' => $this->is_due,
       'created_at' => $this->created_at?->toIso8601String(),
     ];
   }

@@ -64,4 +64,13 @@ class UserFactory extends Factory
       'email_verified_at' => null,
     ]);
   }
+
+  public function viewer(): static
+  {
+    return $this->state(fn (): array => [
+      'tenant_id' => null,
+      'role' => UserRole::User,
+      'permissions' => UserRole::User->permissions(),
+    ]);
+  }
 }

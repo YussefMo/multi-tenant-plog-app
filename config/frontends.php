@@ -6,4 +6,5 @@ return [
   'user' => env('USER_FRONTEND_URL', 'http://user.multi-tenant-plog.test'),
   'support_path' => env('TENANT_SUPPORT_PATH', '/support/accept'),
   'accept_invitation_path' => env('TENANT_ACCEPT_INVITATION_PATH', '/accept-invitation'),
+  'billing_path' => env('TENANT_BILLING_PATH', '/billing'),
 ];

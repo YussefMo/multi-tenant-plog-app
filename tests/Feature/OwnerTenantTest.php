@@ -79,6 +79,18 @@ class OwnerTenantTest extends TestCase
       ->assertJsonPath('data.0.id', $tenant->id);
   }
 
+  public function test_owner_sees_the_tenant_due_flag(): void
+  {
+    $owner = Owner::factory()->create();
+    $tenant = Tenant::factory()->forOwner($owner)->create(['is_due' => true]);
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants')
+      ->assertOk()
+      ->assertJsonPath('data.0.id', $tenant->id)
+      ->assertJsonPath('data.0.is_due', true);
+  }
+
   public function test_owner_can_update_tenant(): void
   {
     $owner = Owner::factory()->create();

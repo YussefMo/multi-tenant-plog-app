@@ -45,4 +45,20 @@ class PostFactory extends Factory
       'published_at' => now(),
     ]);
   }
+
+  public function draft(): static
+  {
+    return $this->state(fn (): array => [
+      'status' => PostStatus::Draft,
+      'published_at' => null,
+    ]);
+  }
+
+  public function archived(): static
+  {
+    return $this->state(fn (): array => [
+      'status' => PostStatus::Archived,
+      'published_at' => now(),
+    ]);
+  }
 }

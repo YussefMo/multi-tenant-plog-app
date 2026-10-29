@@ -42,6 +42,8 @@ OWNER_DB_PORT=3306
 OWNER_DB_DATABASE=multi_tenant_plog_owner
 OWNER_DB_USERNAME=root
 OWNER_DB_PASSWORD=
+
+PUBLIC_API_URL=http://multi-tenant-plog.test
 ```
 
 Then migrate both databases:
@@ -55,6 +57,12 @@ Create the initial owner:
 
 ```bash
 php artisan owner:create
+```
+
+Optional local demo data:
+
+```bash
+php artisan db:seed --class=DemoSeeder
 ```
 
 ## Run
@@ -75,41 +83,69 @@ php artisan serve
 
 Base URL: `http://multi-tenant-plog.test/api`
 
-| Method | Endpoint                                | Auth                     | Description                 |
-| ------ | --------------------------------------- | ------------------------ | --------------------------- |
-| GET    | `/api/v1/csrf-token`                    | Public                   | Tenant CSRF token + session |
-| GET    | `/api/v1/owner/csrf-token`              | Public                   | Owner CSRF token + session  |
-| POST   | `/api/v1/owner/auth/login`              | Public (CSRF)            | Owner login                 |
-| POST   | `/api/v1/owner/auth/logout`             | Owner session            | Owner logout                |
-| GET    | `/api/v1/owner/auth/me`                 | Owner session            | Current owner               |
-| POST   | `/api/v1/owner/tenants/{tenant}/access` | Owner session            | Request support ticket      |
-| GET    | `/api/v1/health`                        | Public                   | Health check                |
-| GET    | `/api/v1/user`                          | Tenant session           | Current authenticated user  |
-| POST   | `/api/v1/auth/login`                    | Public (CSRF)            | Tenant login (email only)   |
-| POST   | `/api/v1/auth/accept-invitation`        | Public (CSRF)            | Accept tenant invitation    |
-| POST   | `/api/v1/auth/logout`                   | Tenant session           | Tenant logout               |
-| GET    | `/api/v1/auth/me`                       | Tenant session           | Current tenant user         |
-| POST   | `/api/v1/auth/support-login`            | Ticket                   | Exchange support ticket     |
-| POST   | `/api/v1/auth/support/end`              | Tenant session           | End support session         |
-| GET    | `/api/v1/tenant`                        | `tenant.settings.view`   | Tenant settings             |
-| PATCH  | `/api/v1/tenant`                        | `tenant.settings.update` | Update tenant settings      |
-| GET    | `/api/v1/posts`                         | `posts.view.*`           | List visible posts          |
-| POST   | `/api/v1/posts`                         | `posts.create`           | Create a draft post         |
-| GET    | `/api/v1/posts/{post}`                  | `posts.view.*`           | Show a visible post         |
-| PATCH  | `/api/v1/posts/{post}`                  | `posts.update.*`         | Update a post               |
-| DELETE | `/api/v1/posts/{post}`                  | `posts.delete.*`         | Soft-delete a post          |
-| POST   | `/api/v1/posts/{post}/publish`          | `posts.publish`          | Publish a post              |
-| POST   | `/api/v1/posts/{post}/unpublish`        | `posts.publish`          | Unpublish a post            |
-| GET    | `/api/v1/users`                         | `users.view`             | List tenant users           |
-| POST   | `/api/v1/users`                         | `users.create`           | Create tenant user          |
-| GET    | `/api/v1/users/{user}`                  | `users.view`             | Show tenant user            |
-| PATCH  | `/api/v1/users/{user}`                  | `users.update`           | Update tenant user          |
-| DELETE | `/api/v1/users/{user}`                  | `users.delete`           | Delete tenant user          |
-| GET    | `/api/v1/profiles`                      | `profiles.view`          | List permission profiles    |
-| POST   | `/api/v1/profiles`                      | `profiles.create`        | Create profile              |
-| GET    | `/api/v1/profiles/{profile}`            | `profiles.view`          | Show profile                |
-| PATCH  | `/api/v1/profiles/{profile}`            | `profiles.update`        | Update profile              |
-| DELETE | `/api/v1/profiles/{profile}`            | `profiles.delete`        | Delete profile              |
+| Method | Endpoint                                 | Auth                     | Description                 |
+| ------ | ---------------------------------------- | ------------------------ | --------------------------- |
+| GET    | `/api/v1/csrf-token`                     | Public                   | Tenant CSRF token + session |
+| GET    | `/api/v1/owner/csrf-token`               | Public                   | Owner CSRF token + session  |
+| POST   | `/api/v1/owner/auth/login`               | Public (CSRF)            | Owner login                 |
+| POST   | `/api/v1/owner/auth/logout`              | Owner session            | Owner logout                |
+| GET    | `/api/v1/owner/auth/me`                  | Owner session            | Current owner               |
+| GET    | `/api/v1/owner/tenants`                  | Owner session            | List owned tenants          |
+| POST   | `/api/v1/owner/tenants`                  | Owner session            | Create tenant + admin       |
+| GET    | `/api/v1/owner/tenants/{tenant}`         | Owner session            | Show tenant                 |
+| PATCH  | `/api/v1/owner/tenants/{tenant}`         | Owner session            | Update tenant               |
+| DELETE | `/api/v1/owner/tenants/{tenant}`         | Owner session            | Soft-delete tenant          |
+| POST   | `/api/v1/owner/tenants/{tenant}/restore` | Owner session            | Restore tenant              |
+| POST   | `/api/v1/owner/tenants/{tenant}/access`  | Owner session            | Request support ticket      |
+| GET    | `/api/v1/owner/plans`                    | Owner session            | List plans                  |
+| POST   | `/api/v1/owner/plans`                    | Owner session            | Create plan                 |
+| GET    | `/api/v1/owner/plans/{plan}`             | Owner session            | Show plan                   |
+| PATCH  | `/api/v1/owner/plans/{plan}`             | Owner session            | Update plan                 |
+| DELETE | `/api/v1/owner/plans/{plan}`             | Owner session            | Delete plan                 |
+| GET    | `/api/v1/owner/billing/metrics`          | Owner session            | Billing metrics             |
+| GET    | `/api/v1/owner/billing/transactions`     | Owner session            | Billing transactions        |
+| GET    | `/api/v1/health`                         | Public                   | Health check                |
+| GET    | `/up`                                    | Public                   | Framework health check      |
+| GET    | `/api/v1/user`                           | Tenant session           | Current authenticated user  |
+| POST   | `/api/v1/auth/login`                     | Public (CSRF)            | Tenant login (email only)   |
+| POST   | `/api/v1/auth/register`                  | Public (CSRF)            | Viewer signup               |
+| POST   | `/api/v1/auth/accept-invitation`         | Public (CSRF)            | Accept tenant invitation    |
+| POST   | `/api/v1/auth/logout`                    | Tenant session           | Tenant logout               |
+| GET    | `/api/v1/auth/me`                        | Tenant session           | Current tenant user         |
+| POST   | `/api/v1/auth/support-login`             | Ticket                   | Exchange support ticket     |
+| POST   | `/api/v1/auth/support/end`               | Tenant session           | End support session         |
+| GET    | `/api/v1/tenant`                         | `tenant.settings.view`   | Tenant settings             |
+| PATCH  | `/api/v1/tenant`                         | `tenant.settings.update` | Update tenant settings      |
+| GET    | `/api/v1/tenants`                        | `tenants.view`           | Viewer tenant directory     |
+| GET    | `/api/v1/tenants/{tenant}/posts`         | `tenants.view`           | Published tenant posts      |
+| GET    | `/api/v1/billing/plans`                  | `billing.view`           | Active plans                |
+| GET    | `/api/v1/billing/subscription`           | `billing.view`           | Current subscription        |
+| GET    | `/api/v1/billing/invoices`               | `billing.view`           | Tenant invoices             |
+| GET    | `/api/v1/billing/payments`               | `billing.view`           | Tenant payments             |
+| POST   | `/api/v1/billing/checkout`               | `billing.manage`         | Create Checkout Session     |
+| POST   | `/api/v1/billing/portal`                 | `billing.manage`         | Create Customer Portal      |
+| POST   | `/api/v1/billing/cancel`                 | `billing.manage`         | Cancel at period end        |
+| GET    | `/api/v1/billing/checkout/success`       | Stripe redirect          | Checkout success redirect   |
+| GET    | `/api/v1/billing/checkout/cancel`        | Stripe redirect          | Checkout cancel redirect    |
+| GET    | `/api/v1/billing/portal/return`          | Stripe redirect          | Portal return redirect      |
+| POST   | `/api/v1/stripe/webhook`                 | Stripe signature         | Stripe webhook              |
+| GET    | `/api/v1/posts`                          | `posts.view.*`           | List visible posts          |
+| POST   | `/api/v1/posts`                          | `posts.create`           | Create a draft post         |
+| GET    | `/api/v1/posts/{post}`                   | `posts.view.*`           | Show a visible post         |
+| PATCH  | `/api/v1/posts/{post}`                   | `posts.update.*`         | Update a post               |
+| DELETE | `/api/v1/posts/{post}`                   | `posts.delete.*`         | Soft-delete a post          |
+| POST   | `/api/v1/posts/{post}/publish`           | `posts.publish`          | Publish a post              |
+| POST   | `/api/v1/posts/{post}/unpublish`         | `posts.publish`          | Unpublish a post            |
+| GET    | `/api/v1/users`                          | `users.view`             | List tenant users           |
+| POST   | `/api/v1/users`                          | `users.create`           | Create tenant user          |
+| GET    | `/api/v1/users/{user}`                   | `users.view`             | Show tenant user            |
+| PATCH  | `/api/v1/users/{user}`                   | `users.update`           | Update tenant user          |
+| DELETE | `/api/v1/users/{user}`                   | `users.delete`           | Delete tenant user          |
+| GET    | `/api/v1/profiles`                       | `profiles.view`          | List permission profiles    |
+| POST   | `/api/v1/profiles`                       | `profiles.create`        | Create profile              |
+| GET    | `/api/v1/profiles/{profile}`             | `profiles.view`          | Show profile                |
+| PATCH  | `/api/v1/profiles/{profile}`             | `profiles.update`        | Update profile              |
+| DELETE | `/api/v1/profiles/{profile}`             | `profiles.delete`        | Delete profile              |
 
 All tenant endpoints require the tenant session. The `admin` role has `["*"]`; other roles use the presets in `config/permissions.php` plus their tenant-scoped profile and direct extras.
 
@@ -125,6 +161,44 @@ Tenant and owner sessions use separate cookies: `tenant_session` and `owner_sess
 2. Send `X-CSRF-TOKEN: <csrf_token>` on every POST/PUT/PATCH/DELETE.
 3. Login regenerates the session and rotates the CSRF token; use the new `csrf_token` returned in the login response.
 4. The built-in `XSRF-TOKEN` cookie is not used.
+
+### Error envelope
+
+All API errors render JSON with a stable shape:
+
+```json
+{
+  "message": "This action is unauthorized.",
+  "status": 403
+}
+```
+
+Validation errors add an `errors` object:
+
+```json
+{
+  "message": "The given data was invalid.",
+  "status": 422,
+  "errors": {
+    "email": ["The email field is required."]
+  }
+}
+```
+
+This covers `401`, `403`, `404`, `409`, `419`, and `422`, plus other HTTP errors.
+
+### Tenant lifecycle
+
+- Delete and restore are owner-only.
+- Deleted tenants are soft-deleted and hidden from owner listings.
+- `tenants.is_due` is a billing flag; it never schedules or triggers deletion.
+- `php artisan tenants:purge` permanently removes tenants soft-deleted for more than 30 days, including their users, posts, profiles, invitations, support rows, sessions, and billing mirror rows.
+- `php artisan schedule:list` shows the daily purge job.
+
+```bash
+php artisan tenants:purge
+php artisan tenants:purge --days=30
+```
 
 ```bash
 curl http://multi-tenant-plog.test/api/v1/health
@@ -166,6 +240,18 @@ The owner dashboard, tenant dashboard, and user web are separate frontends on fi
 - Viewer signup: `POST /api/v1/auth/register`
 - Viewer directory: `GET /api/v1/tenants`, `GET /api/v1/tenants/{tenant}/posts`
 - Support ticket TTL and session idle timeout: `config/support.php`
+
+## Billing
+
+Stripe is fully backend-driven: the frontend sends `plan_id`, receives `checkout_url`, and redirects to Stripe-hosted Checkout. Stripe renders the payment form; webhooks keep the local subscription, invoice, and payment mirror in sync.
+
+- Public API origin for Stripe return/webhook URLs: `PUBLIC_API_URL` (no `/api` suffix)
+- Stripe config: `config/services.php` / `STRIPE_MODE`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_ALLOW_LIVE`
+- Plans: `config/plans.php`, `PlanSeeder`, `php artisan stripe:sync-plans`
+- Payment due flag: `tenants.is_due` (billing-only UI; never schedules deletion)
+- Webhook: `POST /api/v1/stripe/webhook`
+- Backfill: `php artisan stripe:sync-billing`
+- Full guide: [`docs/billing.md`](docs/billing.md)
 
 ## IDE support
 

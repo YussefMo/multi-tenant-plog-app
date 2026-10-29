@@ -20,6 +20,7 @@ return [
     'secret' => env('STRIPE_SECRET'),
     'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     'api_version' => env('STRIPE_API_VERSION', '2026-09-30.endive'),
+    'allow_live' => (bool) env('STRIPE_ALLOW_LIVE', false),
   ],
 
   'postmark' => [

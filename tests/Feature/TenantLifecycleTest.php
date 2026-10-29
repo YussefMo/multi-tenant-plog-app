@@ -3,8 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Models\BillingInvoice;
+use App\Models\BillingPayment;
 use App\Models\PermissionProfile;
+use App\Models\Plan;
 use App\Models\Post;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\TenantSupportAccess;
@@ -108,6 +112,11 @@ class TenantLifecycleTest extends TestCase
     $profile = PermissionProfile::factory()->forTenant($tenant)->create();
     $admin->update(['permission_profile_id' => $profile->id]);
 
+    $plan = Plan::factory()->create();
+    Subscription::factory()->forTenant($tenant)->forPlan($plan)->create();
+    BillingInvoice::factory()->forTenant($tenant)->create();
+    BillingPayment::factory()->forTenant($tenant)->create();
+
     $post = Post::factory()->forAuthor($author)->published()->create();
     $post->delete();
 
@@ -178,8 +187,13 @@ class TenantLifecycleTest extends TestCase
     $this->assertDatabaseMissing('tenant_support_tickets', ['tenant_id' => $tenant->id]);
     $this->assertDatabaseMissing('tenant_support_accesses', ['tenant_id' => $tenant->id]);
     $this->assertDatabaseMissing('posts', ['tenant_id' => $tenant->id]);
+    $this->assertDatabaseMissing('subscriptions', ['tenant_id' => $tenant->id]);
+    $this->assertDatabaseMissing('billing_invoices', ['tenant_id' => $tenant->id]);
+    $this->assertDatabaseMissing('billing_payments', ['tenant_id' => $tenant->id]);
     $this->assertDatabaseMissing('sessions', ['id' => $adminSessionId]);
     $this->assertDatabaseMissing('password_reset_tokens', ['email' => $admin->email]);
+
+    $this->assertDatabaseHas('plans', ['id' => $plan->id]);
 
     $this->assertDatabaseHas('users', ['id' => $viewer->id]);
     $this->assertDatabaseHas('sessions', ['id' => $viewerSessionId]);
@@ -195,6 +209,19 @@ class TenantLifecycleTest extends TestCase
     $this->artisan('tenants:purge')->assertExitCode(0);
 
     $this->assertSoftDeleted('tenants', ['id' => $tenant->id]);
+  }
+
+  public function test_due_tenant_is_not_scheduled_for_deletion_or_purged(): void
+  {
+    $tenant = Tenant::factory()->create(['is_due' => true]);
+
+    $this->artisan('tenants:purge')->assertExitCode(0);
+
+    $this->assertDatabaseHas('tenants', [
+      'id' => $tenant->id,
+      'is_due' => true,
+      'deleted_at' => null,
+    ]);
   }
 
   public function test_purge_command_is_scheduled_daily(): void

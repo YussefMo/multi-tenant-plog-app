@@ -25,6 +25,8 @@ The API returns `redirect_url` so the frontend never has to hardcode domain rule
 | `GET /api/v1/auth/me`                        | `redirect_url` | Same role-based destination                              |
 | `POST /api/v1/auth/support-login`            | `redirect_url` | Tenant dashboard                                         |
 | `POST /api/v1/auth/support/end`              | `redirect_url` | Owner dashboard                                          |
+| `POST /api/v1/billing/checkout`              | `checkout_url` | Stripe-hosted Checkout                                   |
+| `POST /api/v1/billing/portal`                | `portal_url`   | Stripe Customer Portal                                   |
 | Invitation email link                        | —              | Tenant frontend `/accept-invitation?email=...&token=...` |
 
 ## Session and CORS rules
@@ -145,6 +147,33 @@ Tenant /accept-invitation?email&token
   → tenant /login
 ```
 
+## Billing flow
+
+The frontend never loads Stripe.js. It only redirects to the URL returned by the API.
+
+```
+Tenant /billing
+  → POST /api/v1/billing/checkout { plan_id }
+  ← 201 { checkout_url, session_id }
+  → window.location.assign(checkout_url)
+
+Stripe Checkout (hosted by Stripe)
+  → GET {PUBLIC_API_URL}/api/v1/billing/checkout/success?session_id=...
+  → 302 {TENANT_FRONTEND_URL}/billing?status=success
+```
+
+| Stripe return    | API redirect                |
+| ---------------- | --------------------------- |
+| Checkout success | `/billing?status=success`   |
+| Checkout cancel  | `/billing?status=cancelled` |
+| Portal return    | `/billing?status=portal`    |
+
+The API uses `PUBLIC_API_URL` for these Stripe-facing URLs, so changing the ngrok hostname only requires updating that env value and clearing config.
+
+When `tenant.is_due` is `true`, block the rest of the tenant UI and keep only the billing tab visible. The flag is available in `GET /auth/me` and `GET /tenant`.
+
+Webhooks update the subscription even if the user closes the browser before returning. See [`billing.md`](billing.md).
+
 ## Owner support access
 
 This is the important cross-frontend flow.
@@ -200,6 +229,7 @@ This is the important cross-frontend flow.
 - `/login`
 - `/accept-invitation`
 - `/support/accept`
+- `/billing`
 - `/`
 
 ### User web

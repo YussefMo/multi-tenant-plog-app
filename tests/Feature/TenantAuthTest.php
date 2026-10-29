@@ -218,6 +218,22 @@ class TenantAuthTest extends TestCase
     ])->assertStatus(429);
   }
 
+  public function test_due_tenant_flag_is_exposed_in_tenant_context(): void
+  {
+    $tenant = Tenant::factory()->create(['is_due' => true]);
+    $admin = User::factory()->forTenant($tenant)->admin()->create();
+
+    $this->actingAs($admin)
+      ->getJson('/api/v1/auth/me')
+      ->assertOk()
+      ->assertJsonPath('data.tenant.is_due', true);
+
+    $this->actingAs($admin)
+      ->getJson('/api/v1/tenant')
+      ->assertOk()
+      ->assertJsonPath('data.is_due', true);
+  }
+
   public function test_authenticated_user_can_view_profile_and_logout(): void
   {
     $tenant = Tenant::factory()->create();

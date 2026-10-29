@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\Owner\BillingController as OwnerBillingController;
 use App\Http\Controllers\Api\Owner\OwnerAuthController;
+use App\Http\Controllers\Api\Owner\PlanController;
 use App\Http\Controllers\Api\Owner\SupportAccessController;
 use App\Http\Controllers\Api\Owner\TenantController;
+use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\Tenant\AuthController;
+use App\Http\Controllers\Api\Tenant\BillingController;
+use App\Http\Controllers\Api\Tenant\BillingRedirectController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
 use App\Http\Controllers\Api\Tenant\PostController;
 use App\Http\Controllers\Api\Tenant\TenantDirectoryController;
@@ -34,6 +39,15 @@ Route::prefix('v1')->group(function () {
       Route::apiResource('tenants', TenantController::class)
         ->except(['create', 'edit'])
         ->names('api.v1.owner.tenants');
+
+      Route::apiResource('plans', PlanController::class)
+        ->except(['create', 'edit'])
+        ->names('api.v1.owner.plans');
+
+      Route::get('/billing/metrics', [OwnerBillingController::class, 'metrics'])
+        ->name('api.v1.owner.billing.metrics');
+      Route::get('/billing/transactions', [OwnerBillingController::class, 'transactions'])
+        ->name('api.v1.owner.billing.transactions');
 
       Route::post('/tenants/{tenant}/access', [SupportAccessController::class, 'store'])
         ->withTrashed()
@@ -81,6 +95,16 @@ Route::prefix('v1')->group(function () {
     ]);
   })->name('api.v1.health');
 
+  Route::get('/billing/checkout/success', [BillingRedirectController::class, 'success'])
+    ->name('api.v1.billing.checkout.success');
+  Route::get('/billing/checkout/cancel', [BillingRedirectController::class, 'cancel'])
+    ->name('api.v1.billing.checkout.cancel');
+  Route::get('/billing/portal/return', [BillingRedirectController::class, 'portalReturn'])
+    ->name('api.v1.billing.portal.return');
+
+  Route::post('/stripe/webhook', StripeWebhookController::class)
+    ->name('api.v1.stripe.webhook');
+
   Route::middleware(['web', 'auth:web', 'support', 'tenant.active'])->group(function () {
     Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
@@ -98,6 +122,30 @@ Route::prefix('v1')->group(function () {
     Route::patch('/tenant', [TenantSettingsController::class, 'update'])
       ->middleware('permission:tenant.settings.update')
       ->name('api.v1.tenant.update');
+
+    Route::prefix('billing')->group(function () {
+      Route::get('/plans', [BillingController::class, 'plans'])
+        ->middleware('permission:billing.view')
+        ->name('api.v1.billing.plans');
+      Route::get('/subscription', [BillingController::class, 'subscription'])
+        ->middleware('permission:billing.view')
+        ->name('api.v1.billing.subscription');
+      Route::get('/invoices', [BillingController::class, 'invoices'])
+        ->middleware('permission:billing.view')
+        ->name('api.v1.billing.invoices');
+      Route::get('/payments', [BillingController::class, 'payments'])
+        ->middleware('permission:billing.view')
+        ->name('api.v1.billing.payments');
+      Route::post('/checkout', [BillingController::class, 'checkout'])
+        ->middleware('permission:billing.manage')
+        ->name('api.v1.billing.checkout');
+      Route::post('/portal', [BillingController::class, 'portal'])
+        ->middleware('permission:billing.manage')
+        ->name('api.v1.billing.portal');
+      Route::post('/cancel', [BillingController::class, 'cancel'])
+        ->middleware('permission:billing.manage')
+        ->name('api.v1.billing.cancel');
+    });
 
     Route::get('/posts', [PostController::class, 'index'])
       ->middleware('permission:posts.view.any,posts.view.own,posts.view.published')

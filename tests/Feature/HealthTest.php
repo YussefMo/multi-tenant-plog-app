@@ -16,6 +16,11 @@ class HealthTest extends TestCase
       ]);
   }
 
+  public function test_up_health_route_is_public(): void
+  {
+    $this->get('/up')->assertOk();
+  }
+
   public function test_protected_endpoint_requires_authentication(): void
   {
     $this->getJson('/api/v1/user')

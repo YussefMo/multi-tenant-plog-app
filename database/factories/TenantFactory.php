@@ -18,11 +18,17 @@ class TenantFactory extends Factory
       'name' => fake()->company(),
       'category' => fake()->randomElement(['Technology', 'Health', 'Finance', 'Education']),
       'allow_support' => false,
+      'is_due' => false,
     ];
   }
 
   public function forOwner(Owner $owner): static
   {
     return $this->state(fn (): array => ['owner_id' => $owner->id]);
+  }
+
+  public function due(): static
+  {
+    return $this->state(fn (): array => ['is_due' => true]);
   }
 }
