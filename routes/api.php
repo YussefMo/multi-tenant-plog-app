@@ -67,7 +67,7 @@ Route::prefix('v1')->group(function () {
         ->name('api.v1.auth.support-end');
 
       Route::get('/me', [AuthController::class, 'me'])
-        ->middleware('support')
+        ->middleware(['support', 'tenant.active'])
         ->name('api.v1.auth.me');
     });
   });
@@ -81,7 +81,7 @@ Route::prefix('v1')->group(function () {
     ]);
   })->name('api.v1.health');
 
-  Route::middleware(['web', 'auth:web', 'support'])->group(function () {
+  Route::middleware(['web', 'auth:web', 'support', 'tenant.active'])->group(function () {
     Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
 

@@ -137,6 +137,35 @@ class OwnerTenantTest extends TestCase
       ->assertNotFound();
   }
 
+  public function test_owner_cannot_restore_another_owners_trashed_tenant(): void
+  {
+    $owner = Owner::factory()->create();
+    $otherOwner = Owner::factory()->create();
+    $tenant = Tenant::factory()->forOwner($otherOwner)->create();
+    $tenant->delete();
+
+    $this->actingAs($owner, 'owner')
+      ->postJson("/api/v1/owner/tenants/{$tenant->id}/restore")
+      ->assertNotFound();
+
+    $this->assertSoftDeleted('tenants', ['id' => $tenant->id]);
+  }
+
+  public function test_trashed_tenant_is_not_shown_or_updated(): void
+  {
+    $owner = Owner::factory()->create();
+    $tenant = Tenant::factory()->forOwner($owner)->create();
+    $tenant->delete();
+
+    $this->actingAs($owner, 'owner')
+      ->getJson("/api/v1/owner/tenants/{$tenant->id}")
+      ->assertNotFound();
+
+    $this->actingAs($owner, 'owner')
+      ->patchJson("/api/v1/owner/tenants/{$tenant->id}", ['name' => 'Hidden'])
+      ->assertNotFound();
+  }
+
   public function test_guest_cannot_access_owner_tenant_routes(): void
   {
     $this->getJson('/api/v1/owner/tenants')->assertUnauthorized();
