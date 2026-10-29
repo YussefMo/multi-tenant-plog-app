@@ -1,0 +1,770 @@
+[
+  {
+    "path": "routes/api.php",
+    "layer": "routing",
+    "purpose": "Registers every API v1 route: owner, tenant, auth, posts, users, profiles, billing, Stripe webhook, and tenant directory.",
+    "features": ["requests", "auth", "billing", "support", "tenant-directory"]
+  },
+  {
+    "path": "routes/web.php",
+    "layer": "routing",
+    "purpose": "Public JSON root index pointing to the API, health check, and API docs.",
+    "features": ["overview", "docs"]
+  },
+  {
+    "path": "routes/console.php",
+    "layer": "routing",
+    "purpose": "Schedules tenants:purge to run daily.",
+    "features": ["tenant-lifecycle", "commands"]
+  },
+  {
+    "path": "bootstrap/app.php",
+    "layer": "config",
+    "purpose": "Configures routing, middleware aliases, session realm prepending, and the standard JSON error envelope.",
+    "features": ["cross-cutting", "errors", "middleware"]
+  },
+  {
+    "path": "bootstrap/providers.php",
+    "layer": "config",
+    "purpose": "Registers the application and Scramble service providers.",
+    "features": ["cross-cutting", "docs"]
+  },
+  {
+    "path": "config/auth.php",
+    "layer": "config",
+    "purpose": "Defines the separate owner and tenant guards and providers.",
+    "features": ["auth", "session-realms"]
+  },
+  {
+    "path": "config/session.php",
+    "layer": "config",
+    "purpose": "Defines tenant_session and owner_session cookies, lifetimes, domain, SameSite, and secure flags.",
+    "features": ["auth", "session-realms"]
+  },
+  {
+    "path": "config/permissions.php",
+    "layer": "config",
+    "purpose": "Defines the permission catalog and role presets used to materialize users.permissions.",
+    "features": ["permissions"]
+  },
+  {
+    "path": "config/frontends.php",
+    "layer": "config",
+    "purpose": "Defines owner, tenant, and user frontend URLs plus support, invitation, and billing paths.",
+    "features": ["frontends", "redirects"]
+  },
+  {
+    "path": "config/cors.php",
+    "layer": "config",
+    "purpose": "Allows the local frontend origins and credentialed cross-origin requests.",
+    "features": ["frontends", "cors"]
+  },
+  {
+    "path": "config/billing.php",
+    "layer": "config",
+    "purpose": "Defines the public API URL used for Stripe return URLs and webhook paths.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "config/services.php",
+    "layer": "config",
+    "purpose": "Exposes Stripe credentials, API version, sandbox mode, and live-key guard configuration.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "config/support.php",
+    "layer": "config",
+    "purpose": "Defines the support ticket TTL and support-session inactivity timeout.",
+    "features": ["support"]
+  },
+  {
+    "path": "config/scramble.php",
+    "layer": "config",
+    "purpose": "Configures OpenAPI docs, Basic auth middleware, servers, and the docs description.",
+    "features": ["docs"]
+  },
+  {
+    "path": "config/plans.php",
+    "layer": "config",
+    "purpose": "Defines the two seeded plans and their Stripe product/price configuration.",
+    "features": ["billing", "plans"]
+  },
+  {
+    "path": "app/Http/Middleware/ResolveSessionRealm.php",
+    "layer": "middleware",
+    "purpose": "Selects tenant_session or owner_session before StartSession based on the request path.",
+    "features": ["session-realms", "auth"]
+  },
+  {
+    "path": "app/Http/Middleware/ForceJsonResponse.php",
+    "layer": "middleware",
+    "purpose": "Forces API requests to be treated as JSON even without an Accept header.",
+    "features": ["cross-cutting", "errors"]
+  },
+  {
+    "path": "app/Http/Middleware/EnsurePermission.php",
+    "layer": "middleware",
+    "purpose": "Rejects requests when the authenticated user lacks every required permission.",
+    "features": ["permissions"]
+  },
+  {
+    "path": "app/Http/Middleware/EnsureTenantActive.php",
+    "layer": "middleware",
+    "purpose": "Rejects users whose tenant is soft-deleted or missing and invalidates the session.",
+    "features": ["tenant-lifecycle", "session-realms"]
+  },
+  {
+    "path": "app/Http/Middleware/EnsureSupportAccess.php",
+    "layer": "middleware",
+    "purpose": "Re-checks support access, allow_support, the tenant, and the inactivity timeout.",
+    "features": ["support"]
+  },
+  {
+    "path": "app/Http/Middleware/ProtectDocsAccess.php",
+    "layer": "middleware",
+    "purpose": "Protects the API docs with HTTP Basic credentials from DOCS_USERNAME and DOCS_PASSWORD.",
+    "features": ["docs"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+    "layer": "controller",
+    "purpose": "Owner login, logout, and me endpoints using the owner guard and owner_session cookie.",
+    "features": ["auth", "owner"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Owner/TenantController.php",
+    "layer": "controller",
+    "purpose": "Owner tenant CRUD, soft delete, restore, provisioning, and invitation dispatch.",
+    "features": ["tenants", "invitations", "owner"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Owner/SupportAccessController.php",
+    "layer": "controller",
+    "purpose": "Issues a single-use support ticket and returns the tenant-frontend redirect URL.",
+    "features": ["support", "owner"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Owner/PlanController.php",
+    "layer": "controller",
+    "purpose": "Owner plan CRUD with slug generation and subscription deletion guard.",
+    "features": ["plans", "billing", "owner"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Owner/BillingController.php",
+    "layer": "controller",
+    "purpose": "Owner billing metrics and cross-tenant payment transactions.",
+    "features": ["billing", "metrics", "owner"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/AuthController.php",
+    "layer": "controller",
+    "purpose": "Tenant login, viewer registration, invitation acceptance, support login, logout, and me.",
+    "features": ["auth", "invitations", "support", "viewer"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/UserController.php",
+    "layer": "controller",
+    "purpose": "Tenant user CRUD with tenant isolation and hidden support-user exclusion.",
+    "features": ["users", "permissions"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+    "layer": "controller",
+    "purpose": "Tenant permission profile CRUD and user permission resync on profile changes.",
+    "features": ["permissions", "profiles"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/PostController.php",
+    "layer": "controller",
+    "purpose": "Post listing, creation, viewing, update, soft delete, publish, and unpublish.",
+    "features": ["posts"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/TenantSettingsController.php",
+    "layer": "controller",
+    "purpose": "Reads and updates the current tenant's settings.",
+    "features": ["tenant-settings"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/TenantDirectoryController.php",
+    "layer": "controller",
+    "purpose": "Viewer tenant directory with name/category filters and cross-tenant published posts.",
+    "features": ["tenant-directory", "viewer"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/BillingController.php",
+    "layer": "controller",
+    "purpose": "Tenant plans, subscription, checkout, portal, cancel, invoices, and payments.",
+    "features": ["billing"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/BillingRedirectController.php",
+    "layer": "controller",
+    "purpose": "Redirects Stripe return URLs to the tenant frontend billing page.",
+    "features": ["billing", "redirects"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/StripeWebhookController.php",
+    "layer": "controller",
+    "purpose": "Verifies Stripe signatures and delegates verified events to the webhook service.",
+    "features": ["billing", "stripe", "webhooks"]
+  },
+  {
+    "path": "app/Http/Controllers/Concerns/AuthorizesPermissions.php",
+    "layer": "controller",
+    "purpose": "Prevents users from granting permissions or profiles beyond their own effective permissions.",
+    "features": ["permissions", "security"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/LoginRequest.php",
+    "layer": "request",
+    "purpose": "Validates owner email and password login input.",
+    "features": ["auth", "owner"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/StoreTenantRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant creation, admin details, and globally unique admin email.",
+    "features": ["tenants", "invitations"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/UpdateTenantRequest.php",
+    "layer": "request",
+    "purpose": "Validates owner tenant updates.",
+    "features": ["tenants"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/StorePlanRequest.php",
+    "layer": "request",
+    "purpose": "Validates plan creation fields, Stripe IDs, limits, and features.",
+    "features": ["plans", "billing"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/UpdatePlanRequest.php",
+    "layer": "request",
+    "purpose": "Validates plan updates with unique checks ignoring the current plan.",
+    "features": ["plans", "billing"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/LoginRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant login email, password, and remember flag.",
+    "features": ["auth"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/RegisterRequest.php",
+    "layer": "request",
+    "purpose": "Validates public viewer signup name, unique email, and confirmed password.",
+    "features": ["auth", "viewer"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/AcceptInvitationRequest.php",
+    "layer": "request",
+    "purpose": "Validates invitation email, raw token, and password confirmation.",
+    "features": ["invitations", "auth"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/SupportLoginRequest.php",
+    "layer": "request",
+    "purpose": "Validates the support ticket exchange payload.",
+    "features": ["support"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/StoreUserRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant user creation, role, profile, and extra permissions.",
+    "features": ["users", "permissions"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdateUserRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant user updates and unique email changes.",
+    "features": ["users", "permissions"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/StorePermissionProfileRequest.php",
+    "layer": "request",
+    "purpose": "Validates permission profile creation and catalog permissions.",
+    "features": ["profiles", "permissions"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdatePermissionProfileRequest.php",
+    "layer": "request",
+    "purpose": "Validates permission profile updates.",
+    "features": ["profiles", "permissions"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/StorePostRequest.php",
+    "layer": "request",
+    "purpose": "Validates post creation fields.",
+    "features": ["posts"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdatePostRequest.php",
+    "layer": "request",
+    "purpose": "Validates post updates.",
+    "features": ["posts"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdateTenantSettingsRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant name, category, and support flag updates.",
+    "features": ["tenant-settings"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/CheckoutRequest.php",
+    "layer": "request",
+    "purpose": "Validates the plan_id used for Stripe Checkout; never accepts amounts or price IDs.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "app/Http/Resources/OwnerResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for owner accounts.",
+    "features": ["auth", "owner"]
+  },
+  {
+    "path": "app/Http/Resources/UserResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for users, permissions, profile, and nested tenant.",
+    "features": ["users", "auth", "permissions"]
+  },
+  {
+    "path": "app/Http/Resources/TenantResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for tenant data, support flag, and is_due billing flag.",
+    "features": ["tenants", "billing"]
+  },
+  {
+    "path": "app/Http/Resources/TenantDirectoryResource.php",
+    "layer": "resource",
+    "purpose": "Public tenant directory contract with published post counts.",
+    "features": ["tenant-directory", "viewer"]
+  },
+  {
+    "path": "app/Http/Resources/PermissionProfileResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for permission profiles and user counts.",
+    "features": ["profiles", "permissions"]
+  },
+  {
+    "path": "app/Http/Resources/PostResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for posts and author summary.",
+    "features": ["posts"]
+  },
+  {
+    "path": "app/Http/Resources/PlanResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for plans, amounts, limits, and features.",
+    "features": ["plans", "billing"]
+  },
+  {
+    "path": "app/Http/Resources/SubscriptionResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for subscriptions, plan limits, and period timestamps.",
+    "features": ["billing"]
+  },
+  {
+    "path": "app/Http/Resources/BillingInvoiceResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for mirrored invoices.",
+    "features": ["billing", "history"]
+  },
+  {
+    "path": "app/Http/Resources/BillingPaymentResource.php",
+    "layer": "resource",
+    "purpose": "JSON contract for mirrored payments and transaction history.",
+    "features": ["billing", "history"]
+  },
+  {
+    "path": "app/Policies/PostPolicy.php",
+    "layer": "controller",
+    "purpose": "Authorizes post viewing, editing, deletion, publishing, and cross-tenant published access.",
+    "features": ["posts", "permissions"]
+  },
+  {
+    "path": "app/Services/TenantProvisioningService.php",
+    "layer": "service",
+    "purpose": "Creates a tenant, its first admin, and a hashed invitation in one transaction.",
+    "features": ["tenants", "invitations"]
+  },
+  {
+    "path": "app/Services/PermissionSyncService.php",
+    "layer": "service",
+    "purpose": "Materializes role + profile + extra permissions into users.permissions.",
+    "features": ["permissions"]
+  },
+  {
+    "path": "app/Services/SupportUserService.php",
+    "layer": "service",
+    "purpose": "Finds or creates the hidden per-tenant support user.",
+    "features": ["support"]
+  },
+  {
+    "path": "app/Services/FrontendUrlService.php",
+    "layer": "service",
+    "purpose": "Builds owner, tenant, user, support, and invitation frontend URLs.",
+    "features": ["frontends", "redirects", "support"]
+  },
+  {
+    "path": "app/Services/StripeGateway.php",
+    "layer": "service",
+    "purpose": "Wraps StripeClient calls, enforces sandbox mode, and guards live keys.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "app/Services/BillingService.php",
+    "layer": "service",
+    "purpose": "Creates Stripe customers, Checkout sessions, portal sessions, and cancellation updates.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "app/Services/SubscriptionSyncService.php",
+    "layer": "service",
+    "purpose": "Maps Stripe subscriptions to tenants/plans and updates tenant is_due state.",
+    "features": ["billing", "stripe", "webhooks"]
+  },
+  {
+    "path": "app/Services/BillingMirrorService.php",
+    "layer": "service",
+    "purpose": "Upserts invoices and payments from Stripe and resolves their tenant.",
+    "features": ["billing", "history", "webhooks"]
+  },
+  {
+    "path": "app/Services/StripeWebhookService.php",
+    "layer": "service",
+    "purpose": "Processes verified Stripe events idempotently and updates the local mirror.",
+    "features": ["billing", "stripe", "webhooks"]
+  },
+  {
+    "path": "app/Services/BillingMetricsService.php",
+    "layer": "service",
+    "purpose": "Computes MRR/ARR, revenue, refunds, disputes, churn, plan distribution, and monthly timeline.",
+    "features": ["billing", "metrics", "charts"]
+  },
+  {
+    "path": "app/Models/Owner.php",
+    "layer": "model",
+    "purpose": "Owner account on the separate owner database connection.",
+    "features": ["owner", "auth", "databases"]
+  },
+  {
+    "path": "app/Models/Tenant.php",
+    "layer": "model",
+    "purpose": "Tenant root model with soft deletes, support flag, is_due, and relationships.",
+    "features": ["tenants", "billing", "support"]
+  },
+  {
+    "path": "app/Models/User.php",
+    "layer": "model",
+    "purpose": "Tenant or global viewer account with role, materialized permissions, and profile.",
+    "features": ["users", "permissions", "auth"]
+  },
+  {
+    "path": "app/Models/PermissionProfile.php",
+    "layer": "model",
+    "purpose": "Tenant-scoped permission profile assigned to users.",
+    "features": ["profiles", "permissions"]
+  },
+  {
+    "path": "app/Models/Post.php",
+    "layer": "model",
+    "purpose": "Tenant-scoped post with visibility scopes, slug generation, and soft deletes.",
+    "features": ["posts", "tenant-scope"]
+  },
+  {
+    "path": "app/Models/TenantInvitation.php",
+    "layer": "model",
+    "purpose": "Hashed invitation token with expiry and acceptance state.",
+    "features": ["invitations"]
+  },
+  {
+    "path": "app/Models/TenantSupportTicket.php",
+    "layer": "model",
+    "purpose": "Single-use support ticket with expiry and used timestamp.",
+    "features": ["support"]
+  },
+  {
+    "path": "app/Models/TenantSupportAccess.php",
+    "layer": "model",
+    "purpose": "Support session audit row with owner, impersonated user, and end time.",
+    "features": ["support", "audit"]
+  },
+  {
+    "path": "app/Models/Plan.php",
+    "layer": "model",
+    "purpose": "Global plan catalog with Stripe IDs, limits, features, and monthly amount helper.",
+    "features": ["plans", "billing"]
+  },
+  {
+    "path": "app/Models/Subscription.php",
+    "layer": "model",
+    "purpose": "One local subscription per tenant, mapped to a plan and Stripe IDs.",
+    "features": ["billing", "stripe"]
+  },
+  {
+    "path": "app/Models/StripeWebhookEvent.php",
+    "layer": "model",
+    "purpose": "Idempotency record for processed Stripe events.",
+    "features": ["billing", "webhooks"]
+  },
+  {
+    "path": "app/Models/BillingInvoice.php",
+    "layer": "model",
+    "purpose": "Local invoice mirror used for tenant history and metrics.",
+    "features": ["billing", "history"]
+  },
+  {
+    "path": "app/Models/BillingPayment.php",
+    "layer": "model",
+    "purpose": "Local payment mirror used for transactions, refunds, disputes, and metrics.",
+    "features": ["billing", "history", "metrics"]
+  },
+  {
+    "path": "app/Models/Concerns/BelongsToTenant.php",
+    "layer": "model",
+    "purpose": "Adds tenant scope and auto-assigns tenant_id when creating tenant-owned models.",
+    "features": ["tenant-scope", "posts"]
+  },
+  {
+    "path": "app/Models/Scopes/TenantScope.php",
+    "layer": "model",
+    "purpose": "Globally filters tenant-owned queries when the authenticated user has a tenant_id.",
+    "features": ["tenant-scope", "security"]
+  },
+  {
+    "path": "app/Console/Commands/OwnerCreateCommand.php",
+    "layer": "command",
+    "purpose": "Creates an owner account on the owner database.",
+    "features": ["commands", "owner"]
+  },
+  {
+    "path": "app/Console/Commands/SyncPermissionsCommand.php",
+    "layer": "command",
+    "purpose": "Repairs materialized permissions for all users, one tenant, or one user.",
+    "features": ["commands", "permissions"]
+  },
+  {
+    "path": "app/Console/Commands/PurgeTenantsCommand.php",
+    "layer": "command",
+    "purpose": "Permanently removes tenants soft-deleted beyond the retention window and all related rows.",
+    "features": ["commands", "tenant-lifecycle"]
+  },
+  {
+    "path": "app/Console/Commands/StripeSyncPlansCommand.php",
+    "layer": "command",
+    "purpose": "Creates or refreshes Stripe products/prices for configured plans idempotently.",
+    "features": ["commands", "billing", "stripe"]
+  },
+  {
+    "path": "app/Console/Commands/StripeSyncBillingCommand.php",
+    "layer": "command",
+    "purpose": "Backfills Stripe subscriptions, invoices, and payments into the local mirror.",
+    "features": ["commands", "billing", "stripe"]
+  },
+  {
+    "path": "database/migrations/2026_10_27_121640_create_tenants_table.php",
+    "layer": "database",
+    "purpose": "Creates tenants with owner_id index, name, category, support, Stripe customer, and soft deletes.",
+    "features": ["databases", "tenants"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_065621_add_is_due_to_tenants_table.php",
+    "layer": "database",
+    "purpose": "Adds the is_due billing flag to tenants.",
+    "features": ["databases", "billing"]
+  },
+  {
+    "path": "database/migrations/2026_10_28_131911_create_users_table.php",
+    "layer": "database",
+    "purpose": "Creates users with nullable tenant_id, global unique email, role, permissions, and support flag.",
+    "features": ["databases", "users", "permissions"]
+  },
+  {
+    "path": "database/migrations/2026_10_28_151006_create_posts_table.php",
+    "layer": "database",
+    "purpose": "Creates tenant-scoped soft-deletable posts with slug and status indexes.",
+    "features": ["databases", "posts"]
+  },
+  {
+    "path": "database/migrations/2026_10_28_133421_create_tenant_invitations_table.php",
+    "layer": "database",
+    "purpose": "Stores hashed invitation tokens, expiry, and acceptance state.",
+    "features": ["databases", "invitations"]
+  },
+  {
+    "path": "database/migrations/2026_10_28_155557_create_tenant_support_tickets_table.php",
+    "layer": "database",
+    "purpose": "Stores single-use support tickets.",
+    "features": ["databases", "support"]
+  },
+  {
+    "path": "database/migrations/2026_10_28_155558_create_tenant_support_accesses_table.php",
+    "layer": "database",
+    "purpose": "Stores support session audit rows.",
+    "features": ["databases", "support"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_062337_create_plans_table.php",
+    "layer": "database",
+    "purpose": "Creates the global plan catalog with Stripe IDs, limits, features, and interval.",
+    "features": ["databases", "plans"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_062338_create_subscriptions_table.php",
+    "layer": "database",
+    "purpose": "Creates one local subscription per tenant with Stripe IDs and period fields.",
+    "features": ["databases", "billing"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_062339_create_stripe_webhook_events_table.php",
+    "layer": "database",
+    "purpose": "Creates the Stripe event idempotency log.",
+    "features": ["databases", "webhooks"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_062340_create_billing_invoices_table.php",
+    "layer": "database",
+    "purpose": "Creates the local invoice mirror.",
+    "features": ["databases", "billing"]
+  },
+  {
+    "path": "database/migrations/2026_10_29_062341_create_billing_payments_table.php",
+    "layer": "database",
+    "purpose": "Creates the local payment mirror with refunds and status.",
+    "features": ["databases", "billing"]
+  },
+  {
+    "path": "database/migrations/owner/2026_10_27_110855_create_owners_table.php",
+    "layer": "database",
+    "purpose": "Creates the owners table on the separate owner database.",
+    "features": ["databases", "owner"]
+  },
+  {
+    "path": "database/seeders/PlanSeeder.php",
+    "layer": "database",
+    "purpose": "Seeds/updates the two configured plans without wiping existing Stripe IDs.",
+    "features": ["seeders", "plans"]
+  },
+  {
+    "path": "database/seeders/DemoSeeder.php",
+    "layer": "database",
+    "purpose": "Seeds two tenants, 100 large posts, users, profiles, subscriptions, invoices, payments, and metrics data.",
+    "features": ["seeders", "demo"]
+  },
+  {
+    "path": "database/seeders/DatabaseSeeder.php",
+    "layer": "database",
+    "purpose": "Runs the plan seeder by default.",
+    "features": ["seeders"]
+  },
+  {
+    "path": "tests/Feature/OwnerAuthTest.php",
+    "layer": "test",
+    "purpose": "Covers owner login, logout, inactive owners, guard isolation, and rate limiting.",
+    "features": ["tests", "auth", "owner"]
+  },
+  {
+    "path": "tests/Feature/OwnerTenantTest.php",
+    "layer": "test",
+    "purpose": "Covers owner tenant CRUD, ownership isolation, due flag, and duplicate admin email.",
+    "features": ["tests", "tenants"]
+  },
+  {
+    "path": "tests/Feature/TenantInvitationTest.php",
+    "layer": "test",
+    "purpose": "Covers invitation provisioning, raw-token acceptance, expiry, reuse, and hash rejection.",
+    "features": ["tests", "invitations"]
+  },
+  {
+    "path": "tests/Feature/TenantAuthTest.php",
+    "layer": "test",
+    "purpose": "Covers tenant/admin/viewer login, tenant context, due flag, and session behavior.",
+    "features": ["tests", "auth"]
+  },
+  {
+    "path": "tests/Feature/PostTest.php",
+    "layer": "test",
+    "purpose": "Covers post visibility, CRUD, ownership, publishing, slugs, and soft deletes.",
+    "features": ["tests", "posts"]
+  },
+  {
+    "path": "tests/Feature/PermissionSystemTest.php",
+    "layer": "test",
+    "purpose": "Covers materialized permissions, profile resync, support wildcard, and sync command repair.",
+    "features": ["tests", "permissions"]
+  },
+  {
+    "path": "tests/Feature/PermissionProfileTest.php",
+    "layer": "test",
+    "purpose": "Covers profile CRUD, resync, deletion guards, escalation, and hidden support counts.",
+    "features": ["tests", "profiles", "permissions"]
+  },
+  {
+    "path": "tests/Feature/SupportAccessTest.php",
+    "layer": "test",
+    "purpose": "Covers support tickets, login, inactivity timeout, revocation, and hidden support users.",
+    "features": ["tests", "support"]
+  },
+  {
+    "path": "tests/Feature/StripeWebhookTest.php",
+    "layer": "test",
+    "purpose": "Covers webhook signatures, idempotency, subscription sync, invoices, payments, refunds, and disputes.",
+    "features": ["tests", "billing", "webhooks"]
+  },
+  {
+    "path": "tests/Feature/BillingMetricsTest.php",
+    "layer": "test",
+    "purpose": "Covers MRR/ARR, timeline, status counts, revenue, refunds, disputes, and date filters.",
+    "features": ["tests", "billing", "metrics"]
+  },
+  {
+    "path": "tests/Feature/TenantLifecycleTest.php",
+    "layer": "test",
+    "purpose": "Covers trashed-tenant blocking, restore, purge, support revocation, and is_due non-deletion.",
+    "features": ["tests", "tenant-lifecycle"]
+  },
+  {
+    "path": "tests/Feature/TenantDirectoryTest.php",
+    "layer": "test",
+    "purpose": "Covers viewer tenant directory filters and published-only cross-tenant posts.",
+    "features": ["tests", "tenant-directory"]
+  },
+  {
+    "path": "tests/Feature/ApiDocsTest.php",
+    "layer": "test",
+    "purpose": "Covers Basic-auth docs protection, OpenAPI security schemes, and owner auth inclusion.",
+    "features": ["tests", "docs"]
+  },
+  {
+    "path": "tests/Feature/DemoSeederApiTest.php",
+    "layer": "test",
+    "purpose": "Verifies seeded demo data produces non-empty API responses and chart metrics.",
+    "features": ["tests", "seeders", "metrics"]
+  },
+  {
+    "path": "app/Providers/ScrambleServiceProvider.php",
+    "layer": "config",
+    "purpose": "Adds OpenAPI security schemes and document metadata for the docs UI.",
+    "features": ["docs", "cross-cutting"]
+  },
+  {
+    "path": "resources/views/vendor/scramble/docs.blade.php",
+    "layer": "config",
+    "purpose": "Custom Scramble docs view that auto-fetches the correct CSRF token and sends session cookies.",
+    "features": ["docs", "cross-cutting"]
+  },
+  {
+    "path": "docs/frontend-redirects.md",
+    "layer": "config",
+    "purpose": "Documents all frontend redirects, session/CORS rules, CSRF flow, and invitation token handling.",
+    "features": ["frontends", "redirects", "docs"]
+  },
+  {
+    "path": "docs/billing.md",
+    "layer": "config",
+    "purpose": "Documents Stripe setup, API URLs, webhook events, local mirror, commands, and metrics definitions.",
+    "features": ["billing", "docs"]
+  }
+]

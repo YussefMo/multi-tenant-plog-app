@@ -56,11 +56,11 @@
     ],
     "format": [
       "@php vendor/bin/php-cs-fixer fix",
-      "npm run format"
+      "pnpm format"
     ],
     "format:check": [
       "@php vendor/bin/php-cs-fixer fix --dry-run --diff",
-      "npm run format:check"
+      "pnpm format:check"
     ],
     "type-check": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
     "type-check:files": "@php bin/type-check.php",

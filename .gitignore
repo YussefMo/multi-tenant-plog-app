@@ -18,6 +18,10 @@
 /auth.json
 /api.json
 /node_modules
+/frontend/**/node_modules
+/frontend/**/dist
+/frontend/**/.vite
+/frontend/apps/visualizer/src/data/generated
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
@@ -34,4 +38,3 @@ Thumbs.db
 ngnix-setup.md
 tasks.md
 tst
-commands.md

@@ -29,11 +29,16 @@ jobs:
           extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
           coverage: none
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
 
       - name: Prepare environment
         run: cp .env.example .env
@@ -42,7 +47,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Install Node dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate application key
         run: php artisan key:generate
@@ -52,6 +57,12 @@ jobs:
 
       - name: Type check
         run: composer type-check
+
+      - name: Frontend type check
+        run: pnpm typecheck:frontend
+
+      - name: Frontend build
+        run: pnpm build:frontend
 
   tests:
     name: Tests

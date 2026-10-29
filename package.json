@@ -1,9 +1,22 @@
 {
   "name": "multi-tenant-plog-app",
   "private": true,
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
     "format": "prettier --write . --ignore-unknown",
-    "format:check": "prettier --check . --ignore-unknown"
+    "format:check": "prettier --check . --ignore-unknown",
+    "dev": "pnpm dev:frontend",
+    "build": "pnpm build:frontend",
+    "typecheck": "pnpm typecheck:frontend",
+    "dev:frontend": "pnpm -r --parallel --filter \"./frontend/apps/*\" dev",
+    "dev:owner": "pnpm --filter @multi-tenant-plog/owner dev",
+    "dev:tenant": "pnpm --filter @multi-tenant-plog/tenant dev",
+    "dev:user": "pnpm --filter @multi-tenant-plog/user dev",
+    "dev:visualizer": "pnpm --filter @multi-tenant-plog/visualizer dev",
+    "build:frontend": "pnpm -r --filter \"./frontend/apps/*\" build",
+    "typecheck:frontend": "pnpm -r --filter \"./frontend/apps/*\" typecheck",
+    "generate:requests": "pnpm --filter @multi-tenant-plog/visualizer generate:requests",
+    "atlas:validate": "pnpm --filter @multi-tenant-plog/visualizer validate"
   },
   "devDependencies": {
     "prettier": "^3.9.10"

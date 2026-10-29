@@ -8,7 +8,7 @@ Backend-only Laravel 13 API application. No application Blade views, no frontend
 
 - PHP 8.3+
 - Composer 2
-- Node.js 24+ and npm (for Prettier)
+- Node.js 24+ and pnpm 12+ (for Prettier and frontend apps)
 - MySQL / MariaDB
 
 ## Setup
@@ -279,7 +279,7 @@ php artisan test
 The project uses 2-space indentation everywhere.
 
 ```bash
-npm install        # first time only
+pnpm install       # first time only
 composer format    # PHP CS Fixer + Prettier
 composer format:check
 ```
@@ -297,12 +297,53 @@ composer type-check:files  # only files containing type errors
 
 The owner dashboard, tenant dashboard, and user web are separate frontends. Local defaults are `http://localhost:3000`, `http://localhost:3001`, and `http://localhost:3002`. Tenant scope comes from the authenticated user's email and `tenant_id`, never from a slug. Viewers have no tenant and browse the tenant directory. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
 
+The frontend workspace is a pnpm monorepo under `frontend/apps/`:
+
+```text
+owner        http://localhost:3000
+tenant       http://localhost:3001
+user         http://localhost:3002
+visualizer   http://localhost:3003
+```
+
+Run from the repository root:
+
+```bash
+pnpm dev:owner
+pnpm dev:tenant
+pnpm dev:user
+pnpm dev:visualizer
+pnpm dev:frontend       # all four in parallel
+pnpm typecheck:frontend
+pnpm build:frontend
+```
+
+`pnpm dev` and `pnpm build` are aliases for the frontend workspace.
+
 - Frontend URLs: `config/frontends.php` / `OWNER_FRONTEND_URL`, `TENANT_FRONTEND_URL`, `USER_FRONTEND_URL`
 - CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS` (defaults to the three localhost origins and their `127.0.0.1` equivalents)
 - Same-origin note: `SESSION_DOMAIN=null` works for both `localhost:8000` and `multi-tenant-plog.test`; with `composer dev`, point the frontends at `http://localhost:8000/api` or proxy `/api` through each frontend
 - Viewer signup: `POST /api/v1/auth/register`
 - Viewer directory: `GET /api/v1/tenants`, `GET /api/v1/tenants/{tenant}/posts`
 - Support ticket TTL and session idle timeout: `config/support.php`
+
+## System Atlas
+
+Interactive dark-blueprint visualizer for the backend:
+
+```text
+http://localhost:3003
+```
+
+It includes a clickable architecture map, the full generated request catalog, and a purpose catalog for every relevant file. Requests are generated from Laravel's route list so the Atlas cannot silently miss an endpoint.
+
+```bash
+pnpm dev:visualizer
+pnpm generate:requests
+pnpm atlas:validate
+```
+
+See `tasks.md` for the visualizer roadmap.
 
 ## Billing
 
@@ -331,6 +372,8 @@ GitHub Actions runs on every push to `master`:
 
 - `composer format:check`
 - `composer type-check`
+- `pnpm typecheck:frontend`
+- `pnpm build:frontend`
 - `php artisan test` against MariaDB
 - Production build (`composer install --no-dev`, `php artisan config:cache`, boot checks)
 
@@ -338,10 +381,14 @@ The workflow is `.github/workflows/ci.yml`.
 
 ## Structure
 
-- `routes/api.php` — all application routes (API only)
+- `routes/api.php` — all API routes
 - `app/Http/Controllers` — controllers
 - `app/Models` — Eloquent models
 - `database/migrations` — schema
 - `bootstrap/app.php` — routing/middleware/exception configuration
+- `frontend/apps` — pnpm workspace: owner, tenant, user, and System Atlas
+- `docs` — redirect and billing documentation
+- `tasks.md` — System Atlas roadmap (gitignored)
+- `commands.md` — command reference (gitignored)
 
 All exceptions on `api/*` are rendered as JSON.
