@@ -24,9 +24,23 @@ class PlanSeeder extends Seeder
         'limits' => (array) ($planConfig['limits'] ?? []),
         'is_active' => true,
       ]);
-      $plan->stripe_product_id = $planConfig['product_id'] ?? $plan->stripe_product_id;
-      $plan->stripe_price_id = $planConfig['price_id'] ?? $plan->stripe_price_id;
+      $plan->stripe_product_id = $this->stripeId($planConfig['product_id'] ?? null) ?? $plan->stripe_product_id;
+      $plan->stripe_price_id = $this->stripeId($planConfig['price_id'] ?? null) ?? $plan->stripe_price_id;
       $plan->save();
     }
+  }
+
+  /**
+   * Blank environment values must become null, otherwise the unique index rejects the second plan.
+   */
+  private function stripeId(mixed $value): ?string
+  {
+    if (! is_string($value)) {
+      return null;
+    }
+
+    $value = trim($value);
+
+    return $value === '' ? null : $value;
   }
 }
