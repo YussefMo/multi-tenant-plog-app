@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\LoginRequest;
 use App\Http\Resources\OwnerResource;
 use App\Services\FrontendUrlService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,12 +15,14 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+#[Group('Auth', description: 'Authentication endpoints for tenant users, viewers, support sessions, and owners.')]
 class OwnerAuthController extends Controller
 {
   public function __construct(private readonly FrontendUrlService $frontends)
   {
   }
 
+  #[Endpoint(title: 'Owner login', description: 'Authenticate an owner on the owner_session cookie realm.')]
   public function login(LoginRequest $request): OwnerResource
   {
     $key = 'owner-login|'.Str::lower((string) $request->input('email')).'|'.$request->ip();
@@ -50,6 +54,7 @@ class OwnerAuthController extends Controller
       ]);
   }
 
+  #[Endpoint(title: 'Owner logout', description: 'Log out the owner guard and invalidate the owner session.')]
   public function logout(Request $request): JsonResponse
   {
     Auth::guard('owner')->logout();
@@ -59,6 +64,7 @@ class OwnerAuthController extends Controller
     return response()->json(['message' => 'Logged out.']);
   }
 
+  #[Endpoint(title: 'Current owner', description: 'Return the authenticated owner and the owner dashboard redirect URL.')]
   public function me(Request $request): OwnerResource
   {
     return (new OwnerResource($request->user('owner')))

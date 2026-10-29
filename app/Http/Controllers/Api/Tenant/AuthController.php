@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\FrontendUrlService;
 use App\Services\PermissionSyncService;
 use App\Services\SupportUserService;
+use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\IgnoreResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+#[Group('Auth', description: 'Authentication endpoints for tenant users, viewers, support sessions, and owners.')]
 class AuthController extends Controller
 {
   public function __construct(private readonly FrontendUrlService $frontends)

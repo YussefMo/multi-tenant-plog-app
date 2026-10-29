@@ -1,6 +1,6 @@
 <?php
 
-use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
+use App\Http\Middleware\ProtectDocsAccess;
 
 return [
   /*
@@ -169,7 +169,12 @@ MARKDOWN,
 
   'middleware' => [
     'web',
-    RestrictedDocsAccess::class,
+    ProtectDocsAccess::class,
+  ],
+
+  'auth' => [
+    'username' => env('DOCS_USERNAME'),
+    'password' => env('DOCS_PASSWORD'),
   ],
 
   'extensions' => [],

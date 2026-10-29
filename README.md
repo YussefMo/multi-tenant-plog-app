@@ -97,7 +97,30 @@ Raw OpenAPI JSON:
 http://multi-tenant-plog.test/docs/api.json
 ```
 
-The docs are local-only by default. The docs UI automatically fetches the correct tenant or owner CSRF token and sends the session cookie before mutating requests. Log in through the matching login endpoint, then try protected endpoints.
+The docs are protected with HTTP Basic auth using `DOCS_USERNAME` and `DOCS_PASSWORD`:
+
+```dotenv
+DOCS_USERNAME=docs
+DOCS_PASSWORD=change-me
+```
+
+```bash
+curl -u docs:change-me http://multi-tenant-plog.test/docs/api.json
+```
+
+If either value is empty, the docs return `503` instead of exposing the spec.
+
+The docs UI automatically fetches the correct tenant or owner CSRF token and sends the session cookie before mutating requests. Log in through the matching login endpoint, then try protected endpoints.
+
+Owner authentication is separate from tenant authentication:
+
+```text
+POST /api/v1/owner/auth/login
+GET  /api/v1/owner/auth/me
+POST /api/v1/owner/auth/logout
+```
+
+All owner auth operations appear in the `Auth` tag in the docs.
 
 Regenerate the static spec with:
 
