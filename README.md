@@ -332,18 +332,30 @@ pnpm build:frontend
 Interactive dark-blueprint visualizer for the backend:
 
 ```text
-http://localhost:3003
+http://localhost:3003          # dev server
+http://localhost:8000/system-map/   # static build, hash routing
 ```
 
-It includes a clickable architecture map, the full generated request catalog, and a purpose catalog for every relevant file. Requests are generated from Laravel's route list so the Atlas cannot silently miss an endpoint.
+It includes:
+
+- A clickable architecture map across frontends, middleware, controllers, services, models, databases, commands, Stripe, and docs.
+- The full generated request catalog with search, method/realm/group filters, permissions, middleware, and controller files.
+- A purpose catalog for every relevant file, with deep links from journeys and details.
+- 16 playable journeys and cross-cutting systems with middleware, request classes, services, models, tables, DB operations, responses, error branches, and speaker notes.
+- An ERD for the application and owner databases, a model explorer for all 13 models, and a table explorer with readers and writers.
+- A command atlas for `owner:create`, `permissions:sync`, `tenants:purge`, `stripe:sync-plans`, and `stripe:sync-billing`, plus the daily purge schedule.
+- Presenter mode with keyboard navigation, focus mode, deep links, and live switching between journeys, models, commands, and requests.
 
 ```bash
 pnpm dev:visualizer
 pnpm generate:requests
 pnpm atlas:validate
+pnpm build:visualizer     # writes public/system-map
 ```
 
-See `tasks.md` for the visualizer roadmap.
+The static build is written to `public/system-map` and is gitignored. `pnpm build` builds every frontend, including the Atlas.
+
+See `tasks.md` for the completed roadmap and `frontend/apps/visualizer/README.md` for the authoring guide and presentation flow.
 
 ## Billing
 

@@ -1,12 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LayerBadge } from '../components/Badges';
 import { files } from '../data';
 
 const layers = ['ALL', ...Array.from(new Set(files.map((file) => file.layer))).sort()];
 
 export default function FilesPage() {
-  const [query, setQuery] = useState('');
+  const [params] = useSearchParams();
+  const deepPath = params.get('path');
+  const [query, setQuery] = useState(deepPath ?? '');
   const [layer, setLayer] = useState('ALL');
+
+  useEffect(() => {
+    if (deepPath) {
+      setQuery(deepPath);
+    }
+  }, [deepPath]);
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -59,7 +68,10 @@ export default function FilesPage() {
 
       <section className="file-grid">
         {filtered.map((file) => (
-          <article key={file.path} className="file-card">
+          <article
+            key={file.path}
+            className={`file-card${file.path === deepPath ? ' highlighted' : ''}`}
+          >
             <div className="file-head">
               <LayerBadge layer={file.layer} />
               <span>{file.features.length} links</span>

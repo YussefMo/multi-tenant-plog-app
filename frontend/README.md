@@ -23,7 +23,7 @@ pnpm typecheck:frontend
 pnpm build:frontend
 ```
 
-The owner, tenant, and user apps are Phase 1 placeholders. `apps/visualizer` is the System Atlas showcase.
+The owner, tenant, and user apps are Phase 1 placeholders. `apps/visualizer` is the completed System Atlas: architecture map, request and file catalogs, journeys, ERD, table explorer, command atlas, and presenter mode. See `apps/visualizer/README.md`.
 
 Type checking uses `tsgo` from `@typescript/native-preview`, the Go-native TypeScript checker.
 

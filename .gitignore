@@ -23,6 +23,7 @@
 /frontend/**/.vite
 /frontend/apps/visualizer/src/data/generated
 /public/build
+/public/system-map
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage

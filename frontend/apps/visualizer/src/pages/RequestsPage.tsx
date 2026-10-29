@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MethodBadge, RealmBadge } from '../components/Badges';
 import { requestsDocument } from '../data';
 
@@ -13,10 +14,18 @@ const groups = [
 const realms = ['ALL', 'public', 'owner', 'tenant'] as const;
 
 export default function RequestsPage() {
-  const [query, setQuery] = useState('');
+  const [params] = useSearchParams();
+  const deepPath = params.get('path');
+  const [query, setQuery] = useState(deepPath ?? '');
   const [method, setMethod] = useState('ALL');
   const [group, setGroup] = useState('ALL');
   const [realm, setRealm] = useState<(typeof realms)[number]>('ALL');
+
+  useEffect(() => {
+    if (deepPath) {
+      setQuery(deepPath);
+    }
+  }, [deepPath]);
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -98,7 +107,10 @@ export default function RequestsPage() {
 
       <section className="request-grid">
         {filtered.map((request) => (
-          <article key={`${request.method}-${request.path}`} className="request-card">
+          <article
+            key={`${request.method}-${request.path}`}
+            className={`request-card${request.path === deepPath ? ' highlighted' : ''}`}
+          >
             <div className="request-head">
               <MethodBadge method={request.method} />
               <RealmBadge realm={request.realm} />

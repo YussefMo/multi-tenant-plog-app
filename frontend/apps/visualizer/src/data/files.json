@@ -766,5 +766,23 @@
     "layer": "config",
     "purpose": "Documents Stripe setup, API URLs, webhook events, local mirror, commands, and metrics definitions.",
     "features": ["billing", "docs"]
+  },
+  {
+    "path": "app/Notifications/TenantInvitationNotification.php",
+    "layer": "service",
+    "purpose": "Builds the invitation email with the frontend acceptance URL carrying the raw token.",
+    "features": ["invitations", "mail", "frontends"]
+  },
+  {
+    "path": "app/Enums/UserRole.php",
+    "layer": "model",
+    "purpose": "Admin, author, and user roles with their permission preset lookup.",
+    "features": ["permissions", "users"]
+  },
+  {
+    "path": "app/Enums/PostStatus.php",
+    "layer": "model",
+    "purpose": "Draft and published post states used by models, scopes, and the directory.",
+    "features": ["posts"]
   }
 ]

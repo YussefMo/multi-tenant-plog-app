@@ -1,31 +1,42 @@
+import { lazy, Suspense } from 'react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { files, requestsDocument } from './data';
-import FilesPage from './pages/FilesPage';
-import OverviewPage from './pages/OverviewPage';
-import RequestsPage from './pages/RequestsPage';
+import { files, journeys, models, requestsDocument } from './data';
+
+const CommandsPage = lazy(() => import('./pages/CommandsPage'));
+const FilesPage = lazy(() => import('./pages/FilesPage'));
+const JourneysPage = lazy(() => import('./pages/JourneysPage'));
+const ModelsPage = lazy(() => import('./pages/ModelsPage'));
+const OverviewPage = lazy(() => import('./pages/OverviewPage'));
+const PresentPage = lazy(() => import('./pages/PresentPage'));
+const RequestsPage = lazy(() => import('./pages/RequestsPage'));
 
 const navigation = [
-  { to: '/', label: 'Overview', code: '01', ready: true },
-  { to: '/requests', label: 'Requests', code: '02', ready: true },
-  { to: '/files', label: 'Files', code: '03', ready: true },
-  { to: '/journeys', label: 'Journeys', code: '04', ready: false, phase: 'Phase 2' },
-  { to: '/models', label: 'Models + DB', code: '05', ready: false, phase: 'Phase 3' },
-  { to: '/commands', label: 'Commands', code: '06', ready: false, phase: 'Phase 3' },
-  { to: '/present', label: 'Presenter', code: '07', ready: false, phase: 'Phase 5' },
+  { to: '/', label: 'Overview', code: '01' },
+  { to: '/requests', label: 'Requests', code: '02' },
+  { to: '/files', label: 'Files', code: '03' },
+  { to: '/journeys', label: 'Journeys', code: '04' },
+  { to: '/models', label: 'Models + DB', code: '05' },
+  { to: '/commands', label: 'Commands', code: '06' },
+  { to: '/present', label: 'Presenter', code: '07' },
 ];
 
-const sectionNames: Record<string, string> = {
-  '/': 'System overview',
-  '/requests': 'Request catalog',
-  '/files': 'File catalog',
-};
+function sectionFor(pathname: string): string {
+  if (pathname.startsWith('/requests')) return 'Request catalog';
+  if (pathname.startsWith('/files')) return 'File catalog';
+  if (pathname.startsWith('/journeys')) return 'Journey player';
+  if (pathname.startsWith('/models')) return 'Models and database';
+  if (pathname.startsWith('/commands')) return 'Command atlas';
+  if (pathname.startsWith('/present')) return 'Presenter mode';
+  return 'System overview';
+}
 
 function App() {
   const location = useLocation();
-  const section = sectionNames[location.pathname] ?? 'System atlas';
+  const section = sectionFor(location.pathname);
+  const presenter = location.pathname.startsWith('/present');
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${presenter ? ' presenter-shell' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark">SA</span>
@@ -37,36 +48,36 @@ function App() {
 
         <div className="phase-pill">
           <span className="pulse-dot" />
-          Phase 1 · Foundation
+          Atlas complete · 6 phases
         </div>
 
         <nav className="nav" aria-label="Atlas sections">
-          {navigation.map((item) =>
-            item.ready ? (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-              >
-                <span className="nav-code">{item.code}</span>
-                <span>{item.label}</span>
-                <span className="nav-arrow">→</span>
-              </NavLink>
-            ) : (
-              <div key={item.to} className="nav-item locked" aria-disabled="true">
-                <span className="nav-code">{item.code}</span>
-                <span>{item.label}</span>
-                <span className="nav-phase">{item.phase}</span>
-              </div>
-            ),
-          )}
+          {navigation.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+            >
+              <span className="nav-code">{item.code}</span>
+              <span>{item.label}</span>
+              <span className="nav-arrow">→</span>
+            </NavLink>
+          ))}
         </nav>
 
         <div className="sidebar-footer">
           <div>
             <span>API operations</span>
             <strong>{requestsDocument.count}</strong>
+          </div>
+          <div>
+            <span>Journeys</span>
+            <strong>{journeys.length}</strong>
+          </div>
+          <div>
+            <span>Models</span>
+            <strong>{models.length}</strong>
           </div>
           <div>
             <span>Catalogued files</span>
@@ -83,21 +94,29 @@ function App() {
               Atlas <span>/</span> {section}
             </p>
             <p className="topbar-note">
-              Generated from <code>php artisan route:list --json</code>
+              Generated from <code>php artisan route:list --json</code> · validated references
             </p>
           </div>
           <div className="topbar-actions">
             <span className="status-chip">API · /api/v1</span>
-            <span className="status-chip amber">localhost</span>
+            <NavLink className="status-chip amber" to="/present">
+              Presenter →
+            </NavLink>
           </div>
         </header>
 
         <main className="content">
-          <Routes>
-            <Route path="/" element={<OverviewPage />} />
-            <Route path="/requests" element={<RequestsPage />} />
-            <Route path="/files" element={<FilesPage />} />
-          </Routes>
+          <Suspense fallback={<div className="route-loading">Loading atlas surface…</div>}>
+            <Routes>
+              <Route path="/" element={<OverviewPage />} />
+              <Route path="/requests" element={<RequestsPage />} />
+              <Route path="/files" element={<FilesPage />} />
+              <Route path="/journeys/:journeyId?/:stepId?" element={<JourneysPage />} />
+              <Route path="/models" element={<ModelsPage />} />
+              <Route path="/commands" element={<CommandsPage />} />
+              <Route path="/present/:collection?/:itemId?/:stepId?" element={<PresentPage />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

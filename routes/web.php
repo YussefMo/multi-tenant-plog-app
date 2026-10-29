@@ -7,4 +7,5 @@ Route::get('/', fn () => response()->json([
   'api' => '/api/v1',
   'health' => '/up',
   'docs' => '/docs/api',
+  'atlas' => '/system-map/',
 ]));

@@ -13,6 +13,7 @@
     "dev:tenant": "pnpm --filter @multi-tenant-plog/tenant dev",
     "dev:user": "pnpm --filter @multi-tenant-plog/user dev",
     "dev:visualizer": "pnpm --filter @multi-tenant-plog/visualizer dev",
+    "build:visualizer": "pnpm --filter @multi-tenant-plog/visualizer build",
     "build:frontend": "pnpm -r --filter \"./frontend/apps/*\" build",
     "typecheck:frontend": "pnpm -r --filter \"./frontend/apps/*\" typecheck",
     "generate:requests": "pnpm --filter @multi-tenant-plog/visualizer generate:requests",

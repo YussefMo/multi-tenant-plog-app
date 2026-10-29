@@ -5,6 +5,7 @@ frontend/**/dist
 frontend/**/.vite
 frontend/apps/visualizer/src/data/generated
 public/build
+public/system-map
 storage
 _ide_helper.php
 _ide_helper_models.php
