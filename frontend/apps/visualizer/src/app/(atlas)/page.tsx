@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import ArchitectureMap from '../components/ArchitectureMap';
-import Inspector from '../components/Inspector';
-import StatCard from '../components/StatCard';
-import { commands, files, journeys, models, requestsDocument } from '../data';
-import { architectureNodes } from '../data/architecture';
+import ArchitectureMap from '@/components/ArchitectureMap';
+import Inspector from '@/components/Inspector';
+import StatCard from '@/components/StatCard';
+import { commands, files, journeys, models, requestsDocument } from '@/data';
+import { architectureNodes } from '@/data/architecture';
 
 const serviceCount = files.filter((file) => file.layer === 'service').length;
 

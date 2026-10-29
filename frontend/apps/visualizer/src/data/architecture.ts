@@ -27,7 +27,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       tone: 'cyan',
       purpose:
         'The API surface. Owner, tenant, public, billing, Stripe webhook, and docs routes are registered here.',
-      files: ['routes/api.php', 'routes/web.php', 'bootstrap/app.php'],
+      files: ['routes/api.php', 'bootstrap/app.php'],
     },
   },
   {

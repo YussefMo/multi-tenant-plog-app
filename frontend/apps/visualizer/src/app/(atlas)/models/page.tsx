@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import ModelDetail from '../components/ModelDetail';
-import ModelGraph from '../components/ModelGraph';
-import { models, modelsByName, tables, tablesByName } from '../data';
+import ModelDetail from '@/components/ModelDetail';
+import ModelGraph from '@/components/ModelGraph';
+import { models, modelsByName, tables, tablesByName } from '@/data';
 
 export default function ModelsPage() {
   const [params, setParams] = useSearchParams();

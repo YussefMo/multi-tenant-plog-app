@@ -1,14 +1,6 @@
-import { lazy, Suspense } from 'react';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { files, journeys, models, requestsDocument } from './data';
-
-const CommandsPage = lazy(() => import('./pages/CommandsPage'));
-const FilesPage = lazy(() => import('./pages/FilesPage'));
-const JourneysPage = lazy(() => import('./pages/JourneysPage'));
-const ModelsPage = lazy(() => import('./pages/ModelsPage'));
-const OverviewPage = lazy(() => import('./pages/OverviewPage'));
-const PresentPage = lazy(() => import('./pages/PresentPage'));
-const RequestsPage = lazy(() => import('./pages/RequestsPage'));
+import { NavLink, Outlet } from 'react-router-dom';
+import { files, journeys, models, requestsDocument } from '@/data';
+import { usePathname } from '@/lib/router';
 
 const navigation = [
   { to: '/', label: 'Overview', code: '01' },
@@ -30,13 +22,12 @@ function sectionFor(pathname: string): string {
   return 'System overview';
 }
 
-function App() {
-  const location = useLocation();
-  const section = sectionFor(location.pathname);
-  const presenter = location.pathname.startsWith('/present');
+export default function AtlasLayout() {
+  const pathname = usePathname();
+  const section = sectionFor(pathname);
 
   return (
-    <div className={`app-shell${presenter ? ' presenter-shell' : ''}`}>
+    <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark">SA</span>
@@ -106,21 +97,9 @@ function App() {
         </header>
 
         <main className="content">
-          <Suspense fallback={<div className="route-loading">Loading atlas surface…</div>}>
-            <Routes>
-              <Route path="/" element={<OverviewPage />} />
-              <Route path="/requests" element={<RequestsPage />} />
-              <Route path="/files" element={<FilesPage />} />
-              <Route path="/journeys/:journeyId?/:stepId?" element={<JourneysPage />} />
-              <Route path="/models" element={<ModelsPage />} />
-              <Route path="/commands" element={<CommandsPage />} />
-              <Route path="/present/:collection?/:itemId?/:stepId?" element={<PresentPage />} />
-            </Routes>
-          </Suspense>
+          <Outlet />
         </main>
       </div>
     </div>
   );
 }
-
-export default App;

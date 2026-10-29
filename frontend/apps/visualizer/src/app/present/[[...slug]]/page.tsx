@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import CommandDetail from '../components/CommandDetail';
-import JourneyPlayer from '../components/JourneyPlayer';
-import ModelDetail from '../components/ModelDetail';
-import RequestDetail from '../components/RequestDetail';
-import { commands, journeys, journeysById, models, modelsByName, requestsDocument } from '../data';
+import CommandDetail from '@/components/CommandDetail';
+import JourneyPlayer from '@/components/JourneyPlayer';
+import ModelDetail from '@/components/ModelDetail';
+import RequestDetail from '@/components/RequestDetail';
+import { commands, journeys, journeysById, models, modelsByName, requestsDocument } from '@/data';
 
 type Collection = 'journeys' | 'models' | 'commands' | 'requests';
 

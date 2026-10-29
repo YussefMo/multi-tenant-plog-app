@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import CommandDetail from '../components/CommandDetail';
-import { commands, commandsByName, schedules } from '../data';
+import CommandDetail from '@/components/CommandDetail';
+import { commands, commandsByName, schedules } from '@/data';
 
 export default function CommandsPage() {
   const [params, setParams] = useSearchParams();

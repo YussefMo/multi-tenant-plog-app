@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { LayerBadge } from '../components/Badges';
-import { files } from '../data';
+import { LayerBadge } from '@/components/Badges';
+import { files } from '@/data';
 
 const layers = ['ALL', ...Array.from(new Set(files.map((file) => file.layer))).sort()];
 

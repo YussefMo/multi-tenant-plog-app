@@ -6,12 +6,6 @@
     "features": ["requests", "auth", "billing", "support", "tenant-directory"]
   },
   {
-    "path": "routes/web.php",
-    "layer": "routing",
-    "purpose": "Public JSON root index pointing to the API, health check, and API docs.",
-    "features": ["overview", "docs"]
-  },
-  {
     "path": "routes/console.php",
     "layer": "routing",
     "purpose": "Schedules tenants:purge to run daily.",

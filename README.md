@@ -332,8 +332,7 @@ pnpm build:frontend
 Interactive dark-blueprint visualizer for the backend:
 
 ```text
-http://localhost:3003          # dev server
-http://localhost:8000/system-map/   # static build, hash routing
+http://localhost:3003
 ```
 
 It includes:
@@ -350,12 +349,12 @@ It includes:
 pnpm dev:visualizer
 pnpm generate:requests
 pnpm atlas:validate
-pnpm build:visualizer     # writes public/system-map
+pnpm build:visualizer     # writes frontend/apps/visualizer/dist
 ```
 
-The static build is written to `public/system-map` and is gitignored. `pnpm build` builds every frontend, including the Atlas.
+The visualizer build outputs `frontend/apps/visualizer/dist`. Laravel is API-only and does not serve the frontend; deploy the static build with a host that provides an SPA fallback if you need clean deep links. `pnpm build` builds every frontend, including the Atlas.
 
-See `tasks.md` for the completed roadmap and `frontend/apps/visualizer/README.md` for the authoring guide and presentation flow.
+See `tasks.md` for the completed roadmap, `frontend/apps/visualizer/README.md` for the authoring guide and presentation flow, and [`docs/system-atlas-data.md`](docs/system-atlas-data.md) for the data/JSON generation reference.
 
 ## Billing
 

@@ -20,6 +20,6 @@
     "atlas:validate": "pnpm --filter @multi-tenant-plog/visualizer validate"
   },
   "devDependencies": {
-    "prettier": "^3.9.10"
+    "prettier": "catalog:"
   }
 }

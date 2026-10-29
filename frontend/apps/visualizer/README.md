@@ -1,39 +1,53 @@
 # System Atlas
 
-Standalone Vite + React + TypeScript visualizer for the Multi Tenant Plog API. It runs on port `3003` and is also built to `public/system-map` for static hosting.
+Standalone Vite + React + TypeScript visualizer for the Multi Tenant Plog API. It runs on port `3003`.
 
 ## Run
 
 ```bash
 pnpm dev:visualizer     # http://localhost:3003
 pnpm atlas:validate     # reference integrity
-pnpm build:visualizer   # writes public/system-map
+pnpm build:visualizer   # writes dist/
 ```
 
-Requests are regenerated from Laravel on `predev`, `pretypecheck`, `prebuild`, and `prevalidate`. The generated file is gitignored.
+Requests are regenerated from Laravel on `predev`, `pretypecheck`, `prebuild`, and `prevalidate`. The generated file is gitignored. See [`docs/system-atlas-data.md`](../../../docs/system-atlas-data.md) for the full data and JSON generation reference.
 
 ## Surfaces
 
-| Route        | Purpose                                                |
-| ------------ | ------------------------------------------------------ |
-| `#/`         | Architecture map and node inspector                    |
-| `#/requests` | 60 generated API operations, searchable and filterable |
-| `#/files`    | Purpose catalog for every relevant backend file        |
-| `#/journeys` | Playable feature journeys and cross-cutting systems    |
-| `#/models`   | ERD, model explorer, and table explorer                |
-| `#/commands` | Artisan command atlas and daily schedule               |
-| `#/present`  | Presenter mode                                         |
+| Route       | Purpose                                                |
+| ----------- | ------------------------------------------------------ |
+| `/`         | Architecture map and node inspector                    |
+| `/requests` | 60 generated API operations, searchable and filterable |
+| `/files`    | Purpose catalog for every relevant backend file        |
+| `/journeys` | Playable feature journeys and cross-cutting systems    |
+| `/models`   | ERD, model explorer, and table explorer                |
+| `/commands` | Artisan command atlas and daily schedule               |
+| `/present`  | Presenter mode                                         |
 
 Deep links are stable:
 
 ```text
-#/journeys/tenant-provisioning/transaction
-#/models?model=Subscription
-#/models?tab=tables&table=posts
-#/commands?command=tenants%3Apurge
-#/requests?path=%2Fapi%2Fv1%2Fposts
-#/present/journeys/stripe-webhook/invoices
+/journeys/tenant-provisioning/transaction
+/models?model=Subscription
+/models?tab=tables&table=posts
+/commands?command=tenants%3Apurge
+/requests?path=%2Fapi%2Fv1%2Fposts
+/present/journeys/stripe-webhook/invoices
 ```
+
+## App-based routing
+
+`src/app` mirrors Next.js conventions without Next.js:
+
+- `layout.tsx` wraps its segment and renders `<Outlet />`.
+- `page.tsx` is the route component.
+- `(atlas)` is a route group: it does not appear in the URL but supplies the sidebar shell.
+- `[[...slug]]` is the optional catch-all folder for journeys and presenter deep links.
+- `not-found.tsx` is the `*` route.
+- `src/routes.tsx` is the single React Router table that maps the tree to URLs and lazy-loads pages.
+- `src/lib/router.ts` provides the Next-style `useRouter`, `usePathname`, `useSearchParams`, and `useParams` shims.
+
+Adding a page means adding `src/app/(atlas)/<segment>/page.tsx` and one route entry. See [`docs/system-atlas-data.md`](../../../docs/system-atlas-data.md#adding-or-changing-data).
 
 ## Data modules
 
@@ -116,7 +130,7 @@ Journey steps show speaker notes. Switching collections keeps the current journe
 
 ## Static build
 
-`pnpm build:visualizer` writes `public/system-map` with relative asset paths and hash routing. Serve it from Laravel at `/system-map/`. The directory is gitignored and regenerated on every build.
+`pnpm build:visualizer` writes `dist/` with browser routing. The host must provide an SPA fallback (serve `index.html` for unknown paths) to keep deep links working. Laravel is API-only and does not serve the frontend. The directory is gitignored and regenerated on every build.
 
 ## Accessibility and layout
 

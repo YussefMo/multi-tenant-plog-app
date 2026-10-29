@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MethodBadge, RealmBadge } from '../components/Badges';
-import { requestsDocument } from '../data';
+import { MethodBadge, RealmBadge } from '@/components/Badges';
+import { requestsDocument } from '@/data';
 
 const methods = [
   'ALL',

@@ -218,7 +218,7 @@ pnpm dev:owner                   # Owner app on http://localhost:3000
 pnpm dev:tenant                  # Tenant app on http://localhost:3001
 pnpm dev:user                    # User web on http://localhost:3002
 pnpm dev:visualizer              # System Atlas on http://localhost:3003
-pnpm build:visualizer            # Static Atlas build in public/system-map
+pnpm build:visualizer            # Static Atlas build in frontend/apps/visualizer/dist
 pnpm dev:frontend                # All four apps in parallel
 pnpm typecheck:frontend          # tsgo native TypeScript checker
 pnpm build:frontend              # Production build for all apps
@@ -226,7 +226,7 @@ pnpm generate:requests           # Regenerate the Atlas request catalog
 pnpm atlas:validate              # Validate requests, journeys, models, commands, files
 ```
 
-`frontend/apps/visualizer` is the System Atlas: journeys, request catalog, file catalog, ERD, table explorer, command atlas, and presenter mode. The owner, tenant, and user apps are Phase 1 placeholders. The static build is served at `http://localhost:8000/system-map/`.
+`frontend/apps/visualizer` is the System Atlas: journeys, request catalog, file catalog, ERD, table explorer, command atlas, and presenter mode. The owner, tenant, and user apps are Phase 1 placeholders. Laravel is API-only; the frontend apps run on their own Vite servers.
 
 If pnpm reports `no @pnpm/exe.linux-x64 native binary was found for this host`, install a native Linux pnpm and keep package-manager version management disabled:
 

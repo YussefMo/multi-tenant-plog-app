@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import JourneyPlayer from '../components/JourneyPlayer';
-import { journeys, journeysById } from '../data';
+import JourneyPlayer from '@/components/JourneyPlayer';
+import { journeys, journeysById } from '@/data';
 
 export default function JourneysPage() {
   const navigate = useNavigate();
