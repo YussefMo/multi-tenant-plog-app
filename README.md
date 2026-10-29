@@ -295,10 +295,11 @@ composer type-check:files  # only files containing type errors
 
 ## Frontends
 
-The owner dashboard, tenant dashboard, and user web are separate frontends on fixed domains. Tenant scope comes from the authenticated user's email and `tenant_id`, never from a slug. Viewers have no tenant and browse the tenant directory. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
+The owner dashboard, tenant dashboard, and user web are separate frontends. Local defaults are `http://localhost:3000`, `http://localhost:3001`, and `http://localhost:3002`. Tenant scope comes from the authenticated user's email and `tenant_id`, never from a slug. Viewers have no tenant and browse the tenant directory. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
 
 - Frontend URLs: `config/frontends.php` / `OWNER_FRONTEND_URL`, `TENANT_FRONTEND_URL`, `USER_FRONTEND_URL`
-- CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS`
+- CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS` (defaults to the three localhost origins and their `127.0.0.1` equivalents)
+- Same-origin note: `SESSION_DOMAIN=null` works for both `localhost:8000` and `multi-tenant-plog.test`; with `composer dev`, point the frontends at `http://localhost:8000/api` or proxy `/api` through each frontend
 - Viewer signup: `POST /api/v1/auth/register`
 - Viewer directory: `GET /api/v1/tenants`, `GET /api/v1/tenants/{tenant}/posts`
 - Support ticket TTL and session idle timeout: `config/support.php`

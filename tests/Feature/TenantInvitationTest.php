@@ -110,6 +110,24 @@ class TenantInvitationTest extends TestCase
       ->assertJsonValidationErrors('admin_email');
   }
 
+  public function test_database_token_hash_is_not_accepted_as_the_raw_token(): void
+  {
+    $this->createTenant();
+
+    $tokenHash = TenantInvitation::query()
+      ->where('email', 'admin@example.com')
+      ->value('token_hash');
+
+    $this->postJson('/api/v1/auth/accept-invitation', [
+      'email' => 'admin@example.com',
+      'token' => $tokenHash,
+      'password' => 'password123',
+      'password_confirmation' => 'password123',
+    ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('token');
+  }
+
   public function test_invalid_invitation_token_is_rejected(): void
   {
     $this->createTenant();

@@ -2,12 +2,12 @@
 
 Three separate frontends use this API. Each has its own domain.
 
-| Frontend         | Env var               | Local default                          |
-| ---------------- | --------------------- | -------------------------------------- |
-| Owner dashboard  | `OWNER_FRONTEND_URL`  | `http://owner.multi-tenant-plog.test`  |
-| Tenant dashboard | `TENANT_FRONTEND_URL` | `http://tenant.multi-tenant-plog.test` |
-| User web         | `USER_FRONTEND_URL`   | `http://user.multi-tenant-plog.test`   |
-| API              | `APP_URL`             | `http://multi-tenant-plog.test/api`    |
+| Frontend         | Env var               | Local default                       |
+| ---------------- | --------------------- | ----------------------------------- |
+| Owner dashboard  | `OWNER_FRONTEND_URL`  | `http://localhost:3000`             |
+| Tenant dashboard | `TENANT_FRONTEND_URL` | `http://localhost:3001`             |
+| User web         | `USER_FRONTEND_URL`   | `http://localhost:3002`             |
+| API              | `APP_URL`             | `http://multi-tenant-plog.test/api` |
 
 Tenant resolution never uses a slug. Admin/author scope comes from the globally unique email plus `users.tenant_id`. Viewers have no tenant and browse all tenants through the directory.
 
@@ -31,21 +31,48 @@ The API returns `redirect_url` so the frontend never has to hardcode domain rule
 
 ## Session and CORS rules
 
-### Recommended local setup: subdomains of one base
+### Local frontends on localhost ports
 
-All three frontends and the API are subdomains of `multi-tenant-plog.test`:
+The default local frontends are:
+
+```text
+Owner  http://localhost:3000
+Tenant http://localhost:3001
+User   http://localhost:3002
+```
+
+`SESSION_DOMAIN=null` is the safe local default. It makes the session cookie host-only, so it works whether the API is reached at `http://localhost:8000` (`composer dev`) or `http://multi-tenant-plog.test` (Nginx).
 
 ```dotenv
-SESSION_DOMAIN=.multi-tenant-plog.test
+SESSION_DOMAIN=null
 SESSION_SAME_SITE=lax
 SESSION_SECURE_COOKIE=false
 ```
 
-This lets the browser send the `tenant_session` / `owner_session` cookies to the API from any frontend subdomain.
+CORS is configured for the three localhost origins (and their `127.0.0.1` equivalents):
 
-### Separate registrable domains
+```dotenv
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:3002
+```
 
-If the frontends are on completely different domains, the API cookies become third-party:
+If you use `composer dev`, point the frontend API base URL at:
+
+```text
+http://localhost:8000/api
+```
+
+and optionally set:
+
+```dotenv
+APP_URL=http://localhost:8000
+PUBLIC_API_URL=http://localhost:8000
+```
+
+`localhost` frontends and `localhost:8000` are the same site, so session cookies are not third-party.
+
+If the API stays on `multi-tenant-plog.test` while the frontends run on `localhost`, direct cross-origin browser requests make the API session cookies third-party. For reliable local development, proxy `/api` through each frontend dev server, or run the API on `localhost:8000` as above.
+
+Direct cross-site cookie mode requires HTTPS and third-party-cookie support:
 
 ```dotenv
 SESSION_DOMAIN=null
@@ -53,13 +80,13 @@ SESSION_SAME_SITE=none
 SESSION_SECURE_COOKIE=true
 ```
 
-Requirements:
+Frontend fetches must use:
 
-- HTTPS on both API and frontends
-- `CORS_ALLOWED_ORIGINS` lists the exact frontend origins
-- frontend fetches use `credentials: 'include'`
+```ts
+credentials: 'include';
+```
 
-## CSRF flow
+### CSRF flow
 
 1. `GET /api/v1/csrf-token` — tenant realm
 2. `GET /api/v1/owner/csrf-token` — owner realm
@@ -146,6 +173,8 @@ Tenant /accept-invitation?email&token
   → success
   → tenant /login
 ```
+
+The `tenant_invitations.token_hash` column contains only the SHA-256 hash. Use the raw token from the invitation email, or from `invitation.token` in the local/testing tenant-creation response. The database hash will not work.
 
 ## Billing flow
 

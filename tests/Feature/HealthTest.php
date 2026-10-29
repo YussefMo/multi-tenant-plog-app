@@ -21,6 +21,17 @@ class HealthTest extends TestCase
     $this->get('/up')->assertOk();
   }
 
+  public function test_api_root_returns_json_index(): void
+  {
+    $this->get('/')
+      ->assertOk()
+      ->assertJson([
+        'api' => '/api/v1',
+        'health' => '/up',
+        'docs' => '/docs/api',
+      ]);
+  }
+
   public function test_protected_endpoint_requires_authentication(): void
   {
     $this->getJson('/api/v1/user')

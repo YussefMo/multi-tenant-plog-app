@@ -172,13 +172,13 @@ class BillingCheckoutTest extends TestCase
   public function test_billing_return_urls_redirect_to_the_tenant_frontend(): void
   {
     $this->get('/api/v1/billing/checkout/success')
-      ->assertRedirect('http://tenant.multi-tenant-plog.test/billing?status=success');
+      ->assertRedirect(rtrim((string) config('frontends.tenant'), '/').'/billing?status=success');
 
     $this->get('/api/v1/billing/checkout/cancel')
-      ->assertRedirect('http://tenant.multi-tenant-plog.test/billing?status=cancelled');
+      ->assertRedirect(rtrim((string) config('frontends.tenant'), '/').'/billing?status=cancelled');
 
     $this->get('/api/v1/billing/portal/return')
-      ->assertRedirect('http://tenant.multi-tenant-plog.test/billing?status=portal');
+      ->assertRedirect(rtrim((string) config('frontends.tenant'), '/').'/billing?status=portal');
   }
 
   public function test_author_cannot_access_billing(): void
