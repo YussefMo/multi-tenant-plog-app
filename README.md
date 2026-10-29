@@ -97,7 +97,7 @@ Raw OpenAPI JSON:
 http://multi-tenant-plog.test/docs/api.json
 ```
 
-The docs are local-only by default. Authenticated requests use the session cookies and CSRF token described below; use the `Authorize` dialog for `csrfToken`, then call the matching login endpoint before trying protected endpoints.
+The docs are local-only by default. The docs UI automatically fetches the correct tenant or owner CSRF token and sends the session cookie before mutating requests. Log in through the matching login endpoint, then try protected endpoints.
 
 Regenerate the static spec with:
 

@@ -60,13 +60,13 @@ Multi-tenant blog API using session cookies and CSRF protection.
 
 ### Testing authenticated endpoints
 
-1. Call `GET /api/v1/csrf-token` (tenant) or `GET /api/v1/owner/csrf-token` (owner).
-2. Copy `csrf_token`, click **Authorize**, and set `csrfToken`.
-3. Call the matching login endpoint. The browser stores the session cookie.
-4. Use **Try it out** on any endpoint.
+The docs UI automatically fetches the right CSRF token and sends the session cookie before every mutating request.
 
-Owner and tenant sessions use different cookies (`owner_session` / `tenant_session`).
-Webhook requests are signed with the `Stripe-Signature` header instead.
+1. Open the login endpoint for the realm you want to test.
+2. Run `POST /api/v1/auth/login` (tenant) or `POST /api/v1/owner/auth/login` (owner).
+3. Use **Try it out** on any protected endpoint.
+
+Owner and tenant sessions use different cookies (`owner_session` / `tenant_session`), and the docs UI selects the matching CSRF endpoint automatically. Webhook requests are signed with the `Stripe-Signature` header instead.
 MARKDOWN,
   ],
 

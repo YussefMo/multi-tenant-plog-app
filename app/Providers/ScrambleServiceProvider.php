@@ -27,7 +27,7 @@ class ScrambleServiceProvider extends ServiceProvider
       $openApi->components->addSecurityScheme(
         'csrfToken',
         SecurityScheme::apiKey('header', 'X-CSRF-TOKEN')
-          ->setDescription('CSRF token from GET /api/v1/csrf-token or GET /api/v1/owner/csrf-token.'),
+          ->setDescription('CSRF token from the matching CSRF endpoint. The docs UI adds this automatically.'),
       );
       $openApi->components->addSecurityScheme(
         'stripeSignature',
