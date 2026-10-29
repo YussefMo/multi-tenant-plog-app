@@ -56,11 +56,13 @@ class BillingMetricsService
       ],
       'failed_payments' => $failedPayments,
       'disputes' => $disputes,
+      'payment_status_counts' => $this->paymentStatusCounts($from, $to),
       'churn_rate' => $totalSubscriptions === 0
         ? 0.0
         : round(($canceledSubscriptions / $totalSubscriptions) * 100, 2),
       'plan_distribution' => $this->planDistribution($activeSubscriptions),
       'revenue_by_tenant' => $this->revenueByTenant($from, $to),
+      'timeline' => $this->timeline($from, $to),
     ];
   }
 
@@ -106,6 +108,68 @@ class BillingMetricsService
         'net_revenue' => (int) data_get($payment, 'gross_revenue') - (int) data_get($payment, 'refunds'),
       ])
       ->all();
+  }
+
+  /**
+   * @return array<string, int>
+   */
+  private function paymentStatusCounts(?Carbon $from, ?Carbon $to): array
+  {
+    $counts = $this->paymentQuery($from, $to)
+      ->selectRaw('status, COUNT(*) as aggregate')
+      ->groupBy('status')
+      ->pluck('aggregate', 'status');
+
+    return [
+      'succeeded' => (int) ($counts['succeeded'] ?? 0),
+      'partially_refunded' => (int) ($counts['partially_refunded'] ?? 0),
+      'refunded' => (int) ($counts['refunded'] ?? 0),
+      'failed' => (int) ($counts['failed'] ?? 0),
+      'disputed' => (int) ($counts['disputed'] ?? 0),
+    ];
+  }
+
+  /**
+   * @return array<int, array<string, mixed>>
+   */
+  private function timeline(?Carbon $from, ?Carbon $to): array
+  {
+    $start = ($from?->copy() ?? now()->subMonths(11))->startOfMonth();
+    $end = ($to?->copy() ?? now())->endOfMonth();
+
+    if ($start->greaterThan($end)) {
+      return [];
+    }
+
+    $payments = $this->paymentQuery($from, $to)->get()
+      ->groupBy(fn (BillingPayment $payment): string => $payment->paid_at?->format('Y-m') ?? 'unknown');
+
+    $timeline = [];
+    $cursor = $start->copy();
+
+    while ($cursor->lessThanOrEqualTo($end)) {
+      $period = $cursor->format('Y-m');
+      $monthPayments = $payments->get($period, collect());
+      $collected = $monthPayments->whereIn('status', ['succeeded', 'partially_refunded', 'refunded']);
+      $gross = (int) $collected->sum('amount');
+      $refunds = (int) $collected->sum('amount_refunded');
+
+      $timeline[] = [
+        'period' => $period,
+        'label' => $cursor->format('M Y'),
+        'timestamp' => $cursor->copy()->startOfMonth()->toIso8601String(),
+        'gross' => $gross,
+        'refunds' => $refunds,
+        'net' => $gross - $refunds,
+        'payments' => $collected->count(),
+        'failed_payments' => $monthPayments->where('status', 'failed')->count(),
+        'disputes' => $monthPayments->where('status', 'disputed')->count(),
+      ];
+
+      $cursor->addMonth();
+    }
+
+    return $timeline;
   }
 
   /**

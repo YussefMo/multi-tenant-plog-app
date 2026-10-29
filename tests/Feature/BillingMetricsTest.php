@@ -65,7 +65,7 @@ class BillingMetricsTest extends TestCase
       'amount' => 1000,
       'amount_refunded' => 0,
       'status' => 'succeeded',
-      'paid_at' => now()->subDays(40),
+      'paid_at' => now()->subDays(400),
     ]);
 
     $response = $this->actingAs($owner, 'owner')
@@ -87,6 +87,12 @@ class BillingMetricsTest extends TestCase
 
     $this->assertCount(2, $response->json('data.plan_distribution'));
     $this->assertGreaterThanOrEqual(2, count($response->json('data.revenue_by_tenant')));
+    $this->assertCount(12, $response->json('data.timeline'));
+    $this->assertSame(3800, collect($response->json('data.timeline'))->sum('gross'));
+    $this->assertSame(1, $response->json('data.payment_status_counts.succeeded'));
+    $this->assertSame(1, $response->json('data.payment_status_counts.partially_refunded'));
+    $this->assertSame(1, $response->json('data.payment_status_counts.disputed'));
+    $this->assertSame(1, $response->json('data.payment_status_counts.failed'));
   }
 
   public function test_metrics_respect_the_date_range(): void

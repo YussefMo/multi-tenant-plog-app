@@ -248,7 +248,7 @@ Use it:
 
 ## Metrics definitions
 
-`GET /api/v1/owner/billing/metrics` accepts `from` and `to`. Defaults are the start of the current month through now.
+`GET /api/v1/owner/billing/metrics` accepts `from` and `to`. Defaults are the last 12 months through now, so the response is chart-ready out of the box.
 
 - **MRR** — sum of monthly-normalized plan amounts for `active` and `trialing` subscriptions. Yearly plans are divided by 12.
 - **ARR** — MRR × 12.
@@ -258,9 +258,22 @@ Use it:
 - **Net revenue** — gross − refunds.
 - **Failed payments** — count of payments with `failed`.
 - **Disputes** — count of payments with `disputed`.
+- **Payment status counts** — counts keyed by payment status for pie/bar charts.
 - **Churn rate** — canceled / total subscriptions × 100.
 - **Plan distribution** — active/trialing subscriptions grouped by plan, with count and MRR.
 - **Revenue by tenant** — collected payments grouped by tenant in the range.
+- **Timeline** — one entry per month with `period` (`2026-05`), `label` (`May 2026`), `timestamp`, `gross`, `refunds`, `net`, `payments`, `failed_payments`, and `disputes`.
+
+Chart.js example mapping:
+
+```js
+const timeline = data.timeline;
+
+const labels = timeline.map((item) => item.label);
+const netRevenue = timeline.map((item) => item.net);
+const failedPayments = timeline.map((item) => item.failed_payments);
+const disputes = timeline.map((item) => item.disputes);
+```
 
 Amounts are in the smallest currency unit (cents), as Stripe returns them.
 

@@ -14,7 +14,7 @@ class BillingController extends Controller
 {
   public function metrics(Request $request, BillingMetricsService $metrics): JsonResponse
   {
-    $from = $request->date('from') ?? now()->startOfMonth();
+    $from = $request->date('from') ?? now()->subMonths(11)->startOfMonth();
     $to = $request->date('to') ?? now();
 
     return response()->json([

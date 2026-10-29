@@ -65,6 +65,21 @@ Optional local demo data:
 php artisan db:seed --class=DemoSeeder
 ```
 
+This creates 2 tenants, 100 large posts, admin/author/viewer/support users, subscriptions, 12 months of invoices and payments, and chart-ready billing metrics.
+
+Seeded billing rows are local-only mirror data. `checkout` and `portal` can create real Stripe sandbox resources when called; `cancel` needs a real Stripe subscription from a completed checkout.
+
+Demo logins:
+
+```text
+Owner:          owner@example.com   / password123
+Tenant 1 admin: admin@demo.test     / password
+Tenant 1 author:author@demo.test    / password
+Tenant 2 admin: admin2@demo.test    / password
+Tenant 2 author:author2@demo.test   / password
+Viewer:         viewer@demo.test    / password
+```
+
 ## Run
 
 Served by Nginx at **http://multi-tenant-plog.test** (server block: `/etc/nginx/sites-available/multi-tenant-plog-app`, PHP-FPM socket `/run/php/php8.3-fpm.sock`).
@@ -297,6 +312,7 @@ Stripe is fully backend-driven: the frontend sends `plan_id`, receives `checkout
 - Plans: `config/plans.php`, `PlanSeeder`, `php artisan stripe:sync-plans`
 - Payment due flag: `tenants.is_due` (billing-only UI; never schedules deletion)
 - Webhook: `POST /api/v1/stripe/webhook`
+- Owner metrics: `GET /api/v1/owner/billing/metrics` (last 12 months by default, with `timeline` for Chart.js)
 - Backfill: `php artisan stripe:sync-billing`
 - Full guide: [`docs/billing.md`](docs/billing.md)
 
