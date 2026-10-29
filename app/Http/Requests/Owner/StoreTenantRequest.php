@@ -20,4 +20,14 @@ class StoreTenantRequest extends FormRequest
       'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
     ];
   }
+
+  /**
+   * @return array<string, string>
+   */
+  public function messages(): array
+  {
+    return [
+      'admin_email.unique' => 'A user with this email already exists.',
+    ];
+  }
 }

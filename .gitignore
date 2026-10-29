@@ -16,6 +16,7 @@
 !/.vscode/extensions.json
 /.zed
 /auth.json
+/api.json
 /node_modules
 /public/build
 /public/fonts-manifest.dev.json

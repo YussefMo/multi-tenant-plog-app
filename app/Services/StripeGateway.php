@@ -148,9 +148,10 @@ class StripeGateway
   {
     $secret = (string) config('services.stripe.secret');
     $isLive = str_starts_with($secret, 'sk_live_') || str_starts_with($secret, 'rk_live_');
+    $mode = (string) config('services.stripe.mode', 'sandbox');
 
-    if ($isLive && ! config('services.stripe.allow_live') && app()->environment(['local', 'testing'])) {
-      throw new RuntimeException('Live Stripe keys are not allowed in local/testing. Set STRIPE_ALLOW_LIVE=true only if you really mean it.');
+    if (app()->environment(['local', 'testing']) && ! config('services.stripe.allow_live') && ($isLive || $mode !== 'sandbox')) {
+      throw new RuntimeException('Only Stripe sandbox configuration is allowed in local/testing. Set STRIPE_ALLOW_LIVE=true only if you really mean it.');
     }
   }
 

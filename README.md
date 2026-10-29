@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/YussefMo/multi-tenant-plog-app/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/YussefMo/multi-tenant-plog-app/actions/workflows/ci.yml)
 
-Backend-only Laravel 13 API application. No Blade views, no frontend assets, no web routes — JSON in, JSON out.
+Backend-only Laravel 13 API application. No application Blade views, no frontend assets, and no application web UI — JSON in, JSON out. The only HTML page is the local OpenAPI documentation UI.
 
 ## Requirements
 
@@ -82,6 +82,30 @@ php artisan serve
 ## API
 
 Base URL: `http://multi-tenant-plog.test/api`
+
+### API documentation
+
+OpenAPI 3.1 docs with request/response schemas and **Try it out**:
+
+```text
+http://multi-tenant-plog.test/docs/api
+```
+
+Raw OpenAPI JSON:
+
+```text
+http://multi-tenant-plog.test/docs/api.json
+```
+
+The docs are local-only by default. Authenticated requests use the session cookies and CSRF token described below; use the `Authorize` dialog for `csrfToken`, then call the matching login endpoint before trying protected endpoints.
+
+Regenerate the static spec with:
+
+```bash
+php artisan scramble:export
+```
+
+The docs server URL uses `PUBLIC_API_URL`, so it follows the ngrok hostname.
 
 | Method | Endpoint                                 | Auth                     | Description                 |
 | ------ | ---------------------------------------- | ------------------------ | --------------------------- |

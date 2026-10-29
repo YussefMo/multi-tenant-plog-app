@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * @mixin \App\Models\Tenant
+ *
  * @property-read int $id
  * @property-read string $name
  * @property-read string|null $category

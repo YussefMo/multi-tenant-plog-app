@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Owner;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -50,6 +51,22 @@ class OwnerTenantTest extends TestCase
       'email' => 'admin@example.com',
       'accepted_at' => null,
     ]);
+  }
+
+  public function test_owner_cannot_create_a_tenant_with_an_existing_admin_email(): void
+  {
+    $owner = Owner::factory()->create();
+    User::factory()->create(['email' => 'taken@example.com']);
+
+    $this->actingAs($owner, 'owner')
+      ->postJson('/api/v1/owner/tenants', [
+        'name' => 'Acme Inc',
+        'admin_name' => 'Acme Admin',
+        'admin_email' => 'taken@example.com',
+      ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('admin_email')
+      ->assertJsonPath('errors.admin_email.0', 'A user with this email already exists.');
   }
 
   public function test_duplicate_tenant_names_are_allowed(): void

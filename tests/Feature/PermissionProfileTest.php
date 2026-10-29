@@ -74,6 +74,20 @@ class PermissionProfileTest extends TestCase
     $this->assertContains('posts.publish', $fresh->permissions);
   }
 
+  public function test_support_users_are_not_counted_in_profile_user_count(): void
+  {
+    $profile = PermissionProfile::factory()->forTenant($this->tenant)->create();
+
+    User::factory()->forTenant($this->tenant)->support()->create([
+      'permission_profile_id' => $profile->id,
+    ]);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/profiles')
+      ->assertOk()
+      ->assertJsonPath('data.0.users_count', 0);
+  }
+
   public function test_assigned_profile_cannot_be_deleted(): void
   {
     $profile = PermissionProfile::factory()->forTenant($this->tenant)->create();

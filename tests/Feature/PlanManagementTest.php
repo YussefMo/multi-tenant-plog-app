@@ -168,4 +168,17 @@ class PlanManagementTest extends TestCase
 
     StripeGateway::assertSafeConfiguration();
   }
+
+  public function test_live_stripe_mode_is_rejected_unless_allowed(): void
+  {
+    config([
+      'services.stripe.secret' => 'sk_test_example',
+      'services.stripe.mode' => 'live',
+      'services.stripe.allow_live' => false,
+    ]);
+
+    $this->expectException(RuntimeException::class);
+
+    StripeGateway::assertSafeConfiguration();
+  }
 }

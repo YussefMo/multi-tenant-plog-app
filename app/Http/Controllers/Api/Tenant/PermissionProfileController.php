@@ -22,7 +22,7 @@ class PermissionProfileController extends Controller
   {
     $profiles = PermissionProfile::query()
       ->where('tenant_id', $request->user()->tenant_id)
-      ->withCount('users')
+      ->withCount(['users' => fn ($query) => $query->where('is_support', false)])
       ->latest()
       ->paginate(15);
 
@@ -38,16 +38,18 @@ class PermissionProfileController extends Controller
     $profile->tenant_id = $request->user()->tenant_id;
     $profile->save();
 
-    return (new PermissionProfileResource($profile->loadCount('users')))
-      ->response()
-      ->setStatusCode(201);
+    return (new PermissionProfileResource($profile->loadCount([
+      'users' => fn ($query) => $query->where('is_support', false),
+    ])))->response()->setStatusCode(201);
   }
 
   public function show(Request $request, PermissionProfile $profile): PermissionProfileResource
   {
     $this->ensureTenantProfile($request, $profile);
 
-    return new PermissionProfileResource($profile->loadCount('users'));
+    return new PermissionProfileResource($profile->loadCount([
+      'users' => fn ($query) => $query->where('is_support', false),
+    ]));
   }
 
   public function update(
@@ -66,7 +68,9 @@ class PermissionProfileController extends Controller
     $profile->save();
     $permissions->syncUsersForProfile($profile);
 
-    return new PermissionProfileResource($profile->loadCount('users'));
+    return new PermissionProfileResource($profile->loadCount([
+      'users' => fn ($query) => $query->where('is_support', false),
+    ]));
   }
 
   public function destroy(Request $request, PermissionProfile $profile): Response

@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\FrontendUrlService;
 use App\Services\PermissionSyncService;
 use App\Services\SupportUserService;
+use Dedoc\Scramble\Attributes\IgnoreResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ class AuthController extends Controller
   {
   }
 
+  #[IgnoreResponse(404)]
   public function login(LoginRequest $request): UserResource
   {
     $key = 'tenant-login|'.Str::lower((string) $request->input('email')).'|'.$request->ip();
