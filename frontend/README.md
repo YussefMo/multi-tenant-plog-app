@@ -143,6 +143,37 @@ import ArchitectureMap from '@/components/ArchitectureMap';
 
 Do not use `../src/...` from app tests.
 
+## Data layer
+
+Each app follows the same shape:
+
+```text
+src/lib/action/    auth.action.ts, tenant.action.ts, post.action.ts
+src/lib/hooks/     auth.hook.ts, tenant.hook.ts, post.hook.ts
+```
+
+- Actions call the shared axios instance from `@multi-tenant-plog/shared/lib/http`.
+- Hooks wrap actions with TanStack Query and are the only data entry point for pages/components.
+- Cache is disabled for now: `staleTime: 0`, `gcTime: 0`.
+- Use the shared `QueryProvider`; never create a second `QueryClient`.
+
+## Component structure
+
+```text
+src/components/<feature>/     building blocks
+src/components/<Feature>.tsx  orchestrator
+src/layout/                   reusable layouts
+src/app/                      routes and Next-style route shells
+```
+
+Pages import the orchestrator, not individual building blocks. Layouts that wrap a route segment stay in `src/app/**/layout.tsx`.
+
+Component selection order is mandatory:
+
+1. `@multi-tenant-plog/shared/components/components-parts` or `app-parts`
+2. `@multi-tenant-plog/shared/ui` shadcn components
+3. Plain HTML elements
+
 ## Tests
 
 Vitest uses happy-dom and `@testing-library/jest-dom`:

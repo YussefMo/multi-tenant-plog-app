@@ -43,6 +43,27 @@ Before relying on a package's API, confirm its installed version:
 - Vitest project configs may live at the frontend/app root; test files must not.
 - Use happy-dom and `@testing-library/jest-dom`; import Vitest APIs explicitly.
 
+## Frontend Data Layer
+
+- API actions live in `src/lib/action/<domain>.action.ts`, for example `auth.action.ts`, `tenant.action.ts`, `post.action.ts`.
+- Actions import the shared axios instance from `@multi-tenant-plog/shared/lib/http`; do not create app-local axios clients.
+- TanStack Query hooks live in `src/lib/hooks/<domain>.hook.ts`, for example `auth.hook.ts`, `tenant.hook.ts`.
+- Hooks import their actions and are the only layer pages/components use for API data.
+- Cache is disabled for now: set `staleTime: 0`, `gcTime: 0`, and no persistent cache until a query is explicitly approved for caching.
+- Use the shared `QueryProvider`; do not create a second `QueryClient` in an app.
+
+## Frontend Components
+
+- Feature building blocks live in `src/components/<feature>/`.
+- The orchestrator lives at `src/components/<Feature>.tsx` and composes those building blocks.
+- Pages import the orchestrator, not individual building blocks.
+- Reusable layouts live in `src/layout/`. Next-style route shells stay in `src/app/**/layout.tsx`.
+- Component selection order is mandatory:
+  1. `frontend/shared/components/components-parts` and `app-parts`
+  2. `frontend/shared/ui` shadcn components
+  3. Plain HTML elements
+- Use the `@/` alias for all imports inside an app's `src`.
+
 ## Frontend Bundling
 
 - If a frontend change doesn't show in the UI or you get a "Unable to locate file in Vite manifest" error, run `pnpm build` or ask the user to run `pnpm dev` or `composer run dev`.
