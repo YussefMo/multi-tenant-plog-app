@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@multi-tenant-plog/shared": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-router-dom": "catalog:"
+    "react-router-dom": "catalog:",
+    "recharts": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",

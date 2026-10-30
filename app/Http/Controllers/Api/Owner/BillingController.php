@@ -34,7 +34,7 @@ class BillingController extends Controller
       ->when($from !== null, fn ($query) => $query->where('paid_at', '>=', $from))
       ->when($to !== null, fn ($query) => $query->where('paid_at', '<=', $to))
       ->latest('paid_at')
-      ->paginate(20)
+      ->paginate(min(max((int) $request->query('per_page', 20), 1), 100))
       ->withQueryString();
 
     return BillingPaymentResource::collection($transactions);

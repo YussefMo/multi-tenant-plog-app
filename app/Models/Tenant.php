@@ -35,6 +35,16 @@ class Tenant extends Model
     return $this->hasMany(User::class);
   }
 
+  public function admin(): HasOne
+  {
+    return $this->hasOne(User::class)->where('role', 'admin');
+  }
+
+  public function latestInvitation(): HasOne
+  {
+    return $this->hasOne(TenantInvitation::class)->latestOfMany();
+  }
+
   public function profiles(): HasMany
   {
     return $this->hasMany(PermissionProfile::class);

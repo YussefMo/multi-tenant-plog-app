@@ -3,8 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Owner;
+use App\Models\Plan;
+use App\Models\Post;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\TenantProvisioningService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -198,5 +202,105 @@ class OwnerTenantTest extends TestCase
   public function test_guest_cannot_access_owner_tenant_routes(): void
   {
     $this->getJson('/api/v1/owner/tenants')->assertUnauthorized();
+  }
+
+  public function test_owner_can_search_and_filter_tenants_by_state_support_and_due(): void
+  {
+    $owner = Owner::factory()->create();
+    $acme = Tenant::factory()->forOwner($owner)->create([
+      'name' => 'Acme',
+      'category' => 'Technology',
+      'allow_support' => true,
+      'is_due' => true,
+    ]);
+    Tenant::factory()->forOwner($owner)->create([
+      'name' => 'Beta',
+      'category' => 'Finance',
+      'allow_support' => false,
+      'is_due' => false,
+    ]);
+    $trashed = Tenant::factory()->forOwner($owner)->create(['name' => 'Acme Old']);
+    $trashed->delete();
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?search=Acme')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $acme->id);
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?category=Finance')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.name', 'Beta');
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?allow_support=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $acme->id);
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?is_due=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $acme->id);
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?state=trashed')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $trashed->id);
+
+    $response = $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?state=all');
+
+    $response->assertOk()->assertJsonCount(3, 'data');
+    $this->assertNotNull($response->json('data.2.deleted_at'));
+  }
+
+  public function test_owner_can_paginate_tenant_results(): void
+  {
+    $owner = Owner::factory()->create();
+    Tenant::factory()->forOwner($owner)->count(3)->create();
+
+    $this->actingAs($owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?per_page=2')
+      ->assertOk()
+      ->assertJsonCount(2, 'data')
+      ->assertJsonPath('meta.per_page', 2)
+      ->assertJsonPath('meta.total', 3);
+  }
+
+  public function test_tenant_detail_includes_admin_invitation_subscription_and_counts(): void
+  {
+    $owner = Owner::factory()->create();
+    $result = app(TenantProvisioningService::class)->provision($owner, [
+      'name' => 'Acme',
+      'category' => 'Technology',
+      'admin_name' => 'Acme Admin',
+      'admin_email' => 'admin@acme.test',
+    ]);
+
+    $tenant = $result['tenant'];
+    $admin = $result['admin'];
+
+    $plan = Plan::factory()->create(['name' => 'Growth']);
+    Subscription::factory()->forTenant($tenant)->forPlan($plan)->active()->create();
+
+    Post::factory()->forAuthor($admin)->published()->create();
+    Post::factory()->forAuthor($admin)->draft()->create();
+
+    $this->actingAs($owner, 'owner')
+      ->getJson("/api/v1/owner/tenants/{$tenant->id}")
+      ->assertOk()
+      ->assertJsonPath('data.admin.email', 'admin@acme.test')
+      ->assertJsonPath('data.admin.role', 'admin')
+      ->assertJsonPath('data.invitation.email', 'admin@acme.test')
+      ->assertJsonPath('data.invitation.accepted_at', null)
+      ->assertJsonPath('data.subscription.status', 'active')
+      ->assertJsonPath('data.subscription.plan.name', 'Growth')
+      ->assertJsonPath('data.counts.users', 1)
+      ->assertJsonPath('data.counts.posts', 2);
   }
 }

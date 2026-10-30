@@ -11,10 +11,13 @@
     "./lib/http": "./lib/http/index.ts",
     "./lib/query": "./lib/query/index.ts",
     "./lib/router": "./lib/router.ts",
+    "./lib/env": "./lib/env.ts",
     "./hooks/*": "./hooks/*.ts",
     "./theme": "./theme/index.ts",
     "./providers": "./providers/index.ts",
+    "./components/components-parts": "./components/components-parts/index.ts",
     "./components/components-parts/*": "./components/components-parts/*.tsx",
+    "./components/app-parts": "./components/app-parts/index.ts",
     "./components/app-parts/*": "./components/app-parts/*.tsx",
     "./styles/globals.css": "./styles/globals.css"
   },

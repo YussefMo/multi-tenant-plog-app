@@ -36,6 +36,18 @@ Route::prefix('v1')->group(function () {
       Route::get('/auth/me', [OwnerAuthController::class, 'me'])
         ->name('api.v1.owner.me');
 
+      Route::patch('/auth/profile', [OwnerAuthController::class, 'updateProfile'])
+        ->name('api.v1.owner.profile');
+      Route::put('/auth/password', [OwnerAuthController::class, 'updatePassword'])
+        ->name('api.v1.owner.password');
+
+      Route::get('/tenants/purged', [TenantController::class, 'purged'])
+        ->name('api.v1.owner.tenants.purged');
+
+      Route::delete('/tenants/{tenant}/force', [TenantController::class, 'forceDelete'])
+        ->withTrashed()
+        ->name('api.v1.owner.tenants.force-delete');
+
       Route::apiResource('tenants', TenantController::class)
         ->except(['create', 'edit'])
         ->names('api.v1.owner.tenants');

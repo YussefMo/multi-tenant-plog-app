@@ -377,6 +377,12 @@ importers:
       '@multi-tenant-plog/shared':
         specifier: workspace:*
         version: link:../../shared
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.105.0(@types/react@19.3.0)(react@19.3.1)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.65.0(@types/react@19.3.0)(react@19.3.1)
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -386,6 +392,9 @@ importers:
       react-router-dom:
         specifier: 'catalog:'
         version: 7.18.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      recharts:
+        specifier: 'catalog:'
+        version: 3.8.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react-is@17.0.2)(react@19.3.1)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/vite':
         specifier: 'catalog:'

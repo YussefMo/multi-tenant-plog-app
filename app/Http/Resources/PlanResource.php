@@ -17,6 +17,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read array<string, mixed> $features
  * @property-read array<string, int> $limits
  * @property-read bool $is_active
+ * @property-read int|null $subscriptions_count
+ * @property-read int|null $active_subscriptions_count
  * @property-read \Illuminate\Support\Carbon|null $created_at
  */
 class PlanResource extends JsonResource
@@ -35,6 +37,8 @@ class PlanResource extends JsonResource
       'features' => $this->features ?? [],
       'limits' => $this->limits ?? [],
       'is_active' => $this->is_active,
+      'subscriptions_count' => $this->whenCounted('subscriptions', fn () => (int) $this->subscriptions_count, 0),
+      'active_subscriptions_count' => $this->whenCounted('active_subscriptions_count', fn () => (int) $this->active_subscriptions_count, 0),
       'created_at' => $this->created_at?->toIso8601String(),
     ];
   }

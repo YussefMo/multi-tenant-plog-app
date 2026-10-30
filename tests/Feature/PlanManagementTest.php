@@ -181,4 +181,47 @@ class PlanManagementTest extends TestCase
 
     StripeGateway::assertSafeConfiguration();
   }
+
+  public function test_updating_a_plan_with_an_empty_slug_keeps_the_existing_slug(): void
+  {
+    $plan = Plan::factory()->create(['slug' => 'starter']);
+
+    $this->actingAs($this->owner, 'owner')
+      ->patchJson("/api/v1/owner/plans/{$plan->id}", [
+        'name' => 'Starter Renamed',
+        'slug' => null,
+      ])
+      ->assertOk()
+      ->assertJsonPath('data.name', 'Starter Renamed')
+      ->assertJsonPath('data.slug', 'starter');
+  }
+
+  public function test_plans_include_subscription_counts(): void
+  {
+    $plan = Plan::factory()->create();
+    $otherPlan = Plan::factory()->create();
+
+    Subscription::factory()->forTenant(Tenant::factory()->create())->forPlan($plan)->active()->create();
+    Subscription::factory()->forTenant(Tenant::factory()->create())->forPlan($plan)->canceled()->create();
+
+    $this->actingAs($this->owner, 'owner')
+      ->getJson('/api/v1/owner/plans')
+      ->assertOk()
+      ->assertJsonFragment([
+        'id' => $plan->id,
+        'subscriptions_count' => 2,
+        'active_subscriptions_count' => 1,
+      ])
+      ->assertJsonFragment([
+        'id' => $otherPlan->id,
+        'subscriptions_count' => 0,
+        'active_subscriptions_count' => 0,
+      ]);
+
+    $this->actingAs($this->owner, 'owner')
+      ->getJson("/api/v1/owner/plans/{$plan->id}")
+      ->assertOk()
+      ->assertJsonPath('data.subscriptions_count', 2)
+      ->assertJsonPath('data.active_subscriptions_count', 1);
+  }
 }
