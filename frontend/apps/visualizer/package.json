@@ -15,12 +15,15 @@
     "validate": "node scripts/validate-atlas.mjs"
   },
   "dependencies": {
+    "@multi-tenant-plog/shared": "workspace:*",
     "@xyflow/react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router-dom": "catalog:"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

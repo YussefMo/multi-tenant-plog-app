@@ -25,7 +25,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3.36'
+          php-version: "8.3.36"
           extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
           coverage: none
 
@@ -37,8 +37,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
           cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Prepare environment
         run: cp .env.example .env
@@ -47,7 +48,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Install Node dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm --dir frontend install --frozen-lockfile
 
       - name: Generate application key
         run: php artisan key:generate
@@ -59,10 +60,13 @@ jobs:
         run: composer type-check
 
       - name: Frontend type check
-        run: pnpm typecheck:frontend
+        run: pnpm --dir frontend typecheck
+
+      - name: Frontend tests
+        run: pnpm --dir frontend test
 
       - name: Frontend build
-        run: pnpm build:frontend
+        run: pnpm --dir frontend build
 
   tests:
     name: Tests
@@ -73,7 +77,7 @@ jobs:
         image: mariadb:10.11
         env:
           MARIADB_ROOT_PASSWORD: root
-          MARIADB_ROOT_HOST: '%'
+          MARIADB_ROOT_HOST: "%"
           MARIADB_DATABASE: multi_tenant_plog_app_test
         ports:
           - 3306:3306
@@ -102,7 +106,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3.36'
+          php-version: "8.3.36"
           extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
           coverage: none
 
@@ -133,7 +137,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3.36'
+          php-version: "8.3.36"
           extensions: mbstring, pdo_mysql, bcmath, intl, zip, curl, xml
           coverage: none
 

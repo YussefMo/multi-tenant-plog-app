@@ -83,7 +83,7 @@ SESSION_SECURE_COOKIE=true
 Frontend fetches must use:
 
 ```ts
-credentials: 'include';
+credentials: "include";
 ```
 
 ### CSRF flow
@@ -272,13 +272,13 @@ This is the important cross-frontend flow.
 ## Example fetch
 
 ```ts
-await fetch('http://multi-tenant-plog.test/api/v1/auth/login', {
-  method: 'POST',
-  credentials: 'include',
+await fetch("http://multi-tenant-plog.test/api/v1/auth/login", {
+  method: "POST",
+  credentials: "include",
   headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    'X-CSRF-TOKEN': csrfToken,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-CSRF-TOKEN": csrfToken,
   },
   body: JSON.stringify({ email, password }),
 });

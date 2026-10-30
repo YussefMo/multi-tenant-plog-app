@@ -16,6 +16,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "node", "@testing-library/jest-dom/vitest"]
   }
 }

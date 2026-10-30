@@ -297,29 +297,39 @@ composer type-check:files  # only files containing type errors
 
 The owner dashboard, tenant dashboard, and user web are separate frontends. Local defaults are `http://localhost:3000`, `http://localhost:3001`, and `http://localhost:3002`. Tenant scope comes from the authenticated user's email and `tenant_id`, never from a slug. Viewers have no tenant and browse the tenant directory. The API returns `redirect_url` where the frontend should navigate; the full flow map is in [`docs/frontend-redirects.md`](docs/frontend-redirects.md).
 
-The frontend workspace is a pnpm monorepo under `frontend/apps/`:
+The frontend workspace root is `frontend/`. It contains the four apps and a shared package:
 
 ```text
-owner        http://localhost:3000
-tenant       http://localhost:3001
-user         http://localhost:3002
-visualizer   http://localhost:3003
+frontend/apps/owner        http://localhost:3000
+frontend/apps/tenant       http://localhost:3001
+frontend/apps/user         http://localhost:3002
+frontend/apps/visualizer   http://localhost:3003
+frontend/shared            shadcn UI, axios, cookies, toast, theme, query
 ```
 
-Run from the repository root:
+Install and run from the repository root:
 
 ```bash
+pnpm install:frontend
 pnpm dev:owner
 pnpm dev:tenant
 pnpm dev:user
 pnpm dev:visualizer
-pnpm dev:frontend       # all four in parallel
-pnpm typecheck:frontend
-pnpm build:frontend
+pnpm dev                 # all four in parallel
+pnpm typecheck
+pnpm test
+pnpm test:coverage
+pnpm build
 ```
 
-`pnpm dev` and `pnpm build` are aliases for the frontend workspace.
+The root `package.json` is a thin bridge; all frontend dependencies, configs, tests, and the pnpm lockfile live under `frontend/`. See [`frontend/README.md`](frontend/README.md) for the shared API client, cookies, toast, theme, Query, and environment setup.
 
+- Frontend env: `frontend/apps/*/.env` (`VITE_API_URL`, `VITE_API_VERSION`, `VITE_APP_NAME`)
+- Shared HTTP: `frontend/shared/lib/http` (`ownerApi`, `tenantApi`, `api`)
+- Shared cookies: `frontend/shared/lib/cookies`
+- Shared toast: `frontend/shared/lib/toast`
+- Shared theme: `frontend/shared/theme`
+- Shared Query provider: `frontend/shared/providers` (owner, tenant, user only)
 - Frontend URLs: `config/frontends.php` / `OWNER_FRONTEND_URL`, `TENANT_FRONTEND_URL`, `USER_FRONTEND_URL`
 - CORS: `config/cors.php` / `CORS_ALLOWED_ORIGINS` (defaults to the three localhost origins and their `127.0.0.1` equivalents)
 - Same-origin note: `SESSION_DOMAIN=null` works for both `localhost:8000` and `multi-tenant-plog.test`; with `composer dev`, point the frontends at `http://localhost:8000/api` or proxy `/api` through each frontend
@@ -383,8 +393,9 @@ GitHub Actions runs on every push to `master`:
 
 - `composer format:check`
 - `composer type-check`
-- `pnpm typecheck:frontend`
-- `pnpm build:frontend`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
 - `php artisan test` against MariaDB
 - Production build (`composer install --no-dev`, `php artisan config:cache`, boot checks)
 
@@ -397,7 +408,8 @@ The workflow is `.github/workflows/ci.yml`.
 - `app/Models` — Eloquent models
 - `database/migrations` — schema
 - `bootstrap/app.php` — routing/middleware/exception configuration
-- `frontend/apps` — pnpm workspace: owner, tenant, user, and System Atlas
+- `frontend` — pnpm workspace root: `apps/*`, `shared`, tests, and configs
+- `frontend/shared` — shadcn UI, axios/CSRF, cookies, toast, theme, Query
 - `docs` — redirect and billing documentation
 - `tasks.md` — System Atlas roadmap (gitignored)
 - `commands.md` — command reference (gitignored)

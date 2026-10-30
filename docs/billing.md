@@ -125,12 +125,12 @@ Checkout response:
 Frontend:
 
 ```ts
-const response = await fetch('/api/v1/billing/checkout', {
-  method: 'POST',
-  credentials: 'include',
+const response = await fetch("/api/v1/billing/checkout", {
+  method: "POST",
+  credentials: "include",
   headers: {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': csrfToken,
+    "Content-Type": "application/json",
+    "X-CSRF-TOKEN": csrfToken,
   },
   body: JSON.stringify({ plan_id: 1 }),
 });

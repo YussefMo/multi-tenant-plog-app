@@ -210,8 +210,10 @@ stripe listen --forward-to http://multi-tenant-plog.test/api/v1/stripe/webhook
 
 ## Frontend workspace
 
+The pnpm workspace root is `frontend/`. Root scripts are thin delegates.
+
 ```bash
-pnpm install                     # Install root + frontend dependencies
+pnpm install:frontend           # Install frontend dependencies
 pnpm dev                         # All four apps
 pnpm build                       # Build all four apps
 pnpm dev:owner                   # Owner app on http://localhost:3000
@@ -220,13 +222,15 @@ pnpm dev:user                    # User web on http://localhost:3002
 pnpm dev:visualizer              # System Atlas on http://localhost:3003
 pnpm build:visualizer            # Static Atlas build in frontend/apps/visualizer/dist
 pnpm dev:frontend                # All four apps in parallel
-pnpm typecheck:frontend          # tsgo native TypeScript checker
+pnpm typecheck                   # tsgo for apps + shared
+pnpm test                        # Vitest + happy-dom
+pnpm test:coverage               # Vitest coverage
 pnpm build:frontend              # Production build for all apps
 pnpm generate:requests           # Regenerate the Atlas request catalog
 pnpm atlas:validate              # Validate requests, journeys, models, commands, files
 ```
 
-`frontend/apps/visualizer` is the System Atlas: journeys, request catalog, file catalog, ERD, table explorer, command atlas, and presenter mode. The owner, tenant, and user apps are Phase 1 placeholders. Laravel is API-only; the frontend apps run on their own Vite servers.
+`frontend/shared` contains shadcn UI, the axios/CSRF client, cookies, toast helpers, theme, and the TanStack Query provider. `frontend/apps/visualizer` is the System Atlas. The owner, tenant, and user apps are Phase 1 placeholders. Laravel is API-only; the frontend apps run on their own Vite servers.
 
 If pnpm reports `no @pnpm/exe.linux-x64 native binary was found for this host`, install a native Linux pnpm and keep package-manager version management disabled:
 

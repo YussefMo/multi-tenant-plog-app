@@ -1,0 +1,59 @@
+{
+  "name": "@multi-tenant-plog/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./ui/*": "./ui/*.tsx",
+    "./lib/utils": "./lib/utils.ts",
+    "./lib/cookies": "./lib/cookies.ts",
+    "./lib/toast": "./lib/toast.ts",
+    "./lib/http": "./lib/http/index.ts",
+    "./lib/query": "./lib/query/index.ts",
+    "./hooks/*": "./hooks/*.ts",
+    "./theme": "./theme/index.ts",
+    "./providers": "./providers/index.ts",
+    "./test/*": "./test/*.tsx",
+    "./styles/globals.css": "./styles/globals.css"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@base-ui/react": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "@shadcn/react": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "axios": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "cmdk": "catalog:",
+    "date-fns": "catalog:",
+    "embla-carousel-react": "catalog:",
+    "input-otp": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
+    "react": "catalog:",
+    "react-day-picker": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-resizable-panels": "catalog:",
+    "recharts": "catalog:",
+    "sonner": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tw-animate-css": "catalog:",
+    "vaul": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

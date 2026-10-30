@@ -1,43 +1,143 @@
 # Frontend Workspace
 
-pnpm workspace for the four Vite applications.
+`frontend/` is the pnpm workspace root. Everything frontend-related lives here: the four Vite apps, the shared package, tests, Prettier, and the lockfile.
 
 ```text
-apps/owner        http://localhost:3000
-apps/tenant       http://localhost:3001
-apps/user         http://localhost:3002
-apps/visualizer   http://localhost:3003
+frontend/
+  apps/
+    owner/        http://localhost:3000
+    tenant/       http://localhost:3001
+    user/         http://localhost:3002
+    visualizer/   http://localhost:3003
+  shared/
+    ui/           all shadcn components
+    lib/          http, cookies, toast, query, utils
+    theme/        shared light/dark provider
+    providers/    AppProviders + QueryProvider
+    styles/       Tailwind + shadcn globals
+  test/           Vitest setup
 ```
 
-Run everything from the repository root:
+## Install and run
+
+From the repository root:
 
 ```bash
-pnpm install
-pnpm dev               # all four apps
-pnpm dev:frontend
+pnpm install:frontend
+pnpm dev                 # all four apps
 pnpm dev:owner
 pnpm dev:tenant
 pnpm dev:user
 pnpm dev:visualizer
-pnpm typecheck:frontend
-pnpm build:frontend
 ```
 
-The owner, tenant, and user apps are Phase 1 placeholders. `apps/visualizer` is the completed System Atlas: architecture map, request and file catalogs, journeys, ERD, table explorer, command atlas, and presenter mode. See `apps/visualizer/README.md`.
+The root `package.json` is a thin command bridge; every command delegates to `frontend/`.
+
+## Shared package
+
+Apps depend on `@multi-tenant-plog/shared`.
+
+```ts
+import { Button } from '@multi-tenant-plog/shared/ui/button';
+import { ThemeToggle } from '@multi-tenant-plog/shared/ui/theme-toggle';
+import { AppProviders, QueryProvider } from '@multi-tenant-plog/shared/providers';
+import { api, ownerApi } from '@multi-tenant-plog/shared/lib/http';
+import { notify } from '@multi-tenant-plog/shared/lib/toast';
+import { cookies } from '@multi-tenant-plog/shared/lib/cookies';
+```
+
+### HTTP
+
+```ts
+// owner app
+import { ownerApi } from '@multi-tenant-plog/shared/lib/http';
+await ownerApi.post('/tenants', payload);
+
+// tenant and user apps
+import { api } from '@multi-tenant-plog/shared/lib/http';
+await api.post('/auth/login', payload);
+```
+
+The client reads `VITE_API_URL` and `VITE_API_VERSION` from the app `.env`, builds the base URL once, sends cookies with `withCredentials`, fetches the correct realm CSRF token, attaches `X-CSRF-TOKEN`, retries once on `419`, and emits auth events for `401`/`403`.
+
+### Cookies
+
+```ts
+import { cookies } from '@multi-tenant-plog/shared/lib/cookies';
+
+cookies.set('key', 'value', { days: 7 });
+cookies.get('key');
+cookies.remove('key');
+cookies.setJson('profile', { id: 1 });
+```
+
+Laravel session cookies are HttpOnly; the browser sends them automatically through the axios instance. The cookies utility is for client-readable cookies only.
+
+### Toasts
+
+```ts
+import { notify } from '@multi-tenant-plog/shared/lib/toast';
+
+notify.success('Saved');
+notify.error('Something failed');
+notify.apiError(error);
+notify.validation(errors);
+```
+
+`AppProviders` renders the Sonner `<Toaster />` once per app.
+
+### TanStack Query
+
+Owner, tenant, and user wrap their layouts in `QueryProvider`. The visualizer does not use TanStack Query.
+
+### Theme
+
+The shared `ThemeProvider` sets both `data-theme` and the `.dark` class, persists the choice, and exposes `useTheme`/`ThemeToggle`. The visualizer uses the storage key `atlas-theme`.
+
+## Environment files
+
+Each app has `.env` and `.env.example`:
+
+```dotenv
+VITE_API_URL=http://localhost:8000/api
+VITE_API_VERSION=v1
+VITE_APP_NAME=Owner Console
+```
+
+The axios base URL is `${VITE_API_URL}/${VITE_API_VERSION}`, so calls are relative:
+
+```ts
+api.post('/auth/login');
+// -> http://localhost:8000/api/v1/auth/login
+```
+
+## Tests
+
+Vitest uses happy-dom and `@testing-library/jest-dom`:
+
+```bash
+pnpm test
+pnpm test:watch
+pnpm test:coverage
+```
+
+The root config runs one project per app plus `shared`. Tests live next to the code as `*.test.ts` / `*.test.tsx`.
 
 ## Dependency catalog
 
-All shared dependency and dev-dependency versions live in the root `pnpm-workspace.yaml` under `catalog:`. Apps reference them with `"catalog:"` instead of repeating version ranges.
+All dependency and dev-dependency versions live in `frontend/pnpm-workspace.yaml` under `catalog:`. Apps and `shared` use `"catalog:"`.
 
 To add or bump a package:
 
 1. Update the version in `pnpm-workspace.yaml`.
-2. Use `"catalog:"` in the app `package.json`.
-3. Run `pnpm install`.
+2. Use `"catalog:"` in the package that needs it.
+3. Run `pnpm --dir frontend install`.
 
 ## Type checking
 
-Type checking uses `tsgo` from `@typescript/native-preview`, the Go-native TypeScript checker. Each app includes `vite.config.ts` in its `tsconfig.json`, so config files are typechecked too.
+Type checking uses `tsgo` from `@typescript/native-preview`. Each app includes `vite.config.ts` and its tests in the TypeScript project.
+
+## Troubleshooting pnpm in WSL
 
 If pnpm reports `no @pnpm/exe.linux-x64 native binary was found for this host`, install a native Linux pnpm and keep package-manager version management disabled:
 

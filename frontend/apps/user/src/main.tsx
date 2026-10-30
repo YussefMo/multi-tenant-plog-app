@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
+import '@multi-tenant-plog/shared/styles/globals.css';
 import './styles.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

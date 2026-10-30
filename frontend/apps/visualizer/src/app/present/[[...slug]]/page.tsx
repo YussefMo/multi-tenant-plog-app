@@ -4,7 +4,7 @@ import CommandDetail from '@/components/CommandDetail';
 import JourneyPlayer from '@/components/JourneyPlayer';
 import ModelDetail from '@/components/ModelDetail';
 import RequestDetail from '@/components/RequestDetail';
-import ThemeToggle from '@/components/ThemeToggle';
+import { ThemeToggle } from '@multi-tenant-plog/shared/ui/theme-toggle';
 import { commands, journeys, journeysById, models, modelsByName, requestsDocument } from '@/data';
 
 type Collection = 'journeys' | 'models' | 'commands' | 'requests';

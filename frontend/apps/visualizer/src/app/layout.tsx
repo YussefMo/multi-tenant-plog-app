@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { ThemeProvider } from '@/lib/theme';
+import { AppProviders } from '@multi-tenant-plog/shared/providers';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return <AppProviders themeStorageKey="atlas-theme">{children}</AppProviders>;
 }

@@ -1,0 +1,14 @@
+node_modules
+../node_modules
+../vendor
+../storage
+../public/build
+apps/**/dist
+apps/**/.vite
+apps/visualizer/src/data/generated
+../_ide_helper.php
+../_ide_helper_models.php
+../.phpstorm.meta.php
+../api.json
+pnpm-lock.yaml
+composer.lock

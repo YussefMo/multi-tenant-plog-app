@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@shared/*": ["./*"]
+    }
+  },
+  "include": ["ui", "lib", "theme", "providers", "test"]
+}

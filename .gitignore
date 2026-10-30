@@ -18,6 +18,9 @@
 /auth.json
 /api.json
 /node_modules
+/pnpm-lock.yaml
+/frontend/node_modules
+/frontend/.vite
 /frontend/**/node_modules
 /frontend/**/dist
 /frontend/**/.vite

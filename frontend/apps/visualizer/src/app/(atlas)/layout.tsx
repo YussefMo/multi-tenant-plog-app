@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import ThemeToggle from '@/components/ThemeToggle';
+import { ThemeToggle } from '@multi-tenant-plog/shared/ui/theme-toggle';
 import { files, journeys, models, requestsDocument } from '@/data';
 import { usePathname } from '@/lib/router';
 

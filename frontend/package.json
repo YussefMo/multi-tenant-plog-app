@@ -1,0 +1,36 @@
+{
+  "name": "@multi-tenant-plog/frontend",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.15.0",
+  "scripts": {
+    "format": "prettier --write . --ignore-unknown",
+    "format:check": "prettier --check . --ignore-unknown",
+    "format:repo": "prettier --write .. --ignore-unknown",
+    "format:check:repo": "prettier --check .. --ignore-unknown",
+    "dev": "pnpm -r --parallel --filter \"./apps/*\" dev",
+    "dev:owner": "pnpm --filter @multi-tenant-plog/owner dev",
+    "dev:tenant": "pnpm --filter @multi-tenant-plog/tenant dev",
+    "dev:user": "pnpm --filter @multi-tenant-plog/user dev",
+    "dev:visualizer": "pnpm --filter @multi-tenant-plog/visualizer dev",
+    "build": "pnpm build:frontend",
+    "build:visualizer": "pnpm --filter @multi-tenant-plog/visualizer build",
+    "build:frontend": "pnpm -r --filter \"./apps/*\" build",
+    "typecheck": "pnpm typecheck:frontend",
+    "typecheck:frontend": "pnpm -r --filter \"./apps/*\" --filter \"./shared\" typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "generate:requests": "pnpm --filter @multi-tenant-plog/visualizer generate:requests",
+    "atlas:validate": "pnpm --filter @multi-tenant-plog/visualizer validate"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "happy-dom": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:"
+  }
+}
