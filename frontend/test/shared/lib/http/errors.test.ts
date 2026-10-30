@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError, toApiError, validationMessages } from './errors';
+import { ApiError, toApiError, validationMessages } from '@shared/lib/http/errors';
 
 describe('api errors', () => {
   it('normalizes a plain error', () => {

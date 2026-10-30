@@ -7,7 +7,7 @@ export default defineConfig({
       'apps/tenant/vitest.config.ts',
       'apps/user/vitest.config.ts',
       'apps/visualizer/vitest.config.ts',
-      'shared/vitest.config.ts',
+      'test/vitest.config.ts',
     ],
     coverage: {
       provider: 'v8',

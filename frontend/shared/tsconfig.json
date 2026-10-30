@@ -5,5 +5,5 @@
       "@shared/*": ["./*"]
     }
   },
-  "include": ["ui", "lib", "theme", "providers", "test"]
+  "include": ["ui", "lib", "theme", "providers", "components"]
 }

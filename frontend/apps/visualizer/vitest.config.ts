@@ -8,7 +8,7 @@ export default mergeConfig(
       name: 'visualizer',
       environment: 'happy-dom',
       setupFiles: ['../../test/setup.ts'],
-      include: ['src/**/*.{test,spec}.{ts,tsx}'],
+      include: ['test/**/*.{test,spec}.{ts,tsx}'],
     },
   }),
 );

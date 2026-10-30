@@ -111,6 +111,26 @@ api.post('/auth/login');
 // -> http://localhost:8000/api/v1/auth/login
 ```
 
+## Components
+
+Reusable app components live in `shared/components`:
+
+```text
+components-parts/   tables, filters, forms, badges, spinners, modals
+app-parts/          Can/Cannot, DeleteAlert, LogBlock, Logo, ToggleStatusDialog
+```
+
+They are built on the shared shadcn UI and use `@shared/lib/utils`. Import them directly:
+
+```ts
+import StatusBadge from '@multi-tenant-plog/shared/components/components-parts/StatusBadge';
+import TableFooter from '@multi-tenant-plog/shared/components/components-parts/TableFooter';
+import { Can } from '@multi-tenant-plog/shared/components/app-parts/Can';
+import { DeleteAlert } from '@multi-tenant-plog/shared/components/app-parts/DeleteAlert';
+```
+
+No locale or i18n dependency is included.
+
 ## Tests
 
 Vitest uses happy-dom and `@testing-library/jest-dom`:
@@ -121,7 +141,14 @@ pnpm test:watch
 pnpm test:coverage
 ```
 
-The root config runs one project per app plus `shared`. Tests live next to the code as `*.test.ts` / `*.test.tsx`.
+Tests live only in test folders:
+
+```text
+frontend/test/                  shared/root tests
+frontend/apps/<app>/test/       tests for that app
+```
+
+The root config runs one project per app plus the shared test project. Test files are never colocated with source files.
 
 ## Dependency catalog
 

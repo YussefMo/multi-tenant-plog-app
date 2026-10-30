@@ -1,6 +1,6 @@
 import type { AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
 import { describe, expect, it } from 'vitest';
-import { createHttpClient } from './client';
+import { createHttpClient } from '@shared/lib/http';
 
 describe('http client', () => {
   it('uses the API base URL and credentials', () => {

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { cookies } from './cookies';
+import { cookies } from '@shared/lib/cookies';
 
 function clearCookies(): void {
   for (const name of Object.keys(cookies.getAll())) {

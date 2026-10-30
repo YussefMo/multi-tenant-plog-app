@@ -27,9 +27,24 @@ Before relying on a package's API, confirm its installed version:
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## Frontend Workspace
+
+- The pnpm workspace root is `frontend/`. All frontend dependencies, configs, lockfile, tests, and app code live under it.
+- `frontend/shared` contains shared UI, lib, theme, providers, and app components.
+- Run frontend commands from the repository root with `pnpm --dir frontend ...` or the root bridge scripts.
+- Do not add frontend assets, test configs, or app code outside `frontend/`.
+
+## Frontend Tests
+
+- Tests live only in test folders, never beside source files.
+- Shared/root tests: `frontend/test/**`.
+- App tests: `frontend/apps/<app>/test/**`.
+- Vitest project configs may live at the frontend/app root; test files must not.
+- Use happy-dom and `@testing-library/jest-dom`; import Vitest APIs explicitly.
+
 ## Frontend Bundling
 
-- If a frontend change doesn't show in the UI or you get a "Unable to locate file in Vite manifest" error, run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+- If a frontend change doesn't show in the UI or you get a "Unable to locate file in Vite manifest" error, run `pnpm build` or ask the user to run `pnpm dev` or `composer run dev`.
 
 ## Documentation Files
 

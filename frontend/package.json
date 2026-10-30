@@ -17,7 +17,8 @@
     "build:visualizer": "pnpm --filter @multi-tenant-plog/visualizer build",
     "build:frontend": "pnpm -r --filter \"./apps/*\" build",
     "typecheck": "pnpm typecheck:frontend",
-    "typecheck:frontend": "pnpm -r --filter \"./apps/*\" --filter \"./shared\" typecheck",
+    "typecheck:frontend": "pnpm -r --filter \"./apps/*\" --filter \"./shared\" typecheck && tsgo --noEmit -p test/tsconfig.json",
+    "typecheck:test": "tsgo --noEmit -p test/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -28,9 +29,18 @@
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript/native-preview": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "axios": "catalog:",
     "happy-dom": "catalog:",
     "prettier": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:"
   }
 }
