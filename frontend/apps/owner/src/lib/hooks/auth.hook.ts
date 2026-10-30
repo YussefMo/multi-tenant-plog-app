@@ -18,8 +18,8 @@ export function useOwnerMe() {
   return useQuery({
     queryKey: ownerKeys.me,
     queryFn: getOwner,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: false,
   });
 }

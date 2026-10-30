@@ -43,6 +43,7 @@ export default function TenantTable({
     <Table>
       <TableHeaderRe
         headers={['Tenant', 'Category', 'Status', 'Created', isTrashed ? 'Recovery' : 'Actions']}
+        lastColumnAlign="end"
       />
       {isLoading ? (
         <TableBodySkeleton colNum={5} rowCount={6} />

@@ -21,6 +21,14 @@ export default function Plans() {
     });
   };
 
+  const pendingPlanId = deletePlan.isPending
+    ? typeof deletePlan.variables === 'number'
+      ? deletePlan.variables
+      : deletePlan.variables
+        ? Number(deletePlan.variables)
+        : null
+    : null;
+
   const createAction = (
     <Button asChild>
       <Link to="/plans/new">
@@ -51,13 +59,7 @@ export default function Plans() {
               plans={plansQuery.data ?? []}
               isLoading={plansQuery.isLoading}
               onDelete={remove}
-              pendingPlanId={
-                typeof deletePlan.variables === 'number'
-                  ? deletePlan.variables
-                  : deletePlan.variables
-                    ? Number(deletePlan.variables)
-                    : null
-              }
+              pendingPlanId={pendingPlanId}
             />
           )}
         </div>

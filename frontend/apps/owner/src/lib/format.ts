@@ -37,7 +37,7 @@ export function formatDate(value?: string | null): string {
     return '—';
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -55,7 +55,7 @@ export function formatDateTime(value?: string | null): string {
     return '—';
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

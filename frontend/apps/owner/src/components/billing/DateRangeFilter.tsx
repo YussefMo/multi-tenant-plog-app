@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@multi-tenant-plog/shared/ui/button';
-import { Input } from '@multi-tenant-plog/shared/ui/input';
 import { Label } from '@multi-tenant-plog/shared/ui/label';
+import DateTextInput from '@/components/billing/DateTextInput';
 
 interface DateRangeFilterProps {
   fromParam?: string;
@@ -61,25 +61,13 @@ export default function DateRangeFilter({
         <Label htmlFor="from" className="text-xs">
           From
         </Label>
-        <Input
-          id="from"
-          type="date"
-          value={from}
-          className="w-40"
-          onChange={(event) => setFrom(event.target.value)}
-        />
+        <DateTextInput id="from" value={from} className="w-40" onChange={setFrom} />
       </div>
       <div className="space-y-1">
         <Label htmlFor="to" className="text-xs">
           To
         </Label>
-        <Input
-          id="to"
-          type="date"
-          value={to}
-          className="w-40"
-          onChange={(event) => setTo(event.target.value)}
-        />
+        <DateTextInput id="to" value={to} className="w-40" onChange={setTo} />
       </div>
       <Button type="button" variant="outline" onClick={apply}>
         Apply

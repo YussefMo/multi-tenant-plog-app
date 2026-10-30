@@ -31,4 +31,29 @@ describe('http client', () => {
     expect(calls[0]?.url).toBe('/owner/csrf-token');
     expect((calls[1]?.headers as AxiosHeaders)?.get('X-CSRF-TOKEN')).toBe('csrf-owner');
   });
+
+  it('ignores the encrypted XSRF cookie and fetches a fresh token', async () => {
+    document.cookie = 'XSRF-TOKEN=encrypted-cookie-value';
+    const client = createHttpClient({ realm: 'owner' });
+    const calls: InternalAxiosRequestConfig[] = [];
+
+    client.defaults.adapter = async (config) => {
+      calls.push(config);
+
+      return {
+        data: config.url === '/owner/csrf-token' ? { csrf_token: 'csrf-owner' } : { ok: true },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      };
+    };
+
+    await client.post('/tenants', { name: 'Demo' });
+
+    expect(calls[0]?.url).toBe('/owner/csrf-token');
+    expect((calls[1]?.headers as AxiosHeaders)?.get('X-CSRF-TOKEN')).toBe('csrf-owner');
+
+    document.cookie = 'XSRF-TOKEN=; Max-Age=0; path=/';
+  });
 });

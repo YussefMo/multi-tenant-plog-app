@@ -4,9 +4,14 @@ import { cn } from '@shared/lib/utils';
 interface TableHeaderReProps {
   headers: string[];
   className?: string;
+  lastColumnAlign?: 'start' | 'end';
 }
 
-export default function TableHeaderRe({ headers, className }: TableHeaderReProps) {
+export default function TableHeaderRe({
+  headers,
+  className,
+  lastColumnAlign = 'start',
+}: TableHeaderReProps) {
   return (
     <TableHeader className={cn('bg-muted/60', className)}>
       <TableRow className="hover:bg-transparent">
@@ -15,8 +20,7 @@ export default function TableHeaderRe({ headers, className }: TableHeaderReProps
             key={header}
             className={cn(
               'text-muted-foreground h-10 px-4 text-xs font-semibold',
-              index === headers.length - 1 && 'text-end',
-              index !== 0 && index !== headers.length - 1 && 'text-center',
+              index === headers.length - 1 && lastColumnAlign === 'end' && 'text-end',
             )}
           >
             {header}

@@ -31,6 +31,7 @@ export default function PlanTable({
     <Table>
       <TableHeaderRe
         headers={['Plan', 'Amount', 'Interval', 'Subscriptions', 'Status', 'Actions']}
+        lastColumnAlign="end"
       />
       {isLoading ? (
         <TableBodySkeleton colNum={6} rowCount={5} />

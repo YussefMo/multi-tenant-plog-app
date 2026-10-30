@@ -98,8 +98,13 @@ export default function Tenants() {
     });
   };
 
-  const pendingTenantId =
-    deleteTenant.variables ?? restoreTenant.variables ?? forceDeleteTenant.variables ?? null;
+  const pendingTenantId = deleteTenant.isPending
+    ? deleteTenant.variables
+    : restoreTenant.isPending
+      ? restoreTenant.variables
+      : forceDeleteTenant.isPending
+        ? forceDeleteTenant.variables
+        : null;
   const normalizedPendingTenantId =
     typeof pendingTenantId === 'number'
       ? pendingTenantId

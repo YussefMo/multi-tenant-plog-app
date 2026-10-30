@@ -2,7 +2,6 @@ import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestCo
 import { apiBaseUrl } from '@shared/lib/env';
 import { toApiError, type ApiErrorBody } from './errors';
 import { apiEvents } from './events';
-import { readCsrfCookie } from './csrf';
 
 export type ApiRealm = 'owner' | 'tenant';
 
@@ -44,14 +43,7 @@ export function createHttpClient({ realm }: { realm: ApiRealm }): HttpClient {
       return csrfToken;
     }
 
-    const cookieToken = readCsrfCookie();
-
-    if (cookieToken !== null) {
-      csrfToken = cookieToken;
-
-      return csrfToken;
-    }
-
+    // Laravel encrypts the XSRF-TOKEN cookie, so the raw token must come from the realm endpoint.
     csrfRequest ??= fetchCsrf().finally(() => {
       csrfRequest = null;
     });
