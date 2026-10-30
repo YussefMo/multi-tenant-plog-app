@@ -48,6 +48,7 @@ class TenantOverviewController extends Controller
           'category' => $tenant->category,
           'allow_support' => $tenant->allow_support,
           'is_due' => $tenant->is_due,
+          'trial_used_at' => $tenant->trial_used_at?->toIso8601String(),
         ],
         'counts' => [
           'users' => $user->hasPermission('users.view')

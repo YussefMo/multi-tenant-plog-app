@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsurePermission;
 use App\Http\Middleware\EnsureSupportAccess;
 use App\Http\Middleware\EnsureTenantActive;
+use App\Http\Middleware\EnsureTenantNotDue;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\ResolveSessionRealm;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
       'permission' => EnsurePermission::class,
       'support' => EnsureSupportAccess::class,
       'tenant.active' => EnsureTenantActive::class,
+      'tenant.not_due' => EnsureTenantNotDue::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions): void {

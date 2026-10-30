@@ -12,4 +12,6 @@ return [
   'portal_return_path' => '/api/v1/billing/portal/return',
 
   'default_currency' => env('BILLING_CURRENCY', 'usd'),
+
+  'trial_days' => (int) env('BILLING_TRIAL_DAYS', 14),
 ];

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import ConsoleSidebar from '@/layout/ConsoleSidebar';
 import ConsoleTopbar from '@/layout/ConsoleTopbar';
+import DueBanner from '@/layout/DueBanner';
 import SupportBanner from '@/layout/SupportBanner';
 
 export default function ConsoleLayout({ children }: { children: ReactNode }) {
@@ -13,6 +14,7 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen flex-col">
         <ConsoleTopbar />
         <SupportBanner />
+        <DueBanner />
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>

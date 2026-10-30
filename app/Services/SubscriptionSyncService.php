@@ -44,8 +44,14 @@ class SubscriptionSyncService
         'stripe_customer_id' => $customerId,
         'stripe_subscription_id' => $stripeSubscriptionId,
         'status' => (string) data_get($subscription, 'status', 'incomplete'),
-        'current_period_start' => $this->timestamp(data_get($subscription, 'current_period_start')),
-        'current_period_end' => $this->timestamp(data_get($subscription, 'current_period_end')),
+        'current_period_start' => $this->timestamp(
+          data_get($subscription, 'current_period_start')
+            ?? data_get($subscription, 'items.data.0.current_period_start'),
+        ),
+        'current_period_end' => $this->timestamp(
+          data_get($subscription, 'current_period_end')
+            ?? data_get($subscription, 'items.data.0.current_period_end'),
+        ),
         'trial_ends_at' => $this->timestamp(data_get($subscription, 'trial_end')),
         'cancel_at_period_end' => (bool) data_get($subscription, 'cancel_at_period_end', false),
       ],

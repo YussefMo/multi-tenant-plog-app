@@ -48,6 +48,12 @@ export async function checkout(planId: number): Promise<CheckoutResult> {
   return data;
 }
 
+export async function startTrial(): Promise<Subscription> {
+  const { data } = await tenantApi.post<{ data: Subscription }>('/billing/trial');
+
+  return data.data;
+}
+
 export async function portal(): Promise<PortalResult> {
   const { data } = await tenantApi.post<PortalResult>('/billing/portal');
 

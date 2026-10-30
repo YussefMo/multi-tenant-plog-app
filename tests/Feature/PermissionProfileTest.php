@@ -131,8 +131,12 @@ class PermissionProfileTest extends TestCase
 
   public function test_admin_can_search_profiles(): void
   {
-    PermissionProfile::factory()->forTenant($this->tenant)->create(['name' => 'Editors']);
-    PermissionProfile::factory()->forTenant($this->tenant)->create(['name' => 'Reviewers']);
+    PermissionProfile::factory()
+      ->forTenant($this->tenant)
+      ->create(['name' => 'Editors', 'description' => 'Content team']);
+    PermissionProfile::factory()
+      ->forTenant($this->tenant)
+      ->create(['name' => 'Reviewers', 'description' => 'Review team']);
 
     $this->actingAs($this->admin)
       ->getJson('/api/v1/profiles?search=Edit')

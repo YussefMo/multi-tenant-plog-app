@@ -13,6 +13,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read string $name
  * @property-read string $email
  * @property-read UserRole $role
+ * @property-read bool $is_tenant_owner
  * @property-read array<int, string> $permissions
  * @property-read array<int, string> $extra_permissions
  * @property-read PermissionProfile|null $profile
@@ -30,6 +31,7 @@ class UserResource extends JsonResource
       'name' => $this->name,
       'email' => $this->email,
       'role' => $this->role?->value,
+      'is_tenant_owner' => (bool) $this->is_tenant_owner,
       'permissions' => $this->permissions ?? [],
       'extra_permissions' => $this->extra_permissions ?? [],
       'profile' => $this->whenLoaded(

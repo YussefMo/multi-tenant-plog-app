@@ -126,7 +126,7 @@ Route::prefix('v1')->group(function () {
   Route::post('/stripe/webhook', StripeWebhookController::class)
     ->name('api.v1.stripe.webhook');
 
-  Route::middleware(['web', 'auth:web', 'support', 'tenant.active'])->group(function () {
+  Route::middleware(['web', 'auth:web', 'support', 'tenant.active', 'tenant.not_due'])->group(function () {
     Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
       ->name('api.v1.user');
 
@@ -166,6 +166,9 @@ Route::prefix('v1')->group(function () {
       Route::post('/checkout', [BillingController::class, 'checkout'])
         ->middleware('permission:billing.manage')
         ->name('api.v1.billing.checkout');
+      Route::post('/trial', [BillingController::class, 'trial'])
+        ->middleware('permission:billing.manage')
+        ->name('api.v1.billing.trial');
       Route::post('/portal', [BillingController::class, 'portal'])
         ->middleware('permission:billing.manage')
         ->name('api.v1.billing.portal');

@@ -65,6 +65,26 @@ class StripeWebhookTest extends TestCase
     $this->assertFalse($this->tenant->fresh()->is_due);
   }
 
+  public function test_subscription_event_reads_period_dates_from_items_when_needed(): void
+  {
+    $this->webhook($this->event('evt_sub_items_period', 'customer.subscription.updated', $this->subscriptionObject([
+      'current_period_start' => null,
+      'current_period_end' => null,
+      'items' => [
+        'data' => [[
+          'price' => ['id' => 'price_1'],
+          'current_period_start' => now()->timestamp,
+          'current_period_end' => now()->addMonth()->timestamp,
+        ]],
+      ],
+    ])))->assertOk();
+
+    $subscription = Subscription::query()->where('tenant_id', $this->tenant->id)->firstOrFail();
+
+    $this->assertNotNull($subscription->current_period_start);
+    $this->assertNotNull($subscription->current_period_end);
+  }
+
   public function test_past_due_subscription_flags_the_tenant_as_due(): void
   {
     $this->webhook($this->event('evt_sub_past_due', 'customer.subscription.updated', $this->subscriptionObject([
@@ -124,6 +144,14 @@ class StripeWebhookTest extends TestCase
       'stripe_customer_id' => 'cus_tenant',
     ]);
 
+    $gateway = Mockery::mock(StripeGateway::class);
+    $gateway->shouldReceive('retrieveSubscription')
+      ->once()
+      ->with('sub_123')
+      ->andReturn($this->subscriptionObject());
+
+    $this->app->instance(StripeGateway::class, $gateway);
+
     $invoice = $this->invoiceObject();
 
     $this->webhook($this->event('evt_invoice_paid', 'invoice.paid', $invoice))
@@ -133,12 +161,79 @@ class StripeWebhookTest extends TestCase
     $this->assertDatabaseHas('billing_invoices', [
       'tenant_id' => $this->tenant->id,
       'stripe_invoice_id' => 'in_123',
+      'stripe_subscription_id' => 'sub_123',
       'status' => 'paid',
       'total' => 1900,
       'amount_paid' => 1900,
     ]);
 
     $this->assertFalse($this->tenant->fresh()->is_due);
+  }
+
+  public function test_invoice_paid_reads_the_new_parent_subscription_shape_and_amount_remaining(): void
+  {
+    Subscription::factory()->forTenant($this->tenant)->forPlan($this->plan)->create([
+      'stripe_subscription_id' => 'sub_123',
+      'stripe_customer_id' => 'cus_tenant',
+    ]);
+
+    $gateway = Mockery::mock(StripeGateway::class);
+    $gateway->shouldReceive('retrieveSubscription')
+      ->once()
+      ->with('sub_123')
+      ->andReturn($this->subscriptionObject());
+
+    $this->app->instance(StripeGateway::class, $gateway);
+
+    $invoice = $this->invoiceObject([
+      'subscription' => null,
+      'parent' => [
+        'subscription_details' => [
+          'subscription' => 'sub_123',
+          'metadata' => ['tenant_id' => (string) $this->tenant->id, 'plan_id' => (string) $this->plan->id],
+        ],
+      ],
+      'amount_paid' => 1900,
+      'amount_remaining' => 0,
+      'amount_due' => 1900,
+    ]);
+
+    $this->webhook($this->event('evt_invoice_parent', 'invoice.paid', $invoice))->assertOk();
+
+    $this->assertDatabaseHas('billing_invoices', [
+      'stripe_invoice_id' => 'in_123',
+      'stripe_subscription_id' => 'sub_123',
+      'amount_paid' => 1900,
+      'amount_due' => 0,
+    ]);
+  }
+
+  public function test_payment_intent_succeeded_mirrors_the_latest_charge(): void
+  {
+    $gateway = Mockery::mock(StripeGateway::class);
+    $gateway->shouldReceive('retrieveCharge')
+      ->once()
+      ->with('ch_123')
+      ->andReturn($this->chargeObject());
+
+    $this->app->instance(StripeGateway::class, $gateway);
+
+    $this->webhook($this->event('evt_payment_intent', 'payment_intent.succeeded', [
+      'id' => 'pi_123',
+      'customer' => 'cus_tenant',
+      'latest_charge' => 'ch_123',
+      'amount' => 1900,
+      'currency' => 'usd',
+      'status' => 'succeeded',
+    ]))->assertOk();
+
+    $this->assertDatabaseHas('billing_payments', [
+      'tenant_id' => $this->tenant->id,
+      'stripe_charge_id' => 'ch_123',
+      'stripe_payment_intent_id' => 'pi_123',
+      'amount' => 1900,
+      'status' => 'succeeded',
+    ]);
   }
 
   public function test_charge_events_populate_refund_and_dispute_state(): void

@@ -66,6 +66,7 @@ export default function UserEdit() {
           role: user.role === 'admin' ? 'admin' : 'author',
           permission_profile_id: user.profile?.id ?? null,
           extra_permissions: user.extra_permissions,
+          is_tenant_owner: user.is_tenant_owner,
         }}
         onSubmit={submit}
         isPending={updateUser.isPending}

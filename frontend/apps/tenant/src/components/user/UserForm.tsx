@@ -32,6 +32,7 @@ interface UserFormProps {
     role?: 'admin' | 'author';
     permission_profile_id?: number | null;
     extra_permissions?: string[];
+    is_tenant_owner?: boolean;
   };
   currentUserId?: number;
   onSubmit: (payload: CreateUserPayload | UpdateUserPayload) => void;
@@ -76,6 +77,7 @@ export default function UserForm({
   const profileOptions = profilesQuery.data?.data ?? [];
   const isSelf =
     mode === 'edit' && currentUserId !== undefined && initialValues?.email === user?.email;
+  const isTenantOwner = mode === 'edit' && initialValues?.is_tenant_owner === true;
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -202,7 +204,7 @@ export default function UserForm({
               <Select
                 value={role}
                 onValueChange={(value) => setRole(value as 'admin' | 'author')}
-                disabled={isSelf}
+                disabled={isSelf || isTenantOwner}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -213,7 +215,9 @@ export default function UserForm({
                 </SelectContent>
               </Select>
               <p className="text-muted-foreground text-xs">
-                Normal users use the separate user client.
+                {isTenantOwner
+                  ? 'The tenant owner role is locked.'
+                  : 'Normal users use the separate user client.'}
               </p>
             </div>
 

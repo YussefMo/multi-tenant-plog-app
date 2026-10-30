@@ -36,14 +36,14 @@ class BillingMirrorService
       [
         'tenant_id' => $tenant->id,
         'stripe_customer_id' => $this->stringValue(data_get($invoice, 'customer')),
-        'stripe_subscription_id' => $this->stringValue(data_get($invoice, 'subscription')),
+        'stripe_subscription_id' => $this->subscriptionId($invoice),
         'status' => $status ?? (string) data_get($invoice, 'status', 'open'),
         'currency' => (string) data_get($invoice, 'currency', config('billing.default_currency', 'usd')),
         'subtotal' => (int) data_get($invoice, 'subtotal', 0),
         'tax' => (int) data_get($invoice, 'tax', 0),
         'total' => (int) data_get($invoice, 'total', 0),
         'amount_paid' => (int) data_get($invoice, 'amount_paid', 0),
-        'amount_due' => (int) data_get($invoice, 'amount_due', 0),
+        'amount_due' => (int) data_get($invoice, 'amount_remaining', data_get($invoice, 'amount_due', 0)),
         'hosted_invoice_url' => $this->stringValue(data_get($invoice, 'hosted_invoice_url')),
         'invoice_pdf' => $this->stringValue(data_get($invoice, 'invoice_pdf')),
         'period_start' => $this->timestamp(data_get($invoice, 'period_start')),
@@ -51,6 +51,18 @@ class BillingMirrorService
         'paid_at' => $this->timestamp(data_get($invoice, 'status_transitions.paid_at')),
       ],
     );
+  }
+
+  /**
+   * Resolve the Stripe subscription id from old and new invoice shapes.
+   *
+   * @param  array<string, mixed>  $object
+   */
+  public function subscriptionId(array $object): ?string
+  {
+    return $this->stringValue(data_get($object, 'subscription'))
+      ?? $this->stringValue(data_get($object, 'parent.subscription_details.subscription'))
+      ?? $this->stringValue(data_get($object, 'lines.data.0.parent.subscription_item_details.subscription'));
   }
 
   /**
@@ -114,7 +126,7 @@ class BillingMirrorService
    */
   public function tenantFor(array $object): ?Tenant
   {
-    $subscriptionId = $this->stringValue(data_get($object, 'subscription'));
+    $subscriptionId = $this->subscriptionId($object);
 
     if ($subscriptionId !== null) {
       $tenant = Subscription::query()

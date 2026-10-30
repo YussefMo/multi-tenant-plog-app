@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read \Illuminate\Support\Carbon|null $trial_used_at
+ */
 #[Fillable(['name', 'category', 'allow_support', 'is_due'])]
 class Tenant extends Model
 {
@@ -27,6 +30,7 @@ class Tenant extends Model
     return [
       'allow_support' => 'boolean',
       'is_due' => 'boolean',
+      'trial_used_at' => 'datetime',
     ];
   }
 

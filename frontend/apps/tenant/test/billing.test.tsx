@@ -49,7 +49,24 @@ vi.mock('@/lib/hooks/billing.hook', () => ({
     isLoading: false,
   }),
   usePortal: () => ({ mutate: vi.fn(), isPending: false }),
+  useStartTrial: () => ({ mutate: vi.fn(), isPending: false }),
   useCancelSubscription: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/lib/hooks/tenant.hook', () => ({
+  useTenant: () => ({
+    data: {
+      id: 1,
+      name: 'Acme',
+      category: 'Technology',
+      allow_support: true,
+      is_due: false,
+      trial_used_at: null,
+      deleted_at: null,
+      created_at: null,
+    },
+    isLoading: false,
+  }),
 }));
 
 import Billing from '@/components/Billing';

@@ -131,6 +131,10 @@ class UserController extends Controller
       abort(422, 'You cannot change your own role.');
     }
 
+    if ($user->is_tenant_owner && isset($data['role']) && $data['role'] !== UserRole::Admin->value) {
+      abort(422, 'The tenant owner role cannot be changed.');
+    }
+
     if (isset($data['role'])) {
       $this->ensureCanGrant($request, UserRole::from($data['role'])->permissions());
     }
@@ -154,6 +158,11 @@ class UserController extends Controller
   {
     $this->ensureTenantUser($request, $user);
     abort_if($user->id === $request->user()->id, 422, 'You cannot delete yourself.');
+    abort_if($user->is_tenant_owner, 422, 'The tenant owner cannot be deleted.');
+
+    if ($user->role === UserRole::Admin && ! $request->user()->is_tenant_owner) {
+      abort(403, 'Only the tenant owner can delete an admin.');
+    }
 
     $user->delete();
 

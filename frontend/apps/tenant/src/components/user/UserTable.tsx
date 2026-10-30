@@ -10,6 +10,7 @@ import {
   TableHeaderRe,
 } from '@multi-tenant-plog/shared/components/components-parts';
 import { Table, TableBody, TableCell, TableRow } from '@multi-tenant-plog/shared/ui/table';
+import { Badge } from '@multi-tenant-plog/shared/ui/badge';
 import InvitationBadge from '@/components/user/InvitationBadge';
 import { formatDate } from '@/lib/format';
 import { hasPermission } from '@/lib/permissions';
@@ -37,6 +38,13 @@ export default function UserTable({
   const { data: currentUser } = useTenantMe();
   const canUpdate = hasPermission(currentUser, 'users.update');
   const canDelete = hasPermission(currentUser, 'users.delete');
+  const actorIsTenantOwner = currentUser?.is_tenant_owner === true;
+
+  const canDeleteUser = (user: TenantUser): boolean =>
+    canDelete &&
+    user.id !== currentUser?.id &&
+    !user.is_tenant_owner &&
+    (user.role !== 'admin' || actorIsTenantOwner);
 
   return (
     <Table>
@@ -53,7 +61,6 @@ export default function UserTable({
       ) : (
         <TableBody>
           {users.map((user) => {
-            const isSelf = user.id === currentUser?.id;
             const canResend =
               canUpdate && user.invitation !== null && user.invitation.status !== 'accepted';
 
@@ -64,7 +71,10 @@ export default function UserTable({
                   <div className="text-muted-foreground text-xs">{user.email}</div>
                 </TableCell>
                 <TableCell className="px-4 py-3">
-                  <RoleBadge value={user.role} />
+                  <div className="flex flex-wrap items-center gap-1">
+                    <RoleBadge value={user.role} />
+                    {user.is_tenant_owner ? <Badge variant="outline">Owner</Badge> : null}
+                  </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground px-4 py-3 text-sm">
                   {user.profile?.name ?? '—'}
@@ -97,7 +107,7 @@ export default function UserTable({
                         onClick={() => onInvite?.(user)}
                       />
                     ) : null}
-                    {canDelete && !isSelf ? (
+                    {canDeleteUser(user) ? (
                       <DeleteAlert
                         title={`Delete ${user.name}?`}
                         description="This removes the tenant user permanently."

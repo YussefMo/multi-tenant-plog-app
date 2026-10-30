@@ -1,7 +1,10 @@
 import type { TenantInvitationStatus, TenantSummary } from '@/lib/types/auth.type';
 
 export interface TenantOverview {
-  tenant: Pick<TenantSummary, 'id' | 'name' | 'category' | 'allow_support' | 'is_due'>;
+  tenant: Pick<
+    TenantSummary,
+    'id' | 'name' | 'category' | 'allow_support' | 'is_due' | 'trial_used_at'
+  >;
   counts: {
     users: number | null;
     profiles: number | null;

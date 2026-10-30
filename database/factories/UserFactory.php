@@ -24,6 +24,7 @@ class UserFactory extends Factory
       'extra_permissions' => [],
       'permission_profile_id' => null,
       'is_support' => false,
+      'is_tenant_owner' => false,
       'remember_token' => Str::random(10),
     ];
   }
@@ -38,6 +39,15 @@ class UserFactory extends Factory
     return $this->state(fn (): array => [
       'role' => UserRole::Admin,
       'permissions' => UserRole::Admin->permissions(),
+    ]);
+  }
+
+  public function tenantOwner(): static
+  {
+    return $this->state(fn (): array => [
+      'role' => UserRole::Admin,
+      'permissions' => UserRole::Admin->permissions(),
+      'is_tenant_owner' => true,
     ]);
   }
 

@@ -22,6 +22,7 @@ use Illuminate\Notifications\Notifiable;
  * @property array<int, string> $permissions
  * @property array<int, string> $extra_permissions
  * @property bool $is_support
+ * @property bool $is_tenant_owner
  * @property \App\Models\PermissionProfile|null $profile
  * @property \App\Models\Tenant|null $tenant
  */
@@ -37,6 +38,7 @@ class User extends Authenticatable
     'permissions' => '[]',
     'extra_permissions' => '[]',
     'is_support' => false,
+    'is_tenant_owner' => false,
   ];
 
   protected function casts(): array
@@ -46,6 +48,7 @@ class User extends Authenticatable
       'permissions' => 'array',
       'extra_permissions' => 'array',
       'is_support' => 'boolean',
+      'is_tenant_owner' => 'boolean',
       'email_verified_at' => 'datetime',
       'password' => 'hashed',
     ];

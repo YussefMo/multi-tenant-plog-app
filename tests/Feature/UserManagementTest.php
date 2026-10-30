@@ -204,6 +204,68 @@ class UserManagementTest extends TestCase
       ->assertStatus(422);
   }
 
+  public function test_admin_cannot_delete_the_tenant_owner(): void
+  {
+    $owner = User::factory()->forTenant($this->tenant)->tenantOwner()->create();
+
+    $this->actingAs($this->admin)
+      ->deleteJson("/api/v1/users/{$owner->id}")
+      ->assertStatus(422)
+      ->assertJsonPath('message', 'The tenant owner cannot be deleted.');
+  }
+
+  public function test_full_access_author_cannot_delete_the_tenant_owner(): void
+  {
+    $owner = User::factory()->forTenant($this->tenant)->tenantOwner()->create();
+    $author = User::factory()->forTenant($this->tenant)->author()->create();
+    $author->forceFill(['permissions' => ['*']])->save();
+
+    $this->actingAs($author)
+      ->deleteJson("/api/v1/users/{$owner->id}")
+      ->assertStatus(422)
+      ->assertJsonPath('message', 'The tenant owner cannot be deleted.');
+  }
+
+  public function test_admin_cannot_delete_another_admin(): void
+  {
+    $target = User::factory()->forTenant($this->tenant)->admin()->create();
+
+    $this->actingAs($this->admin)
+      ->deleteJson("/api/v1/users/{$target->id}")
+      ->assertForbidden();
+  }
+
+  public function test_full_access_author_cannot_delete_an_admin(): void
+  {
+    $target = User::factory()->forTenant($this->tenant)->admin()->create();
+    $author = User::factory()->forTenant($this->tenant)->author()->create();
+    $author->forceFill(['permissions' => ['*']])->save();
+
+    $this->actingAs($author)
+      ->deleteJson("/api/v1/users/{$target->id}")
+      ->assertForbidden();
+  }
+
+  public function test_tenant_owner_can_delete_another_admin(): void
+  {
+    $owner = User::factory()->forTenant($this->tenant)->tenantOwner()->create();
+    $target = User::factory()->forTenant($this->tenant)->admin()->create();
+
+    $this->actingAs($owner)
+      ->deleteJson("/api/v1/users/{$target->id}")
+      ->assertNoContent();
+  }
+
+  public function test_tenant_owner_role_cannot_be_changed(): void
+  {
+    $owner = User::factory()->forTenant($this->tenant)->tenantOwner()->create();
+
+    $this->actingAs($this->admin)
+      ->patchJson("/api/v1/users/{$owner->id}", ['role' => 'author'])
+      ->assertStatus(422)
+      ->assertJsonPath('message', 'The tenant owner role cannot be changed.');
+  }
+
   public function test_cross_tenant_user_is_not_accessible(): void
   {
     $otherTenant = Tenant::factory()->create();

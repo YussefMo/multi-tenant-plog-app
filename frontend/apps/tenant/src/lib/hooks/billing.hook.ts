@@ -7,6 +7,7 @@ import {
   listPayments,
   listPlans,
   portal,
+  startTrial,
 } from '@/lib/action/billing.action';
 import { tenantKeys } from '@/lib/query-keys';
 import type { BillingListParams } from '@/lib/types/billing.type';
@@ -19,6 +20,8 @@ function useInvalidateBilling() {
     void queryClient.invalidateQueries({ queryKey: tenantKeys.invoices() });
     void queryClient.invalidateQueries({ queryKey: tenantKeys.payments() });
     void queryClient.invalidateQueries({ queryKey: tenantKeys.overview });
+    void queryClient.invalidateQueries({ queryKey: tenantKeys.tenant });
+    void queryClient.invalidateQueries({ queryKey: tenantKeys.me });
   };
 }
 
@@ -65,6 +68,15 @@ export function useCheckout() {
 
   return useMutation({
     mutationFn: (planId: number) => checkout(planId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useStartTrial() {
+  const invalidate = useInvalidateBilling();
+
+  return useMutation({
+    mutationFn: startTrial,
     onSuccess: invalidate,
   });
 }

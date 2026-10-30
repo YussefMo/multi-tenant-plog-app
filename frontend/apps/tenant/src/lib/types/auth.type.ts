@@ -6,6 +6,7 @@ export interface TenantSummary {
   category: string | null;
   allow_support: boolean;
   is_due: boolean;
+  trial_used_at: string | null;
   deleted_at: string | null;
   created_at: string | null;
 }
@@ -22,6 +23,7 @@ export interface TenantUser {
   name: string;
   email: string;
   role: string | null;
+  is_tenant_owner: boolean;
   permissions: string[];
   extra_permissions: string[];
   profile: PermissionProfile | null;

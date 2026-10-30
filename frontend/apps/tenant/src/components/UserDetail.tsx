@@ -4,6 +4,7 @@ import { DeleteAlert } from '@multi-tenant-plog/shared/components/app-parts';
 import { RoleBadge, Spinner } from '@multi-tenant-plog/shared/components/components-parts';
 import { notify } from '@multi-tenant-plog/shared/lib/toast';
 import { Button } from '@multi-tenant-plog/shared/ui/button';
+import { Badge } from '@multi-tenant-plog/shared/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@multi-tenant-plog/shared/ui/card';
 import ErrorPanel from '@/components/ErrorPanel';
 import PageHeader from '@/components/PageHeader';
@@ -36,8 +37,13 @@ export default function UserDetail() {
 
   const user = userQuery.data;
   const isSelf = user.id === currentUser?.id;
+  const actorIsTenantOwner = currentUser?.is_tenant_owner === true;
   const canUpdate = hasPermission(currentUser, 'users.update');
-  const canDelete = hasPermission(currentUser, 'users.delete') && !isSelf;
+  const canDelete =
+    hasPermission(currentUser, 'users.delete') &&
+    !isSelf &&
+    !user.is_tenant_owner &&
+    (user.role !== 'admin' || actorIsTenantOwner);
   const canResend = canUpdate && user.invitation !== null && user.invitation.status !== 'accepted';
 
   const handleInvite = () => {
@@ -104,7 +110,10 @@ export default function UserDetail() {
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">Role</span>
-              <RoleBadge value={user.role} />
+              <div className="flex items-center gap-1">
+                <RoleBadge value={user.role} />
+                {user.is_tenant_owner ? <Badge variant="outline">Owner</Badge> : null}
+              </div>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">Profile</span>

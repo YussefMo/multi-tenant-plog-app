@@ -125,6 +125,7 @@ class DemoSeeder extends Seeder
     $user->tenant_id = $tenant?->id;
     $user->permissions = $role->permissions();
     $user->is_support = false;
+    $user->is_tenant_owner = $tenant !== null && $role === UserRole::Admin;
     $user->email_verified_at = now();
     $user->save();
 

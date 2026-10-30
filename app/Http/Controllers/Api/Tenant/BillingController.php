@@ -14,6 +14,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Services\BillingService;
+use App\Services\TenantTrialService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -52,6 +53,16 @@ class BillingController extends Controller
       'checkout_url' => $session['url'],
       'session_id' => $session['id'],
     ], 201);
+  }
+
+  public function trial(Request $request, TenantTrialService $trials): JsonResponse
+  {
+    $tenant = $this->tenant($request);
+    $subscription = $trials->start($tenant);
+
+    return (new SubscriptionResource($subscription->load('plan')))
+      ->response()
+      ->setStatusCode(201);
   }
 
   public function portal(Request $request, BillingService $billing): JsonResponse

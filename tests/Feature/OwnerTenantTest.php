@@ -39,6 +39,8 @@ class OwnerTenantTest extends TestCase
       ->assertJsonPath('data.name', 'Acme Inc')
       ->assertJsonPath('data.category', 'Technology')
       ->assertJsonPath('data.allow_support', false)
+      ->assertJsonPath('data.is_due', true)
+      ->assertJsonPath('admin.is_tenant_owner', true)
       ->assertJsonPath('admin.email', 'admin@example.com')
       ->assertJsonStructure(['invitation' => ['expires_at', 'token']]);
 

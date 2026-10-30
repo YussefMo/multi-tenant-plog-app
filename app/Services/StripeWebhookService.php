@@ -73,10 +73,17 @@ class StripeWebhookService
         break;
       case 'invoice.paid':
         $this->mirror->upsertInvoice($object);
+        $this->syncInvoiceSubscription($object);
         $this->setTenantDue($object, false);
         break;
       case 'invoice.payment_failed':
         $this->handleInvoicePaymentFailed($object);
+        break;
+      case 'payment_intent.succeeded':
+        $this->mirrorPaymentIntent($object, 'succeeded');
+        break;
+      case 'payment_intent.payment_failed':
+        $this->mirrorPaymentIntent($object, 'failed');
         break;
       case 'charge.succeeded':
         $this->mirror->upsertPayment($object, 'succeeded');
@@ -116,14 +123,38 @@ class StripeWebhookService
    */
   private function handleInvoicePaymentFailed(array $invoice): void
   {
-    $subscription = data_get($invoice, 'subscription');
+    $subscriptionId = $this->mirror->subscriptionId($invoice);
 
-    if (is_string($subscription) && $subscription !== '') {
-      $this->subscriptions->sync($this->stripe->retrieveSubscription($subscription));
+    if ($subscriptionId !== null) {
+      $this->subscriptions->sync($this->stripe->retrieveSubscription($subscriptionId));
     }
 
     $this->mirror->upsertInvoice($invoice);
     $this->setTenantDue($invoice, true);
+  }
+
+  /**
+   * @param  array<string, mixed>  $invoice
+   */
+  private function syncInvoiceSubscription(array $invoice): void
+  {
+    $subscriptionId = $this->mirror->subscriptionId($invoice);
+
+    if ($subscriptionId !== null) {
+      $this->subscriptions->sync($this->stripe->retrieveSubscription($subscriptionId));
+    }
+  }
+
+  /**
+   * @param  array<string, mixed>  $intent
+   */
+  private function mirrorPaymentIntent(array $intent, string $status): void
+  {
+    $chargeId = data_get($intent, 'latest_charge');
+
+    if (is_string($chargeId) && $chargeId !== '') {
+      $this->mirror->upsertPayment($this->stripe->retrieveCharge($chargeId), $status);
+    }
   }
 
   /**

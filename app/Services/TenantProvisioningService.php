@@ -24,6 +24,7 @@ class TenantProvisioningService
       $tenant = new Tenant([
         'name' => $data['name'],
         'category' => $data['category'] ?? null,
+        'is_due' => true,
       ]);
       $tenant->owner_id = $owner->id;
       $tenant->save();
@@ -37,6 +38,7 @@ class TenantProvisioningService
       ]);
       $admin->tenant_id = $tenant->id;
       $admin->is_support = false;
+      $admin->is_tenant_owner = true;
       $admin->permissions = ['*'];
       $admin->save();
 
