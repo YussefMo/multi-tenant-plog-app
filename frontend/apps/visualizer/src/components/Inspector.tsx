@@ -1,5 +1,5 @@
-import { filesByPath } from '../data';
-import type { ArchitectureNodeData } from '../types';
+import { filesByPath } from '@/data';
+import type { ArchitectureNodeData } from '@/types';
 
 interface InspectorProps {
   node: ArchitectureNodeData;

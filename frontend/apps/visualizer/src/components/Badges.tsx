@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { AtlasLayer, DbOperation, Realm } from '../types';
+import type { AtlasLayer, DbOperation, Realm } from '@/types';
 
 export function MethodBadge({ method }: { method: string }) {
   return <span className={`method method-${method.toLowerCase()}`}>{method}</span>;

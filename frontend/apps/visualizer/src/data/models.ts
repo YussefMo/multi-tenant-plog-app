@@ -1,4 +1,4 @@
-import type { ModelRecord, TableRecord } from '../types';
+import type { ModelRecord, TableRecord } from '@/types';
 
 export const models: ModelRecord[] = [
   {

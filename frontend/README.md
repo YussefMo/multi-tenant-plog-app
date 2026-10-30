@@ -131,6 +131,18 @@ import { DeleteAlert } from '@multi-tenant-plog/shared/components/app-parts/Dele
 
 No locale or i18n dependency is included.
 
+## App imports
+
+Each app maps `@/` to its own `src/`. Use it everywhere inside `src`, including tests:
+
+```ts
+import Page from '@/app/page';
+import { router } from '@/routes';
+import ArchitectureMap from '@/components/ArchitectureMap';
+```
+
+Do not use `../src/...` from app tests.
+
 ## Tests
 
 Vitest uses happy-dom and `@testing-library/jest-dom`:

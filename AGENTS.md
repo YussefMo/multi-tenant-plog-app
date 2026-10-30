@@ -32,6 +32,7 @@ Before relying on a package's API, confirm its installed version:
 - The pnpm workspace root is `frontend/`. All frontend dependencies, configs, lockfile, tests, and app code live under it.
 - `frontend/shared` contains shared UI, lib, theme, providers, and app components.
 - Run frontend commands from the repository root with `pnpm --dir frontend ...` or the root bridge scripts.
+- Use `@/` for imports inside each app's `src`. Tests import app source through `@/...` as well.
 - Do not add frontend assets, test configs, or app code outside `frontend/`.
 
 ## Frontend Tests

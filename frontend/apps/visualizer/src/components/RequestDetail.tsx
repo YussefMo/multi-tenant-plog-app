@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import type { RequestRecord } from '../types';
-import { MethodBadge, RealmBadge } from './Badges';
+import type { RequestRecord } from '@/types';
+import { MethodBadge, RealmBadge } from '@/components/Badges';
 
 export default function RequestDetail({ request }: { request: RequestRecord }) {
   return (

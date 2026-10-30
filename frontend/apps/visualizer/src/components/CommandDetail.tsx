@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import type { CommandRecord } from '../types';
-import { DbOpBadge, ToneBadge } from './Badges';
+import type { CommandRecord } from '@/types';
+import { DbOpBadge, ToneBadge } from '@/components/Badges';
 
 interface CommandDetailProps {
   command: CommandRecord;

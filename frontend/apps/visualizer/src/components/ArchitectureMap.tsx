@@ -7,9 +7,9 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react';
 import { useCallback } from 'react';
-import type { ArchitectureNodeData } from '../types';
-import { architectureEdges, architectureNodes } from '../data/architecture';
-import BlueprintNode, { type BlueprintNodeType } from './BlueprintNode';
+import type { ArchitectureNodeData } from '@/types';
+import { architectureEdges, architectureNodes } from '@/data/architecture';
+import BlueprintNode, { type BlueprintNodeType } from '@/components/BlueprintNode';
 
 const nodeTypes = {
   blueprint: BlueprintNode,

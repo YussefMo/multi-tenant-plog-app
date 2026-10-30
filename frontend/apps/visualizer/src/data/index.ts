@@ -1,9 +1,9 @@
-import filesJson from './files.json';
-import requestsJson from './generated/requests.generated.json';
-import { commands, commandsByName, schedules } from './commands';
-import { journeys, journeysById } from './journeys';
-import { erdEdges, models, modelsByName, tables, tablesByName } from './models';
-import type { FileRecord, RequestsDocument } from '../types';
+import filesJson from '@/data/files.json';
+import requestsJson from '@/data/generated/requests.generated.json';
+import { commands, commandsByName, schedules } from '@/data/commands';
+import { journeys, journeysById } from '@/data/journeys';
+import { erdEdges, models, modelsByName, tables, tablesByName } from '@/data/models';
+import type { FileRecord, RequestsDocument } from '@/types';
 
 export const files = filesJson as FileRecord[];
 export const requestsDocument = requestsJson as RequestsDocument;

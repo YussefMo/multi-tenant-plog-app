@@ -1,4 +1,4 @@
-import type { CommandRecord } from '../types';
+import type { CommandRecord } from '@/types';
 
 export const commands: CommandRecord[] = [
   {

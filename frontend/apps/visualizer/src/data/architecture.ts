@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
-import type { ArchitectureNodeData } from '../types';
+import type { ArchitectureNodeData } from '@/types';
 
 export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
   {

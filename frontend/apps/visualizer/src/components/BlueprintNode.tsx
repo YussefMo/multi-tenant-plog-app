@@ -1,6 +1,6 @@
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { memo } from 'react';
-import type { ArchitectureNodeData } from '../types';
+import type { ArchitectureNodeData } from '@/types';
 
 export type BlueprintNodeType = Node<ArchitectureNodeData, 'blueprint'>;
 

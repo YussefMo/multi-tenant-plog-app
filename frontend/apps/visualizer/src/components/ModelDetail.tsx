@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import type { ModelRecord } from '../types';
-import { DbOpBadge } from './Badges';
+import type { ModelRecord } from '@/types';
+import { DbOpBadge } from '@/components/Badges';
 
 interface ModelDetailProps {
   model: ModelRecord;

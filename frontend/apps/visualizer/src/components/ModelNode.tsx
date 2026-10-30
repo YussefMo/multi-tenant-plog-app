@@ -1,6 +1,6 @@
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { memo } from 'react';
-import type { ModelRecord } from '../types';
+import type { ModelRecord } from '@/types';
 
 export interface ModelNodeData extends Record<string, unknown> {
   model: ModelRecord;

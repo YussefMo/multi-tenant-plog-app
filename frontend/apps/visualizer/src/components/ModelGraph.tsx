@@ -8,8 +8,8 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react';
 import { useCallback, useMemo } from 'react';
-import { erdEdges, models } from '../data';
-import ModelNode, { type ModelFlowNode } from './ModelNode';
+import { erdEdges, models } from '@/data';
+import ModelNode, { type ModelFlowNode } from '@/components/ModelNode';
 
 const nodeTypes = {
   model: ModelNode,

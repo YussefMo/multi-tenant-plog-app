@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import type { Journey, JourneyStep } from '../types';
-import { DbOpBadge, MethodBadge, RealmBadge, ToneBadge } from './Badges';
+import type { Journey, JourneyStep } from '@/types';
+import { DbOpBadge, MethodBadge, RealmBadge, ToneBadge } from '@/components/Badges';
 
 interface JourneyPlayerProps {
   journey: Journey;
