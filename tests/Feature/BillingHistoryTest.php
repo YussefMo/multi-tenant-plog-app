@@ -111,6 +111,26 @@ class BillingHistoryTest extends TestCase
       ->assertForbidden();
   }
 
+  public function test_billing_history_supports_per_page(): void
+  {
+    $this->invoice(['stripe_invoice_id' => 'in_one']);
+    $this->invoice(['stripe_invoice_id' => 'in_two']);
+    $this->payment(['stripe_charge_id' => 'ch_one']);
+    $this->payment(['stripe_charge_id' => 'ch_two']);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/billing/invoices?per_page=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('meta.per_page', 1);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/billing/payments?per_page=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('meta.per_page', 1);
+  }
+
   /**
    * @param  array<string, mixed>  $attributes
    */

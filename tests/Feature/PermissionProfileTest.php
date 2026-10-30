@@ -128,4 +128,25 @@ class PermissionProfileTest extends TestCase
       ])
       ->assertForbidden();
   }
+
+  public function test_admin_can_search_profiles(): void
+  {
+    PermissionProfile::factory()->forTenant($this->tenant)->create(['name' => 'Editors']);
+    PermissionProfile::factory()->forTenant($this->tenant)->create(['name' => 'Reviewers']);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/profiles?search=Edit')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.name', 'Editors');
+  }
+
+  public function test_admin_can_load_permission_catalog(): void
+  {
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/permissions')
+      ->assertOk()
+      ->assertJsonPath('data.catalog.0', 'posts.view.any')
+      ->assertJsonPath('data.presets.admin.0', '*');
+  }
 }

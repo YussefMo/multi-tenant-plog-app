@@ -76,6 +76,7 @@ class BillingController extends Controller
     $tenant = $this->tenant($request);
     $from = $request->date('from');
     $to = $request->date('to');
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
 
     $invoices = BillingInvoice::query()
       ->where('tenant_id', $tenant->id)
@@ -83,7 +84,7 @@ class BillingController extends Controller
       ->when($from !== null, fn ($query) => $query->where('created_at', '>=', $from))
       ->when($to !== null, fn ($query) => $query->where('created_at', '<=', $to))
       ->latest()
-      ->paginate(15)
+      ->paginate($perPage)
       ->withQueryString();
 
     return BillingInvoiceResource::collection($invoices);
@@ -94,6 +95,7 @@ class BillingController extends Controller
     $tenant = $this->tenant($request);
     $from = $request->date('from');
     $to = $request->date('to');
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
 
     $payments = BillingPayment::query()
       ->where('tenant_id', $tenant->id)
@@ -101,7 +103,7 @@ class BillingController extends Controller
       ->when($from !== null, fn ($query) => $query->where('paid_at', '>=', $from))
       ->when($to !== null, fn ($query) => $query->where('paid_at', '<=', $to))
       ->latest()
-      ->paginate(15)
+      ->paginate($perPage)
       ->withQueryString();
 
     return BillingPaymentResource::collection($payments);

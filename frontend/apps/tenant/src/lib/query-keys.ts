@@ -1,0 +1,17 @@
+export const tenantKeys = {
+  all: ['tenant'] as const,
+  me: ['tenant', 'me'] as const,
+  overview: ['tenant', 'overview'] as const,
+  tenant: ['tenant', 'settings'] as const,
+  permissions: ['tenant', 'permissions'] as const,
+  posts: (params?: unknown) => ['tenant', 'posts', params ?? {}] as const,
+  post: (id: number | string) => ['tenant', 'posts', String(id)] as const,
+  users: (params?: unknown) => ['tenant', 'users', params ?? {}] as const,
+  user: (id: number | string) => ['tenant', 'users', String(id)] as const,
+  profiles: (params?: unknown) => ['tenant', 'profiles', params ?? {}] as const,
+  profile: (id: number | string) => ['tenant', 'profiles', String(id)] as const,
+  subscription: ['tenant', 'billing', 'subscription'] as const,
+  plans: ['tenant', 'billing', 'plans'] as const,
+  invoices: (params?: unknown) => ['tenant', 'billing', 'invoices', params ?? {}] as const,
+  payments: (params?: unknown) => ['tenant', 'billing', 'payments', params ?? {}] as const,
+};

@@ -29,8 +29,9 @@ class UpdateUserRequest extends FormRequest
         'max:255',
         Rule::unique('users', 'email')->ignore($userId),
       ],
-      'password' => ['sometimes', 'nullable', 'string', 'min:8'],
-      'role' => ['sometimes', Rule::enum(UserRole::class)],
+      'password' => ['sometimes', 'nullable', 'string', 'min:8', 'confirmed'],
+      'password_confirmation' => ['sometimes', 'nullable', 'string', 'min:8'],
+      'role' => ['sometimes', Rule::in([UserRole::Admin->value, UserRole::Author->value])],
       'permission_profile_id' => [
         'sometimes',
         'nullable',

@@ -10,11 +10,15 @@ use App\Http\Requests\Tenant\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\PermissionProfile;
 use App\Models\User;
+use App\Notifications\TenantInvitationNotification;
+use App\Services\FrontendUrlService;
 use App\Services\PermissionSyncService;
+use App\Services\TenantInvitationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
 {
@@ -22,51 +26,106 @@ class UserController extends Controller
 
   public function index(Request $request): AnonymousResourceCollection
   {
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+    $search = trim((string) $request->query('search', ''));
+
     $users = User::query()
       ->where('tenant_id', $request->user()->tenant_id)
       ->where('is_support', false)
-      ->with('profile')
+      ->with('profile', 'latestInvitation')
+      ->when($search !== '', function ($query) use ($search): void {
+        $query->where(function ($query) use ($search): void {
+          $query->where('name', 'like', "%{$search}%")
+            ->orWhere('email', 'like', "%{$search}%");
+        });
+      })
+      ->when(
+        $request->filled('role'),
+        fn ($query) => $query->where('role', $request->string('role')->toString()),
+      )
+      ->when(
+        $request->filled('permission_profile_id'),
+        fn ($query) => $query->where('permission_profile_id', $request->integer('permission_profile_id')),
+      )
       ->latest()
-      ->paginate(15);
+      ->paginate($perPage)
+      ->withQueryString();
 
     return UserResource::collection($users);
   }
 
-  public function store(StoreUserRequest $request, PermissionSyncService $permissions): JsonResponse
-  {
+  public function store(
+    StoreUserRequest $request,
+    PermissionSyncService $permissions,
+    TenantInvitationService $invitations,
+    FrontendUrlService $frontends,
+  ): JsonResponse {
     $data = $request->validated();
     $role = UserRole::from($data['role']);
     $rolePermissions = $role->permissions();
     $this->ensureCanGrant($request, [...$rolePermissions, ...($data['extra_permissions'] ?? [])]);
     $this->ensureCanAssignProfile($request, $data['permission_profile_id'] ?? null);
 
-    $user = new User($data);
-    $user->tenant_id = $role === UserRole::User ? null : $request->user()->tenant_id;
+    $invite = $request->boolean('invite');
 
-    if ($role === UserRole::User) {
-      $user->permission_profile_id = null;
-    }
-
+    $user = new User([
+      'name' => $data['name'],
+      'email' => $data['email'],
+      'password' => $invite ? null : ($data['password'] ?? null),
+      'role' => $role,
+      'permission_profile_id' => $data['permission_profile_id'] ?? null,
+      'extra_permissions' => $data['extra_permissions'] ?? [],
+    ]);
+    $user->tenant_id = $request->user()->tenant_id;
     $user->is_support = false;
     $user->permissions = [];
     $user->save();
 
     $permissions->sync($user);
 
-    return (new UserResource($user->load('profile')))->response()->setStatusCode(201);
+    $additional = [];
+
+    if ($invite) {
+      $result = $invitations->create($user);
+
+      Notification::route('mail', $user->email)
+        ->notify(new TenantInvitationNotification($result['invitation'], $result['token'], $frontends));
+
+      $additional['invitation'] = [
+        'expires_at' => $result['invitation']->expires_at?->toIso8601String(),
+      ];
+
+      if (app()->environment(['local', 'testing'])) {
+        $additional['invitation']['token'] = $result['token'];
+      }
+    }
+
+    return (new UserResource($user->load('profile', 'latestInvitation')))
+      ->additional($additional)
+      ->response()
+      ->setStatusCode(201);
   }
 
   public function show(Request $request, User $user): UserResource
   {
     $this->ensureTenantUser($request, $user);
 
-    return new UserResource($user->load('profile'));
+    return new UserResource($user->load('profile', 'latestInvitation'));
   }
 
-  public function update(UpdateUserRequest $request, User $user, PermissionSyncService $permissions): UserResource
-  {
+  public function update(
+    UpdateUserRequest $request,
+    User $user,
+    PermissionSyncService $permissions,
+  ): UserResource {
     $this->ensureTenantUser($request, $user);
     $data = $request->validated();
+
+    if (array_key_exists('password', $data) && blank($data['password'])) {
+      unset($data['password']);
+    }
+
+    unset($data['password_confirmation']);
 
     if ($user->id === $request->user()->id && isset($data['role']) && $data['role'] !== $user->role?->value) {
       abort(422, 'You cannot change your own role.');
@@ -88,7 +147,7 @@ class UserController extends Controller
     $user->save();
     $permissions->sync($user);
 
-    return new UserResource($user->load('profile'));
+    return new UserResource($user->load('profile', 'latestInvitation'));
   }
 
   public function destroy(Request $request, User $user): Response
@@ -99,6 +158,34 @@ class UserController extends Controller
     $user->delete();
 
     return response()->noContent();
+  }
+
+  public function invite(
+    Request $request,
+    User $user,
+    TenantInvitationService $invitations,
+    FrontendUrlService $frontends,
+  ): JsonResponse {
+    $this->ensureTenantUser($request, $user);
+    abort_if($user->password !== null, 422, 'This user has already accepted the invitation.');
+
+    $result = $invitations->create($user);
+
+    Notification::route('mail', $user->email)
+      ->notify(new TenantInvitationNotification($result['invitation'], $result['token'], $frontends));
+
+    $payload = [
+      'message' => 'Invitation sent.',
+      'invitation' => [
+        'expires_at' => $result['invitation']->expires_at?->toIso8601String(),
+      ],
+    ];
+
+    if (app()->environment(['local', 'testing'])) {
+      $payload['invitation']['token'] = $result['token'];
+    }
+
+    return response()->json($payload);
   }
 
   private function ensureTenantUser(Request $request, User $user): void

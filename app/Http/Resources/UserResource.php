@@ -17,6 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read array<int, string> $extra_permissions
  * @property-read PermissionProfile|null $profile
  * @property-read \App\Models\Tenant|null $tenant
+ * @property-read \App\Models\TenantInvitation|null $latestInvitation
  * @property-read \Illuminate\Support\Carbon|null $created_at
  */
 class UserResource extends JsonResource
@@ -38,6 +39,16 @@ class UserResource extends JsonResource
       'tenant' => $this->whenLoaded(
         'tenant',
         fn () => $this->tenant ? new TenantResource($this->tenant) : null,
+      ),
+      'invitation' => $this->whenLoaded(
+        'latestInvitation',
+        fn () => $this->latestInvitation ? [
+          'expires_at' => $this->latestInvitation->expires_at?->toIso8601String(),
+          'accepted_at' => $this->latestInvitation->accepted_at?->toIso8601String(),
+          'status' => $this->latestInvitation->accepted_at !== null
+            ? 'accepted'
+            : ($this->latestInvitation->expires_at->isPast() ? 'expired' : 'pending'),
+        ] : null,
       ),
       'created_at' => $this->created_at?->toIso8601String(),
     ];

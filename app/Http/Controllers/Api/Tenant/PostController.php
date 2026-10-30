@@ -22,11 +22,29 @@ class PostController extends Controller
     $user = $request->user();
     abort_unless($user instanceof User, 401);
 
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+    $search = trim((string) $request->query('search', ''));
+
     $posts = Post::query()
       ->visibleTo($user)
       ->with('author')
+      ->when($search !== '', function ($query) use ($search): void {
+        $query->where(function ($query) use ($search): void {
+          $query->where('title', 'like', "%{$search}%")
+            ->orWhere('slug', 'like', "%{$search}%");
+        });
+      })
+      ->when(
+        $request->filled('status'),
+        fn ($query) => $query->where('status', $request->string('status')->toString()),
+      )
+      ->when(
+        $request->filled('author_id'),
+        fn ($query) => $query->where('user_id', $request->integer('author_id')),
+      )
       ->latest()
-      ->paginate(15);
+      ->paginate($perPage)
+      ->withQueryString();
 
     return PostResource::collection($posts);
   }

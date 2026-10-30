@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Tenant;
+use App\Models\TenantSupportAccess;
 use App\Models\User;
+use App\Services\SupportUserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -257,5 +260,94 @@ class TenantAuthTest extends TestCase
   public function test_guest_cannot_view_profile(): void
   {
     $this->getJson('/api/v1/auth/me')->assertUnauthorized();
+  }
+
+  public function test_user_can_update_profile(): void
+  {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->forTenant($tenant)->admin()->create([
+      'name' => 'Old Name',
+      'email' => 'old@example.com',
+    ]);
+
+    $this->actingAs($admin)
+      ->patchJson('/api/v1/auth/profile', [
+        'name' => 'New Name',
+        'email' => 'new@example.com',
+      ])
+      ->assertOk()
+      ->assertJsonPath('data.name', 'New Name')
+      ->assertJsonPath('data.email', 'new@example.com');
+
+    $this->assertDatabaseHas('users', [
+      'id' => $admin->id,
+      'name' => 'New Name',
+      'email' => 'new@example.com',
+    ]);
+  }
+
+  public function test_user_can_update_password_with_current_password(): void
+  {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->forTenant($tenant)->admin()->create([
+      'password' => 'old-password',
+    ]);
+
+    $this->actingAs($admin)
+      ->putJson('/api/v1/auth/password', [
+        'current_password' => 'old-password',
+        'password' => 'new-password',
+        'password_confirmation' => 'new-password',
+      ])
+      ->assertOk()
+      ->assertJsonPath('message', 'Password updated.');
+
+    $this->assertTrue(Hash::check('new-password', $admin->fresh()->password));
+  }
+
+  public function test_password_update_rejects_wrong_current_password(): void
+  {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->forTenant($tenant)->admin()->create([
+      'password' => 'old-password',
+    ]);
+
+    $this->actingAs($admin)
+      ->putJson('/api/v1/auth/password', [
+        'current_password' => 'wrong-password',
+        'password' => 'new-password',
+        'password_confirmation' => 'new-password',
+      ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('current_password');
+
+    $this->assertTrue(Hash::check('old-password', $admin->fresh()->password));
+  }
+
+  public function test_me_exposes_support_session_state(): void
+  {
+    $tenant = Tenant::factory()->create(['allow_support' => true]);
+    $support = app(SupportUserService::class)->forTenant($tenant);
+
+    $access = new TenantSupportAccess([
+      'impersonated_user_id' => $support->id,
+      'started_at' => now(),
+    ]);
+    $access->tenant_id = $tenant->id;
+    $access->owner_id = 5;
+    $access->save();
+
+    $this->actingAs($support)
+      ->withSession([
+        'support_access_id' => $access->id,
+        'support_owner_id' => 5,
+        'support_tenant_id' => $tenant->id,
+        'support_last_activity_at' => now()->timestamp,
+      ])
+      ->getJson('/api/v1/auth/me')
+      ->assertOk()
+      ->assertJsonPath('support', true)
+      ->assertJsonPath('support_owner_id', 5)
+      ->assertJsonPath('support_tenant_id', $tenant->id);
   }
 }

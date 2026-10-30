@@ -9,9 +9,11 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\BillingController;
 use App\Http\Controllers\Api\Tenant\BillingRedirectController;
+use App\Http\Controllers\Api\Tenant\PermissionCatalogController;
 use App\Http\Controllers\Api\Tenant\PermissionProfileController;
 use App\Http\Controllers\Api\Tenant\PostController;
 use App\Http\Controllers\Api\Tenant\TenantDirectoryController;
+use App\Http\Controllers\Api\Tenant\TenantOverviewController;
 use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
 use App\Http\Resources\UserResource;
@@ -95,6 +97,13 @@ Route::prefix('v1')->group(function () {
       Route::get('/me', [AuthController::class, 'me'])
         ->middleware(['support', 'tenant.active'])
         ->name('api.v1.auth.me');
+
+      Route::patch('/profile', [AuthController::class, 'updateProfile'])
+        ->middleware(['support', 'tenant.active'])
+        ->name('api.v1.auth.profile');
+      Route::put('/password', [AuthController::class, 'updatePassword'])
+        ->middleware(['support', 'tenant.active'])
+        ->name('api.v1.auth.password');
     });
   });
 
@@ -134,6 +143,12 @@ Route::prefix('v1')->group(function () {
     Route::patch('/tenant', [TenantSettingsController::class, 'update'])
       ->middleware('permission:tenant.settings.update')
       ->name('api.v1.tenant.update');
+    Route::get('/tenant/overview', [TenantOverviewController::class, 'show'])
+      ->name('api.v1.tenant.overview');
+
+    Route::get('/permissions', [PermissionCatalogController::class, 'index'])
+      ->middleware('permission:users.view,profiles.view')
+      ->name('api.v1.permissions.index');
 
     Route::prefix('billing')->group(function () {
       Route::get('/plans', [BillingController::class, 'plans'])
@@ -196,6 +211,9 @@ Route::prefix('v1')->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
       ->middleware('permission:users.delete')
       ->name('api.v1.users.destroy');
+    Route::post('/users/{user}/invite', [UserController::class, 'invite'])
+      ->middleware('permission:users.update')
+      ->name('api.v1.users.invite');
 
     Route::get('/profiles', [PermissionProfileController::class, 'index'])
       ->middleware('permission:profiles.view')

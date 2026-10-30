@@ -20,8 +20,16 @@ class StoreUserRequest extends FormRequest
     return [
       'name' => ['required', 'string', 'max:255'],
       'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-      'password' => ['nullable', 'string', 'min:8'],
-      'role' => ['required', Rule::enum(UserRole::class)],
+      'invite' => ['sometimes', 'boolean'],
+      'password' => [
+        'nullable',
+        'string',
+        'min:8',
+        'confirmed',
+        Rule::requiredIf(fn (): bool => ! $this->boolean('invite')),
+      ],
+      'password_confirmation' => ['nullable', 'string', 'min:8'],
+      'role' => ['required', Rule::in([UserRole::Admin->value, UserRole::Author->value])],
       'permission_profile_id' => [
         'nullable',
         'integer',

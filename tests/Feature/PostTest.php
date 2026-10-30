@@ -201,4 +201,28 @@ class PostTest extends TestCase
       ->assertOk()
       ->assertJsonCount(0, 'data');
   }
+
+  public function test_admin_can_filter_posts_by_search_status_and_author(): void
+  {
+    $draft = Post::factory()->forAuthor($this->author)->create(['title' => 'Search Draft']);
+    Post::factory()->forAuthor($this->otherAuthor)->published()->create(['title' => 'Search Published']);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/posts?search=Search&status=draft')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $draft->id);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/posts?author_id='.$this->author->id)
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $draft->id);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/posts?per_page=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('meta.per_page', 1);
+  }
 }

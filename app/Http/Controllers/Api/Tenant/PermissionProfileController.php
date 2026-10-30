@@ -20,11 +20,21 @@ class PermissionProfileController extends Controller
 
   public function index(Request $request): AnonymousResourceCollection
   {
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+    $search = trim((string) $request->query('search', ''));
+
     $profiles = PermissionProfile::query()
       ->where('tenant_id', $request->user()->tenant_id)
       ->withCount(['users' => fn ($query) => $query->where('is_support', false)])
+      ->when($search !== '', function ($query) use ($search): void {
+        $query->where(function ($query) use ($search): void {
+          $query->where('name', 'like', "%{$search}%")
+            ->orWhere('description', 'like', "%{$search}%");
+        });
+      })
       ->latest()
-      ->paginate(15);
+      ->paginate($perPage)
+      ->withQueryString();
 
     return PermissionProfileResource::collection($profiles);
   }

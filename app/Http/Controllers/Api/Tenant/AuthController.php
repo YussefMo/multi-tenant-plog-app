@@ -8,6 +8,8 @@ use App\Http\Requests\Tenant\AcceptInvitationRequest;
 use App\Http\Requests\Tenant\LoginRequest;
 use App\Http\Requests\Tenant\RegisterRequest;
 use App\Http\Requests\Tenant\SupportLoginRequest;
+use App\Http\Requests\Tenant\UpdatePasswordRequest;
+use App\Http\Requests\Tenant\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\TenantInvitation;
 use App\Models\TenantSupportAccess;
@@ -21,6 +23,7 @@ use Dedoc\Scramble\Attributes\IgnoreResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -63,7 +66,7 @@ class AuthController extends Controller
     RateLimiter::clear($key);
 
     $user = User::query()->findOrFail(Auth::guard('web')->id());
-    $user->load('tenant', 'profile');
+    $user->load('tenant', 'profile', 'latestInvitation');
 
     return (new UserResource($user))->additional([
       'csrf_token' => csrf_token(),
@@ -141,11 +144,13 @@ class AuthController extends Controller
     $access->save();
     $request->session()->put('support_access_id', $access->id);
 
-    $support->load('tenant', 'profile');
+    $support->load('tenant', 'profile', 'latestInvitation');
 
     return (new UserResource($support))->additional([
       'csrf_token' => csrf_token(),
       'support' => true,
+      'support_owner_id' => $ticket->owner_id,
+      'support_tenant_id' => $tenant->id,
       'redirect_url' => $this->frontends->tenant(),
     ])->response()->setStatusCode(200);
   }
@@ -174,12 +179,51 @@ class AuthController extends Controller
 
     abort_unless($user instanceof User, 401);
 
-    $user->load('tenant', 'profile');
+    $user->load('tenant', 'profile', 'latestInvitation');
+
+    $support = $request->session()->has('support_access_id');
+
+    return (new UserResource($user))->additional([
+      'csrf_token' => csrf_token(),
+      'redirect_url' => $this->redirectUrlFor($user),
+      'support' => $support,
+      'support_owner_id' => $support ? $request->session()->get('support_owner_id') : null,
+      'support_tenant_id' => $support ? $request->session()->get('support_tenant_id') : null,
+    ]);
+  }
+
+  public function updateProfile(UpdateProfileRequest $request): UserResource
+  {
+    $user = $request->user();
+    abort_unless($user instanceof User, 401);
+    abort_if($user->isSupport(), 403, 'Support users cannot update their profile.');
+
+    $user->fill($request->validated());
+    $user->save();
+    $user->load('tenant', 'profile', 'latestInvitation');
 
     return (new UserResource($user))->additional([
       'csrf_token' => csrf_token(),
       'redirect_url' => $this->redirectUrlFor($user),
     ]);
+  }
+
+  public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+  {
+    $user = $request->user();
+    abort_unless($user instanceof User, 401);
+    abort_if($user->isSupport(), 403, 'Support users cannot update their password.');
+
+    if (! Hash::check((string) $request->input('current_password'), $user->password)) {
+      throw ValidationException::withMessages([
+        'current_password' => __('auth.password'),
+      ]);
+    }
+
+    $user->password = (string) $request->input('password');
+    $user->save();
+
+    return response()->json(['message' => 'Password updated.']);
   }
 
   public function acceptInvitation(AcceptInvitationRequest $request): JsonResponse

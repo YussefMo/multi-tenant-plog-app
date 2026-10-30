@@ -8,10 +8,13 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class TenantProvisioningService
 {
+  public function __construct(private readonly TenantInvitationService $invitations)
+  {
+  }
+
   /**
    * @return array{tenant: Tenant, admin: User, invitation: TenantInvitation, token: string}
    */
@@ -37,16 +40,7 @@ class TenantProvisioningService
       $admin->permissions = ['*'];
       $admin->save();
 
-      $token = Str::random(64);
-      $invitation = new TenantInvitation([
-        'email' => $admin->email,
-        'role' => UserRole::Admin,
-        'permissions' => ['*'],
-        'token_hash' => hash('sha256', $token),
-        'expires_at' => now()->addDays(7),
-      ]);
-      $invitation->tenant_id = $tenant->id;
-      $invitation->save();
+      ['invitation' => $invitation, 'token' => $token] = $this->invitations->create($admin);
 
       return compact('tenant', 'admin', 'invitation', 'token');
     });

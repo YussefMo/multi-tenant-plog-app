@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\PermissionProfile;
 use App\Models\Tenant;
+use App\Models\TenantInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -52,6 +53,7 @@ class UserManagementTest extends TestCase
         'name' => 'Author',
         'email' => 'author@example.com',
         'password' => 'password123',
+        'password_confirmation' => 'password123',
         'role' => 'author',
         'permission_profile_id' => $profile->id,
         'extra_permissions' => ['posts.publish'],
@@ -91,7 +93,7 @@ class UserManagementTest extends TestCase
     $this->assertContains('posts.publish', $fresh->permissions);
   }
 
-  public function test_admin_created_viewers_are_not_tenant_scoped(): void
+  public function test_admin_cannot_create_a_normal_user(): void
   {
     $this->actingAs($this->admin)
       ->postJson('/api/v1/users', [
@@ -99,15 +101,100 @@ class UserManagementTest extends TestCase
         'email' => 'viewer@example.com',
         'role' => 'user',
       ])
-      ->assertCreated()
-      ->assertJsonPath('data.role', 'user')
-      ->assertJsonPath('data.tenant_id', null);
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('role');
+  }
 
-    $this->assertDatabaseHas('users', [
-      'email' => 'viewer@example.com',
-      'role' => 'user',
-      'tenant_id' => null,
+  public function test_password_is_required_when_invite_is_false(): void
+  {
+    $this->actingAs($this->admin)
+      ->postJson('/api/v1/users', [
+        'name' => 'Author',
+        'email' => 'author@example.com',
+        'role' => 'author',
+        'invite' => false,
+      ])
+      ->assertStatus(422)
+      ->assertJsonValidationErrors('password');
+  }
+
+  public function test_admin_can_invite_an_author_without_a_password(): void
+  {
+    $this->actingAs($this->admin)
+      ->postJson('/api/v1/users', [
+        'name' => 'Author',
+        'email' => 'author@example.com',
+        'role' => 'author',
+        'invite' => true,
+      ])
+      ->assertCreated()
+      ->assertJsonPath('data.email', 'author@example.com')
+      ->assertJsonPath('data.invitation.status', 'pending')
+      ->assertJsonStructure(['data' => ['invitation' => ['expires_at', 'status']], 'invitation' => ['expires_at', 'token']]);
+
+    $user = User::query()->where('email', 'author@example.com')->firstOrFail();
+
+    $this->assertNull($user->password);
+    $this->assertDatabaseHas('tenant_invitations', [
+      'tenant_id' => $this->tenant->id,
+      'email' => 'author@example.com',
+      'accepted_at' => null,
     ]);
+  }
+
+  public function test_admin_can_resend_an_invitation(): void
+  {
+    $this->actingAs($this->admin)
+      ->postJson('/api/v1/users', [
+        'name' => 'Author',
+        'email' => 'author@example.com',
+        'role' => 'author',
+        'invite' => true,
+      ])
+      ->assertCreated();
+
+    $user = User::query()->where('email', 'author@example.com')->firstOrFail();
+    $firstInvitationId = TenantInvitation::query()->where('email', $user->email)->value('id');
+
+    $this->actingAs($this->admin)
+      ->postJson("/api/v1/users/{$user->id}/invite")
+      ->assertOk()
+      ->assertJsonPath('message', 'Invitation sent.')
+      ->assertJsonStructure(['invitation' => ['expires_at', 'token']]);
+
+    $this->assertDatabaseMissing('tenant_invitations', ['id' => $firstInvitationId]);
+    $this->assertDatabaseCount('tenant_invitations', 1);
+  }
+
+  public function test_invitation_cannot_be_resent_after_acceptance(): void
+  {
+    $user = User::factory()->forTenant($this->tenant)->author()->create();
+
+    $this->actingAs($this->admin)
+      ->postJson("/api/v1/users/{$user->id}/invite")
+      ->assertStatus(422);
+  }
+
+  public function test_admin_can_filter_users(): void
+  {
+    $profile = PermissionProfile::factory()->forTenant($this->tenant)->create();
+    $author = User::factory()->forTenant($this->tenant)->author()->create([
+      'name' => 'Search Author',
+      'permission_profile_id' => $profile->id,
+    ]);
+    User::factory()->forTenant($this->tenant)->admin()->create();
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/users?search=Search&role=author&permission_profile_id='.$profile->id)
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('data.0.id', $author->id);
+
+    $this->actingAs($this->admin)
+      ->getJson('/api/v1/users?per_page=1')
+      ->assertOk()
+      ->assertJsonCount(1, 'data')
+      ->assertJsonPath('meta.per_page', 1);
   }
 
   public function test_admin_cannot_change_their_own_role(): void
