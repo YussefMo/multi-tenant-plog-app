@@ -104,6 +104,20 @@ class TenantPurgeTest extends TestCase
       ->assertJsonStructure(['data' => [['id', 'tenant_id', 'owner_id', 'tenant_name', 'admin_email', 'purged_by_owner_id', 'purged_at', 'snapshot']]]);
   }
 
+  public function test_purge_dry_run_lists_trashed_tenants_without_deleting(): void
+  {
+    $owner = Owner::factory()->create();
+    $tenant = Tenant::factory()->forOwner($owner)->create(['name' => 'Pending Purge']);
+    $tenant->delete();
+
+    $this->artisan('tenants:purge', ['--dry-run' => true])
+      ->expectsOutputToContain('Pending Purge')
+      ->assertExitCode(0);
+
+    $this->assertSoftDeleted('tenants', ['id' => $tenant->id]);
+    $this->assertDatabaseCount('tenant_purges', 0);
+  }
+
   public function test_purge_command_writes_an_audit_row_without_a_purging_owner(): void
   {
     $owner = Owner::factory()->create();

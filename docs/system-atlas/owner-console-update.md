@@ -258,10 +258,19 @@ Update the `tenants:purge` record in `frontend/apps/visualizer/src/data/commands
 Permanently remove tenants soft-deleted beyond the retention window, write a purge audit row, and delete all related rows.
 ```
 
+- Add the `--dry-run` option:
+
+```ts
+{
+  flag: '--dry-run',
+  description: 'List trashed tenants with deleted_at, purge_at, and readiness without deleting.'
+}
+```
+
 - Update `notes`:
 
 ```text
-Delegates to TenantPurgeService::purge(). The audit row is written before the tenant and related rows are deleted.
+Delegates to TenantPurgeService::purge(). The audit row is written before the tenant and related rows are deleted. --dry-run lists pending purges.
 ```
 
 ## 6. Journey changes
