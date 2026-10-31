@@ -80,7 +80,7 @@ export default function ModelsPage() {
             <div className="panel-heading">
               <div>
                 <p className="section-label">Entity relationship diagram</p>
-                <h3>13 Eloquent models</h3>
+                <h3>{models.length} Eloquent models</h3>
               </div>
               <label className="select-field inline">
                 <span>Model</span>

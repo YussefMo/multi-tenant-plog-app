@@ -2,7 +2,7 @@
   {
     "path": "routes/api.php",
     "layer": "routing",
-    "purpose": "Registers every API v1 route: owner, tenant, auth, posts, users, profiles, billing, Stripe webhook, and tenant directory.",
+    "purpose": "Registers owner, tenant, viewer, public, billing, Stripe webhook, and docs routes, including owner profile/password, tenant filters/force delete/purged history, permissions catalog, tenant overview, viewer overview, and tenant profile.",
     "features": ["requests", "auth", "billing", "support", "tenant-directory"]
   },
   {
@@ -122,13 +122,13 @@
   {
     "path": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
     "layer": "controller",
-    "purpose": "Owner login, logout, and me endpoints using the owner guard and owner_session cookie.",
+    "purpose": "Owner login, logout, auth:me, profile update, and password update with current-password verification.",
     "features": ["auth", "owner"]
   },
   {
     "path": "app/Http/Controllers/Api/Owner/TenantController.php",
     "layer": "controller",
-    "purpose": "Owner tenant CRUD, soft delete, restore, provisioning, and invitation dispatch.",
+    "purpose": "Owner tenant list filters, detail resource, create/update, soft delete/restore, force delete, and purged history.",
     "features": ["tenants", "invitations", "owner"]
   },
   {
@@ -140,37 +140,37 @@
   {
     "path": "app/Http/Controllers/Api/Owner/PlanController.php",
     "layer": "controller",
-    "purpose": "Owner plan CRUD with slug generation and subscription deletion guard.",
+    "purpose": "Owner plan CRUD with total and active subscription counts and a delete guard.",
     "features": ["plans", "billing", "owner"]
   },
   {
     "path": "app/Http/Controllers/Api/Owner/BillingController.php",
     "layer": "controller",
-    "purpose": "Owner billing metrics and cross-tenant payment transactions.",
+    "purpose": "Owner billing metrics and cross-tenant transactions with status, date, tenant, and pagination filters.",
     "features": ["billing", "metrics", "owner"]
   },
   {
     "path": "app/Http/Controllers/Api/Tenant/AuthController.php",
     "layer": "controller",
-    "purpose": "Tenant login, viewer registration, invitation acceptance, support login, logout, and me.",
+    "purpose": "Tenant and viewer login/register/logout, invitation acceptance, support login, profile/password updates, and support-session state in /auth/me.",
     "features": ["auth", "invitations", "support", "viewer"]
   },
   {
     "path": "app/Http/Controllers/Api/Tenant/UserController.php",
     "layer": "controller",
-    "purpose": "Tenant user CRUD with tenant isolation and hidden support-user exclusion.",
+    "purpose": "Tenant user list/create/update/delete with invite/resend, invitation status, filters, admin/author-only roles, and tenant-owner protection.",
     "features": ["users", "permissions"]
   },
   {
     "path": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
     "layer": "controller",
-    "purpose": "Tenant permission profile CRUD and user permission resync on profile changes.",
+    "purpose": "Tenant permission profile CRUD with search, pagination, and assignment guards.",
     "features": ["permissions", "profiles"]
   },
   {
     "path": "app/Http/Controllers/Api/Tenant/PostController.php",
     "layer": "controller",
-    "purpose": "Post listing, creation, viewing, update, soft delete, publish, and unpublish.",
+    "purpose": "Tenant post CRUD, publish/unpublish, permission-aware listing, search/status/author filters, and tenant payloads for the global feed.",
     "features": ["posts"]
   },
   {
@@ -182,13 +182,13 @@
   {
     "path": "app/Http/Controllers/Api/Tenant/TenantDirectoryController.php",
     "layer": "controller",
-    "purpose": "Viewer tenant directory with name/category filters and cross-tenant published posts.",
+    "purpose": "Viewer directory index, tenant profile, and tenant published-post feed with search, per_page, and published counts.",
     "features": ["tenant-directory", "viewer"]
   },
   {
     "path": "app/Http/Controllers/Api/Tenant/BillingController.php",
     "layer": "controller",
-    "purpose": "Tenant plans, subscription, checkout, portal, cancel, invoices, and payments.",
+    "purpose": "Tenant billing plans, subscription, invoices, payments, checkout, trial, portal, and cancel endpoints with pagination.",
     "features": ["billing"]
   },
   {
@@ -266,13 +266,13 @@
   {
     "path": "app/Http/Requests/Tenant/StoreUserRequest.php",
     "layer": "request",
-    "purpose": "Validates tenant user creation, role, profile, and extra permissions.",
+    "purpose": "Validates tenant user create payloads including invite flag, password confirmation, and admin/author-only roles.",
     "features": ["users", "permissions"]
   },
   {
     "path": "app/Http/Requests/Tenant/UpdateUserRequest.php",
     "layer": "request",
-    "purpose": "Validates tenant user updates and unique email changes.",
+    "purpose": "Validates tenant user updates including admin/author-only roles and optional password confirmation.",
     "features": ["users", "permissions"]
   },
   {
@@ -320,13 +320,13 @@
   {
     "path": "app/Http/Resources/UserResource.php",
     "layer": "resource",
-    "purpose": "JSON contract for users, permissions, profile, and nested tenant.",
+    "purpose": "User JSON contract with role, tenant-owner status, permissions, profile, tenant, and invitation status.",
     "features": ["users", "auth", "permissions"]
   },
   {
     "path": "app/Http/Resources/TenantResource.php",
     "layer": "resource",
-    "purpose": "JSON contract for tenant data, support flag, and is_due billing flag.",
+    "purpose": "Tenant JSON contract including soft-delete state and owner-facing summary fields.",
     "features": ["tenants", "billing"]
   },
   {
@@ -344,13 +344,13 @@
   {
     "path": "app/Http/Resources/PostResource.php",
     "layer": "resource",
-    "purpose": "JSON contract for posts and author summary.",
+    "purpose": "Post JSON contract with author and optional tenant payload.",
     "features": ["posts"]
   },
   {
     "path": "app/Http/Resources/PlanResource.php",
     "layer": "resource",
-    "purpose": "JSON contract for plans, amounts, limits, and features.",
+    "purpose": "Plan JSON contract with subscription and active-subscription counts.",
     "features": ["plans", "billing"]
   },
   {
@@ -380,7 +380,7 @@
   {
     "path": "app/Services/TenantProvisioningService.php",
     "layer": "service",
-    "purpose": "Creates a tenant, its first admin, and a hashed invitation in one transaction.",
+    "purpose": "Provisions a tenant, its owner admin, and the initial invitation through TenantInvitationService.",
     "features": ["tenants", "invitations"]
   },
   {
@@ -416,19 +416,19 @@
   {
     "path": "app/Services/SubscriptionSyncService.php",
     "layer": "service",
-    "purpose": "Maps Stripe subscriptions to tenants/plans and updates tenant is_due state.",
+    "purpose": "Syncs subscriptions and falls back to item-level period dates when top-level dates are absent.",
     "features": ["billing", "stripe", "webhooks"]
   },
   {
     "path": "app/Services/BillingMirrorService.php",
     "layer": "service",
-    "purpose": "Upserts invoices and payments from Stripe and resolves their tenant.",
+    "purpose": "Mirrors invoices/payments and resolves subscription IDs from legacy and new Stripe invoice shapes; uses amount_remaining for due.",
     "features": ["billing", "history", "webhooks"]
   },
   {
     "path": "app/Services/StripeWebhookService.php",
     "layer": "service",
-    "purpose": "Processes verified Stripe events idempotently and updates the local mirror.",
+    "purpose": "Handles invoice, subscription, charge, and payment-intent events; syncs subscription on invoice.paid; mirrors payments from latest_charge.",
     "features": ["billing", "stripe", "webhooks"]
   },
   {
@@ -440,19 +440,19 @@
   {
     "path": "app/Models/Owner.php",
     "layer": "model",
-    "purpose": "Owner account on the separate owner database connection.",
+    "purpose": "Software owner account with profile and password update support.",
     "features": ["owner", "auth", "databases"]
   },
   {
     "path": "app/Models/Tenant.php",
     "layer": "model",
-    "purpose": "Tenant root model with soft deletes, support flag, is_due, and relationships.",
+    "purpose": "Tenant root with owner/admin/invitation relations, trial and due state, and soft deletes.",
     "features": ["tenants", "billing", "support"]
   },
   {
     "path": "app/Models/User.php",
     "layer": "model",
-    "purpose": "Tenant or global viewer account with role, materialized permissions, and profile.",
+    "purpose": "Tenant admin/author or global viewer with role, materialized permissions, tenant-owner marker, profile, and latest invitation.",
     "features": ["users", "permissions", "auth"]
   },
   {
@@ -488,7 +488,7 @@
   {
     "path": "app/Models/Plan.php",
     "layer": "model",
-    "purpose": "Global plan catalog with Stripe IDs, limits, features, and monthly amount helper.",
+    "purpose": "Subscription plan with subscription counts and delete guard.",
     "features": ["plans", "billing"]
   },
   {
@@ -542,7 +542,7 @@
   {
     "path": "app/Console/Commands/PurgeTenantsCommand.php",
     "layer": "command",
-    "purpose": "Permanently removes tenants soft-deleted beyond the retention window and all related rows.",
+    "purpose": "Permanently removes tenants soft-deleted beyond the retention window, delegates to TenantPurgeService, and writes the purge audit row.",
     "features": ["commands", "tenant-lifecycle"]
   },
   {
@@ -554,7 +554,7 @@
   {
     "path": "app/Console/Commands/StripeSyncBillingCommand.php",
     "layer": "command",
-    "purpose": "Backfills Stripe subscriptions, invoices, and payments into the local mirror.",
+    "purpose": "Backfills subscriptions, invoices, and payments from Stripe using legacy and new invoice shapes.",
     "features": ["commands", "billing", "stripe"]
   },
   {
@@ -704,7 +704,7 @@
   {
     "path": "tests/Feature/StripeWebhookTest.php",
     "layer": "test",
-    "purpose": "Covers webhook signatures, idempotency, subscription sync, invoices, payments, refunds, and disputes.",
+    "purpose": "Covers new invoice parent shape, amount_remaining, payment-intent charge mirroring, and item-level period dates.",
     "features": ["tests", "billing", "webhooks"]
   },
   {
@@ -722,7 +722,7 @@
   {
     "path": "tests/Feature/TenantDirectoryTest.php",
     "layer": "test",
-    "purpose": "Covers viewer tenant directory filters and published-only cross-tenant posts.",
+    "purpose": "Covers viewer directory filters, pagination, tenant profile, tenant posts, tenant payloads, and soft-deleted tenant exclusion.",
     "features": ["tests", "tenant-directory"]
   },
   {
@@ -778,5 +778,299 @@
     "layer": "model",
     "purpose": "Draft and published post states used by models, scopes, and the directory.",
     "features": ["posts"]
+  },
+  {
+    "path": "app/Services/TenantPurgeService.php",
+    "layer": "service",
+    "purpose": "Purges a trashed tenant in one transaction and writes the tenant_purges audit snapshot before deleting related rows.",
+    "features": ["tenant-lifecycle", "purge", "owner", "commands"]
+  },
+  {
+    "path": "app/Models/TenantPurge.php",
+    "layer": "model",
+    "purpose": "Immutable purge audit row. Stores tenant identity, purging owner, timestamp, and JSON snapshot without a FK to tenants.",
+    "features": ["tenant-lifecycle", "purge", "owner"]
+  },
+  {
+    "path": "app/Http/Resources/TenantDetailResource.php",
+    "layer": "resource",
+    "purpose": "Owner tenant detail contract with admin, invitation, subscription, user count, and post count.",
+    "features": ["tenants", "owner"]
+  },
+  {
+    "path": "app/Http/Resources/TenantPurgeResource.php",
+    "layer": "resource",
+    "purpose": "Read-only permanently-deleted tenant history contract.",
+    "features": ["tenant-lifecycle", "purge", "owner"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/UpdateOwnerProfileRequest.php",
+    "layer": "request",
+    "purpose": "Validates owner name/email updates and unique owner email.",
+    "features": ["auth", "owner"]
+  },
+  {
+    "path": "app/Http/Requests/Owner/UpdateOwnerPasswordRequest.php",
+    "layer": "request",
+    "purpose": "Validates current password, new password, and confirmation.",
+    "features": ["auth", "owner"]
+  },
+  {
+    "path": "database/migrations/2026_10_30_000000_create_tenant_purges_table.php",
+    "layer": "database",
+    "purpose": "Creates tenant_purges with tenant identity, purged_by_owner_id, purged_at, and JSON snapshot.",
+    "features": ["tenant-lifecycle", "purge"]
+  },
+  {
+    "path": "tests/Feature/OwnerProfileTest.php",
+    "layer": "test",
+    "purpose": "Covers owner profile/password updates, current-password rejection, uniqueness, and guest guards.",
+    "features": ["auth", "owner", "tests"]
+  },
+  {
+    "path": "tests/Feature/TenantPurgeTest.php",
+    "layer": "test",
+    "purpose": "Covers force delete, purge audit, purged history, ownership, and scheduled purge audit.",
+    "features": ["tenant-lifecycle", "purge", "owner", "tests"]
+  },
+  {
+    "path": "app/Services/TenantInvitationService.php",
+    "layer": "service",
+    "purpose": "Creates and replaces tenant user invitations, hashes tokens, invalidates old pending invitations, and returns a local/testing token.",
+    "features": ["tenant-users", "invitations", "tenant-console"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/PermissionCatalogController.php",
+    "layer": "controller",
+    "purpose": "Returns the permission catalog and role presets for tenant user and profile forms.",
+    "features": ["permissions", "tenant-users", "tenant-console"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/TenantOverviewController.php",
+    "layer": "controller",
+    "purpose": "Returns permission-aware tenant counts, post status counts, and subscription summary for the tenant dashboard.",
+    "features": ["tenant-dashboard", "tenant-console"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdateProfileRequest.php",
+    "layer": "request",
+    "purpose": "Validates tenant user name/email updates and unique email.",
+    "features": ["auth", "tenant-settings"]
+  },
+  {
+    "path": "app/Http/Requests/Tenant/UpdatePasswordRequest.php",
+    "layer": "request",
+    "purpose": "Validates current password, new password, and confirmation for tenant users.",
+    "features": ["auth", "tenant-settings"]
+  },
+  {
+    "path": "tests/Feature/TenantOverviewTest.php",
+    "layer": "test",
+    "purpose": "Covers permission-aware tenant overview counts and subscription output.",
+    "features": ["tenant-dashboard", "tests"]
+  },
+  {
+    "path": "app/Http/Middleware/EnsureTenantNotDue.php",
+    "layer": "middleware",
+    "purpose": "Blocks tenant writes with 402 when is_due is true while allowing reads, billing, logout, and account security endpoints.",
+    "features": ["tenant-billing", "due-protection", "middleware"]
+  },
+  {
+    "path": "app/Services/TenantTrialService.php",
+    "layer": "service",
+    "purpose": "Starts a one-time tenant trial, clears is_due, records trial_used_at, and creates a trialing subscription.",
+    "features": ["tenant-billing", "trial", "tenant-console"]
+  },
+  {
+    "path": "app/Console/Commands/MarkTenantsDueCommand.php",
+    "layer": "command",
+    "purpose": "Marks tenants due and moves expired trialing subscriptions to past_due.",
+    "features": ["commands", "tenant-billing", "due-protection"]
+  },
+  {
+    "path": "database/migrations/2026_10_31_000000_add_trial_used_at_to_tenants_table.php",
+    "layer": "database",
+    "purpose": "Adds trial_used_at so a tenant can request the automatic trial only once.",
+    "features": ["tenant-billing", "trial"]
+  },
+  {
+    "path": "tests/Feature/TenantTrialTest.php",
+    "layer": "test",
+    "purpose": "Covers one-time trial start, role/permission guards, and trial-expiry marking.",
+    "features": ["tenant-billing", "trial", "tests"]
+  },
+  {
+    "path": "tests/Feature/TenantDueProtectionTest.php",
+    "layer": "test",
+    "purpose": "Covers 402 write blocking for due tenants and allowed reads/billing/account actions.",
+    "features": ["tenant-billing", "due-protection", "tests"]
+  },
+  {
+    "path": "database/migrations/2026_10_31_000001_add_is_tenant_owner_to_users_table.php",
+    "layer": "database",
+    "purpose": "Adds and backfills is_tenant_owner so the original tenant admin is protected.",
+    "features": ["tenant-users", "protection", "database"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/Tenant/ViewerOverviewController.php",
+    "layer": "controller",
+    "purpose": "Returns viewer directory counts, categories, recent tenants, and recent published posts for the Discover dashboard.",
+    "features": ["viewer-directory", "user-console"]
+  },
+  {
+    "path": "tests/Feature/ViewerOverviewTest.php",
+    "layer": "test",
+    "purpose": "Covers viewer overview counts, categories, recent tenants, recent published posts, and non-viewer guards.",
+    "features": ["viewer-directory", "tests"]
+  },
+  {
+    "path": "config/mail.php",
+    "layer": "config",
+    "purpose": "Defines the default Laravel mailer, SMTP/Resend transports, and the global from address used by invitation emails.",
+    "features": ["mail", "invitations", "notifications"]
+  },
+  {
+    "path": "frontend/apps/owner/src/routes.tsx",
+    "layer": "client",
+    "purpose": "Owner console route table: auth group, console group, tenants, plans, billing, and settings pages.",
+    "features": ["owner-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/owner/src/layout/RequireOwner.tsx",
+    "layer": "client",
+    "purpose": "Owner session guard with loading, 401 redirect, and 403 state.",
+    "features": ["owner-console", "auth", "frontend"]
+  },
+  {
+    "path": "frontend/apps/owner/src/layout/ConsoleLayout.tsx",
+    "layer": "client",
+    "purpose": "Owner console shell with sidebar, topbar, mobile navigation, and content outlet.",
+    "features": ["owner-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/owner/src/lib/action/tenant.action.ts",
+    "layer": "client",
+    "purpose": "Owner tenant API actions: list filters, detail, create, update, delete, restore, force delete, purged history, support access.",
+    "features": ["owner-console", "tenants", "frontend"]
+  },
+  {
+    "path": "frontend/apps/owner/src/lib/hooks/tenant.hook.ts",
+    "layer": "client",
+    "purpose": "TanStack Query hooks for owner tenant data with cache-0 queries and mutation invalidation.",
+    "features": ["owner-console", "tenants", "frontend"]
+  },
+  {
+    "path": "frontend/apps/owner/src/components/Tenants.tsx",
+    "layer": "client",
+    "purpose": "Owner tenant list orchestrator with Active, Deleted, and Permanently deleted tabs.",
+    "features": ["owner-console", "tenants", "frontend"]
+  },
+  {
+    "path": "frontend/shared/lib/http/client.ts",
+    "layer": "client",
+    "purpose": "Shared axios client with realm-specific CSRF fetching, 419 retry, and credentialed requests.",
+    "features": ["owner-console", "frontend", "cross-cutting"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/routes.tsx",
+    "layer": "client",
+    "purpose": "Tenant console route table: auth pages and console pages.",
+    "features": ["tenant-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/layout/RequireTenantAuth.tsx",
+    "layer": "client",
+    "purpose": "Tenant session guard with loading, 401/403 redirects, and viewer redirect.",
+    "features": ["tenant-console", "auth", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/layout/ConsoleLayout.tsx",
+    "layer": "client",
+    "purpose": "Tenant console shell with sidebar, topbar, support banner, and mobile navigation.",
+    "features": ["tenant-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/lib/action/user.action.ts",
+    "layer": "client",
+    "purpose": "Tenant user API actions including invite and resend invitation.",
+    "features": ["tenant-console", "tenant-users", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/lib/hooks/user.hook.ts",
+    "layer": "client",
+    "purpose": "TanStack hooks for tenant users and invitation mutations.",
+    "features": ["tenant-console", "tenant-users", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/components/Users.tsx",
+    "layer": "client",
+    "purpose": "Tenant user list orchestrator with filters, pagination, and invitation actions.",
+    "features": ["tenant-console", "tenant-users", "frontend"]
+  },
+  {
+    "path": "frontend/apps/tenant/src/components/Dashboard.tsx",
+    "layer": "client",
+    "purpose": "Tenant dashboard with counts, recent posts, subscription, and recent billing.",
+    "features": ["tenant-console", "tenant-dashboard", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/routes.tsx",
+    "layer": "client",
+    "purpose": "User client route table: login, register, discover, tenant profile, posts, post detail, and settings.",
+    "features": ["user-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/layout/RequireViewerAuth.tsx",
+    "layer": "client",
+    "purpose": "Viewer session guard with loading, 401/403 redirects, and non-viewer sessions sent to the viewer login.",
+    "features": ["user-console", "auth", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/layout/ViewerLayout.tsx",
+    "layer": "client",
+    "purpose": "Viewer shell with topbar, desktop navigation, and content container.",
+    "features": ["user-console", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/lib/action/directory.action.ts",
+    "layer": "client",
+    "purpose": "Viewer directory API actions: overview, tenants, tenant profile, and tenant posts.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/lib/hooks/directory.hook.ts",
+    "layer": "client",
+    "purpose": "TanStack hooks for the viewer overview, directory, tenant profile, and tenant posts.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/components/Discover.tsx",
+    "layer": "client",
+    "purpose": "Discover orchestrator with metrics, search, category filter, tenant cards, recent posts, and pagination.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/components/Tenant.tsx",
+    "layer": "client",
+    "purpose": "Tenant public page with header, published post search, and pagination.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/components/Posts.tsx",
+    "layer": "client",
+    "purpose": "Global published post feed with search and pagination.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/components/PostDetail.tsx",
+    "layer": "client",
+    "purpose": "Published post detail with tenant link, author, published date, and body.",
+    "features": ["user-console", "viewer-directory", "frontend"]
+  },
+  {
+    "path": "frontend/apps/user/src/components/Settings.tsx",
+    "layer": "client",
+    "purpose": "Viewer settings orchestrator: profile, password, appearance, and sign out.",
+    "features": ["user-console", "settings", "frontend"]
   }
 ]

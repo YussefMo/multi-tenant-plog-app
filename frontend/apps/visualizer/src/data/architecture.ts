@@ -13,7 +13,15 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       tone: 'cyan',
       purpose:
         'Three separate Vite applications. They only call the API over HTTP and redirect the browser to API-provided URLs.',
-      files: ['config/frontends.php', 'config/cors.php', 'docs/frontend-redirects.md'],
+      files: [
+        'config/frontends.php',
+        'config/cors.php',
+        'docs/frontend-redirects.md',
+        'frontend/apps/owner/src/routes.tsx',
+        'frontend/apps/tenant/src/routes.tsx',
+        'frontend/apps/user/src/routes.tsx',
+        'frontend/shared/lib/http/client.ts',
+      ],
     },
   },
   {
@@ -22,11 +30,11 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
     position: { x: 280, y: 0 },
     data: {
       label: 'Routes',
-      subtitle: '60 API operations · 44 paths',
+      subtitle: '72 API operations · 56 paths',
       layer: 'routing',
       tone: 'cyan',
       purpose:
-        'The API surface. Owner, tenant, public, billing, Stripe webhook, and docs routes are registered here.',
+        'The API surface. Owner, tenant, viewer, public, billing, Stripe webhook, and docs routes live here, including owner profile/password, tenant filters/force delete/purged, permissions catalog, tenant overview, viewer overview, and tenant profile.',
       files: ['routes/api.php', 'bootstrap/app.php'],
     },
   },
@@ -46,6 +54,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
         'app/Http/Middleware/ForceJsonResponse.php',
         'app/Http/Middleware/EnsurePermission.php',
         'app/Http/Middleware/EnsureTenantActive.php',
+        'app/Http/Middleware/EnsureTenantNotDue.php',
         'app/Http/Middleware/EnsureSupportAccess.php',
       ],
     },
@@ -105,6 +114,9 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
         'app/Http/Controllers/Api/Tenant/AuthController.php',
         'app/Http/Controllers/Api/Tenant/PostController.php',
         'app/Http/Controllers/Api/Tenant/BillingController.php',
+        'app/Http/Controllers/Api/Tenant/PermissionCatalogController.php',
+        'app/Http/Controllers/Api/Tenant/TenantOverviewController.php',
+        'app/Http/Controllers/Api/Tenant/ViewerOverviewController.php',
         'app/Http/Controllers/Api/StripeWebhookController.php',
       ],
     },
@@ -122,7 +134,11 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
         'FormRequests validate incoming payloads. Policies and AuthorizesPermissions prevent cross-tenant access and permission escalation.',
       files: [
         'app/Http/Requests/Owner/StoreTenantRequest.php',
+        'app/Http/Requests/Owner/UpdateOwnerProfileRequest.php',
+        'app/Http/Requests/Owner/UpdateOwnerPasswordRequest.php',
         'app/Http/Requests/Tenant/StoreUserRequest.php',
+        'app/Http/Requests/Tenant/UpdateProfileRequest.php',
+        'app/Http/Requests/Tenant/UpdatePasswordRequest.php',
         'app/Policies/PostPolicy.php',
         'app/Http/Controllers/Concerns/AuthorizesPermissions.php',
       ],
@@ -138,12 +154,15 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       layer: 'service',
       tone: 'green',
       purpose:
-        'Business logic lives here: tenant provisioning, permission sync, support users, billing sessions, webhook processing, mirror sync, and metrics.',
+        'Business logic lives here: tenant provisioning, invitations, trial and due handling, permission sync, support users, billing sessions, webhook processing, mirror sync, purge audits, and metrics.',
       files: [
         'app/Services/TenantProvisioningService.php',
+        'app/Services/TenantInvitationService.php',
         'app/Services/PermissionSyncService.php',
         'app/Services/SupportUserService.php',
         'app/Services/BillingService.php',
+        'app/Services/TenantTrialService.php',
+        'app/Services/TenantPurgeService.php',
         'app/Services/StripeWebhookService.php',
         'app/Services/BillingMetricsService.php',
       ],
@@ -155,7 +174,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
     position: { x: 840, y: 640 },
     data: {
       label: 'Models & scopes',
-      subtitle: '13 models · tenant scope · soft deletes',
+      subtitle: '14 models · tenant scope · soft deletes',
       layer: 'model',
       tone: 'cyan',
       purpose:
@@ -165,6 +184,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
         'app/Models/User.php',
         'app/Models/Post.php',
         'app/Models/Subscription.php',
+        'app/Models/TenantPurge.php',
         'app/Models/Concerns/BelongsToTenant.php',
         'app/Models/Scopes/TenantScope.php',
       ],
@@ -180,13 +200,16 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       layer: 'database',
       tone: 'amber',
       purpose:
-        'Primary MySQL database for tenant data, permissions, posts, support sessions, billing mirror rows, webhook events, and sessions.',
+        'Primary MySQL database for tenant data, permissions, posts, support sessions, billing mirror rows, webhook events, purge audits, and sessions.',
       files: [
         'database/migrations/2026_10_27_121640_create_tenants_table.php',
         'database/migrations/2026_10_28_131911_create_users_table.php',
         'database/migrations/2026_10_28_151006_create_posts_table.php',
         'database/migrations/2026_10_29_062338_create_subscriptions_table.php',
         'database/migrations/2026_10_29_062341_create_billing_payments_table.php',
+        'database/migrations/2026_10_30_000000_create_tenant_purges_table.php',
+        'database/migrations/2026_10_31_000000_add_trial_used_at_to_tenants_table.php',
+        'database/migrations/2026_10_31_000001_add_is_tenant_owner_to_users_table.php',
       ],
     },
   },
@@ -222,7 +245,11 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       files: [
         'app/Http/Resources/UserResource.php',
         'app/Http/Resources/TenantResource.php',
+        'app/Http/Resources/TenantDetailResource.php',
+        'app/Http/Resources/TenantPurgeResource.php',
+        'app/Http/Resources/TenantDirectoryResource.php',
         'app/Http/Resources/PostResource.php',
+        'app/Http/Resources/PlanResource.php',
         'app/Http/Resources/SubscriptionResource.php',
         'app/Http/Resources/BillingPaymentResource.php',
       ],
@@ -234,15 +261,16 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
     position: { x: 0, y: 200 },
     data: {
       label: 'Commands',
-      subtitle: 'purge · sync · seed · owner',
+      subtitle: 'purge · mark due · sync · seed · owner',
       layer: 'command',
       tone: 'amber',
       purpose:
-        'Operational entry points that are not HTTP requests: owner creation, permission repair, tenant purge, Stripe plan/billing sync.',
+        'Operational entry points that are not HTTP requests: owner creation, permission repair, tenant purge, due marking, Stripe plan/billing sync.',
       files: [
         'app/Console/Commands/OwnerCreateCommand.php',
         'app/Console/Commands/SyncPermissionsCommand.php',
         'app/Console/Commands/PurgeTenantsCommand.php',
+        'app/Console/Commands/MarkTenantsDueCommand.php',
         'app/Console/Commands/StripeSyncPlansCommand.php',
         'app/Console/Commands/StripeSyncBillingCommand.php',
       ],
@@ -254,11 +282,11 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
     position: { x: 0, y: 400 },
     data: {
       label: 'Scheduler',
-      subtitle: 'daily tenant purge',
+      subtitle: 'daily purge + mark due',
       layer: 'command',
       tone: 'amber',
       purpose:
-        'routes/console.php schedules tenants:purge daily. Purge only touches tenants already soft-deleted beyond the retention window.',
+        'routes/console.php schedules tenants:purge and tenants:mark-due daily. Purge only touches tenants already soft-deleted beyond the retention window.',
       files: ['routes/console.php'],
     },
   },
@@ -272,7 +300,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
       layer: 'service',
       tone: 'red',
       purpose:
-        'Stripe-hosted Checkout and Customer Portal. Webhooks verify signatures, process events idempotently, and update the local mirror.',
+        'Stripe-hosted Checkout and Customer Portal. Webhooks verify signatures, process events idempotently, and update the local mirror, including new invoice shapes, amount_remaining, payment intents, and item-level period dates.',
       files: [
         'app/Services/StripeGateway.php',
         'app/Services/StripeWebhookService.php',

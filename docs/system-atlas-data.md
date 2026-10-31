@@ -63,7 +63,7 @@ The file is gitignored and must never be edited by hand. Shape:
 {
   "generatedAt": "2026-10-29T13:25:52.912Z",
   "source": "php artisan route:list --json --except-vendor",
-  "count": 60,
+  "count": 72,
   "requests": [
     {
       "method": "POST",
@@ -239,7 +239,7 @@ Every `writes[].table` must exist in the table catalog.
 Successful output:
 
 ```text
-Atlas OK: 60 requests, 131 files, 16 journeys, 13 models, 5 commands, all references valid.
+Atlas OK: 72 requests, 179 files, 30 journeys, 14 models, 6 commands, all references valid.
 ```
 
 ## Adding or changing data

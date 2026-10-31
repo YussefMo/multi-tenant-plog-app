@@ -17,7 +17,7 @@ Requests are regenerated from Laravel on `predev`, `pretypecheck`, `prebuild`, a
 | Route       | Purpose                                                |
 | ----------- | ------------------------------------------------------ |
 | `/`         | Architecture map and node inspector                    |
-| `/requests` | 60 generated API operations, searchable and filterable |
+| `/requests` | 72 generated API operations, searchable and filterable |
 | `/files`    | Purpose catalog for every relevant backend file        |
 | `/journeys` | Playable feature journeys and cross-cutting systems    |
 | `/models`   | ERD, model explorer, and table explorer                |
@@ -52,7 +52,7 @@ Adding a page means adding `src/app/(atlas)/<segment>/page.tsx` and one route en
 ## Data modules
 
 - `src/data/journeys.ts` — journeys and cross-cutting systems. Each step carries actor, request, middleware, request class, controller, service, models, table impacts, response, errors, files, and speaker notes.
-- `src/data/models.ts` — the 13 Eloquent models, columns, relations, readers/writers, system tables, and ERD edges.
+- `src/data/models.ts` — the 14 Eloquent models, columns, relations, readers/writers, system tables, and ERD edges.
 - `src/data/commands.ts` — commands, options, writes, external calls, schedules, and output.
 - `src/data/files.json` — the file catalog. Every path must exist and have a purpose.
 - `src/data/generated/requests.generated.json` — generated from `php artisan route:list --json --except-vendor`.
@@ -115,18 +115,25 @@ Journey steps show speaker notes. Switching collections keeps the current journe
 
 1. Overview: trace the architecture map from frontends to databases.
 2. Owner login: session realm and owner guard.
-3. Tenant provisioning: tenant, admin, hashed invitation, mail.
-4. Invitation acceptance: raw token, password, burned invitation.
-5. Tenant login: role-aware redirect and `tenant.active`.
-6. Post lifecycle: draft, publish, unpublish, soft delete.
-7. Viewer directory: the deliberate `TenantScope` bypass.
-8. Permission resync: role ∪ profile ∪ extras.
-9. Support access: ticket, hidden user, audit row, idle timeout.
-10. Checkout and webhook: Stripe-hosted payment and the idempotent mirror.
-11. Billing metrics: MRR, revenue, refunds, disputes, timeline.
-12. Tenant lifecycle: soft delete, blocked traffic, restore, 30-day purge.
-13. Cross-cutting systems: session realms, tenant isolation, error envelope, docs.
-14. Models and commands: finish on the ERD and the purge command.
+3. Owner profile and password: identity and credential rotation.
+4. Tenant provisioning: tenant, admin, hashed invitation, configured mailer.
+5. Invitation acceptance: raw token, password, burned invitation.
+6. Tenant user invitations: invite, resend, accept, login.
+7. Tenant login: role-aware redirect and `tenant.active`.
+8. Tenant overview: permission-aware dashboard counts.
+9. Tenant account security: profile and password updates.
+10. Post lifecycle: draft, publish, unpublish, soft delete.
+11. Tenant user protection: owner marker and admin deletion guards.
+12. Tenant permission profiles: catalog, CRUD, resync, delete guard.
+13. Viewer directory and user client: register, discover, tenant pages, global feed.
+14. Support access: ticket, hidden user, audit row, idle timeout, `/auth/me` state.
+15. Checkout and webhook: Stripe-hosted payment, new invoice shapes, payment intents.
+16. Tenant billing history: invoices and payments.
+17. Tenant trial and due protection: one-time trial, 402 writes, mark-due.
+18. Billing metrics: MRR, revenue, refunds, disputes, timeline.
+19. Tenant lifecycle: soft delete, blocked traffic, restore, force delete, purged history.
+20. Cross-cutting systems: session realms, tenant isolation, error envelope, docs.
+21. Models and commands: finish on the ERD, purge audit, and mark-due command.
 
 ## Static build
 

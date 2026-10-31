@@ -55,19 +55,30 @@ export const commands: CommandRecord[] = [
   },
   {
     name: 'tenants:purge',
-    signature: 'php artisan tenants:purge {--days=30}',
+    signature: 'php artisan tenants:purge {--days=30} {--dry-run}',
     file: 'app/Console/Commands/PurgeTenantsCommand.php',
     purpose:
-      'Permanently remove tenants soft-deleted beyond the retention window and all related rows.',
+      'Permanently remove tenants soft-deleted beyond the retention window, write a purge audit row, and delete all related rows.',
     tone: 'red',
     options: [
       {
         flag: '--days',
         description: 'Retention window after deleted_at. Default 30; 0 purges immediately.',
       },
+      {
+        flag: '--dry-run',
+        description:
+          'List trashed tenants with deleted_at, purge_at, and readiness without deleting.',
+      },
     ],
     reads: ['tenants (onlyTrashed)', 'users', 'posts', 'billing mirrors'],
     writes: [
+      {
+        table: 'tenant_purges',
+        operation: 'insert',
+        detail:
+          'Audit snapshot with tenant, owner, admin email, purging owner, timestamp, and JSON snapshot.',
+      },
       { table: 'sessions', operation: 'delete', detail: 'Sessions belonging to tenant users.' },
       {
         table: 'password_reset_tokens',
@@ -91,7 +102,25 @@ export const commands: CommandRecord[] = [
     idempotent: true,
     output: ['Purged tenant {id}.', 'Purged {count} tenant(s).'],
     notes:
-      'is_due is unrelated to retention. Only deleted_at starts the clock. The whole purge for one tenant is a single transaction.',
+      'Delegates to TenantPurgeService::purge(). The audit row is written before the tenant and related rows are deleted. --dry-run lists pending purges. is_due is unrelated to retention; only deleted_at starts the clock.',
+  },
+  {
+    name: 'tenants:mark-due',
+    signature: 'php artisan tenants:mark-due',
+    file: 'app/Console/Commands/MarkTenantsDueCommand.php',
+    purpose: 'Mark tenants due when their trial has expired and move the subscription to past_due.',
+    tone: 'red',
+    options: [],
+    reads: ['subscriptions (trialing)', 'tenants'],
+    writes: [
+      { table: 'tenants', operation: 'update', detail: 'is_due = true.' },
+      { table: 'subscriptions', operation: 'update', detail: 'status = past_due.' },
+    ],
+    external: [],
+    schedule: 'Daily at midnight via routes/console.php.',
+    idempotent: true,
+    output: ['Marked {count} tenant(s) due.'],
+    notes: 'Only expired trialing subscriptions are touched.',
   },
   {
     name: 'stripe:sync-plans',
@@ -150,7 +179,7 @@ export const commands: CommandRecord[] = [
     idempotent: true,
     output: ['Tenant {id}: {n} subscription(s), {n} invoice(s), {n} payment(s).'],
     notes:
-      'Useful after downtime or when a webhook endpoint was misconfigured. Every write is an upsert keyed by Stripe ID.',
+      'Useful after downtime or when a webhook endpoint was misconfigured. Every write is an upsert keyed by Stripe ID. Also repairs legacy/new invoice subscription shapes, amount_remaining, and payment-intent charges.',
   },
 ];
 
@@ -176,8 +205,22 @@ export const schedules: ScheduleRecord[] = [
     file: 'routes/console.php',
     effects: [
       'Reads only trashed tenants older than the retention window.',
+      'Writes a tenant_purges audit snapshot before deleting.',
       'Deletes sessions, reset tokens, support rows, invitations, posts, billing mirrors, subscriptions, users, profiles, then the tenant.',
       'Runs in one transaction per tenant.',
+    ],
+  },
+  {
+    id: 'tenant-mark-due',
+    command: 'tenants:mark-due',
+    expression: 'daily()',
+    cadence: 'Once per day at midnight',
+    purpose: 'Mark tenants due when their trial has expired and move the subscription to past_due.',
+    file: 'routes/console.php',
+    effects: [
+      'Reads trialing subscriptions whose trial has ended.',
+      'Sets tenants.is_due = true.',
+      'Sets subscriptions.status = past_due.',
     ],
   },
 ];
