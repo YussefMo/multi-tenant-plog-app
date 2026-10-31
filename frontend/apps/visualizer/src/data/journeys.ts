@@ -3077,7 +3077,7 @@ export const journeys: Journey[] = [
         id: 'guard',
         title: 'Session guard',
         summary:
-          'RequireTenantAuth loads auth:me, redirects 401/403 to login, and redirects viewers.',
+          'RequireTenantAuth loads auth:me, redirects 401/403 to login, and sends viewer sessions to the tenant login with an explanatory callout.',
         actor: 'Tenant console',
         speakerNotes: 'Tenant me is cached for ten minutes.',
       },

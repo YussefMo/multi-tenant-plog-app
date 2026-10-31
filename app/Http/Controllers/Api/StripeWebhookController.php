@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\StripeWebhookService;
 use Dedoc\Scramble\Attributes\BodyParameter;
 use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\HeaderParameter;
 use Dedoc\Scramble\Attributes\Response as DocsResponse;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,7 @@ use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 use UnexpectedValueException;
 
+#[Group('Stripe webhook', description: 'Stripe webhook processing and idempotency.')]
 class StripeWebhookController extends Controller
 {
   #[Endpoint(

@@ -37,7 +37,19 @@ class ApiDocsTest extends TestCase
       ->assertOk();
 
     $this->assertSame('3.1.2', $response->json('openapi'));
-    $this->assertGreaterThanOrEqual(40, count($response->json('paths')));
+    $this->assertSame(56, count($response->json('paths')));
+
+    $operations = collect($response->json('paths'))
+      ->flatMap(fn (array $methods): array => collect($methods)
+        ->only(['get', 'post', 'put', 'patch', 'delete'])
+        ->values()
+        ->all());
+
+    $this->assertSame(72, $operations->count());
+    $this->assertTrue(
+      $operations->every(fn (array $operation): bool => filled($operation['summary'] ?? null)),
+      'Every documented operation must have a summary.',
+    );
     $this->assertArrayHasKey('tenantSession', $response->json('components.securitySchemes'));
     $this->assertArrayHasKey('ownerSession', $response->json('components.securitySchemes'));
     $this->assertArrayHasKey('csrfToken', $response->json('components.securitySchemes'));

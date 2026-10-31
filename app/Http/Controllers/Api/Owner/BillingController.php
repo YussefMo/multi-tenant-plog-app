@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BillingPaymentResource;
 use App\Models\BillingPayment;
 use App\Services\BillingMetricsService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+#[Group('Billing', description: 'Owner billing metrics and cross-tenant transactions.')]
 class BillingController extends Controller
 {
+  #[Endpoint(title: 'Billing metrics', description: 'Return MRR, ARR, revenue, refunds, disputes, churn, and the monthly timeline.')]
   public function metrics(Request $request, BillingMetricsService $metrics): JsonResponse
   {
     $from = $request->date('from') ?? now()->startOfMonth()->subMonths(11);
@@ -22,6 +26,7 @@ class BillingController extends Controller
     ]);
   }
 
+  #[Endpoint(title: 'Billing transactions', description: 'List cross-tenant payments with tenant, status, date, and pagination filters.')]
   public function transactions(Request $request): AnonymousResourceCollection
   {
     $from = $request->date('from');

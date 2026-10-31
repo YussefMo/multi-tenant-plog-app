@@ -9,11 +9,15 @@ use App\Models\Post;
 use App\Models\Scopes\TenantScope;
 use App\Models\Tenant;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+#[Group('Viewer overview', description: 'Viewer discover metrics and recent content.')]
 class ViewerOverviewController extends Controller
 {
+  #[Endpoint(title: 'Viewer overview', description: 'Return viewer counts, categories, recent tenants, and recent published posts.')]
   public function show(Request $request): JsonResponse
   {
     $user = $request->user();

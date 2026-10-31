@@ -11,11 +11,15 @@ use App\Models\Post;
 use App\Models\Scopes\TenantScope;
 use App\Models\Tenant;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+#[Group('Viewer directory', description: 'Viewer tenant directory, profile, and published posts.')]
 class TenantDirectoryController extends Controller
 {
+  #[Endpoint(title: 'List directory tenants', description: 'List active tenants with search, category, and pagination.')]
   public function index(Request $request): AnonymousResourceCollection
   {
     $this->ensureViewer($request);
@@ -50,6 +54,7 @@ class TenantDirectoryController extends Controller
     return TenantDirectoryResource::collection($tenants);
   }
 
+  #[Endpoint(title: 'Show directory tenant', description: 'Return one active tenant with its published post count.')]
   public function show(Request $request, Tenant $tenant): TenantDirectoryResource
   {
     $this->ensureViewer($request);
@@ -63,6 +68,7 @@ class TenantDirectoryController extends Controller
     return new TenantDirectoryResource($tenant);
   }
 
+  #[Endpoint(title: 'List tenant published posts', description: 'List published posts for one active tenant with search and pagination.')]
   public function posts(Request $request, Tenant $tenant): AnonymousResourceCollection
   {
     $this->ensureViewer($request);

@@ -9,11 +9,15 @@ use App\Models\Post;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+#[Group('Tenant overview', description: 'Tenant dashboard counts and subscription summary.')]
 class TenantOverviewController extends Controller
 {
+  #[Endpoint(title: 'Tenant overview', description: 'Return permission-aware counts, post status totals, and the subscription summary.')]
   public function show(Request $request): JsonResponse
   {
     $user = $request->user();

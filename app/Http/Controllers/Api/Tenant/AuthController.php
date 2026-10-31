@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Services\FrontendUrlService;
 use App\Services\PermissionSyncService;
 use App\Services\SupportUserService;
+use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\IgnoreResponse;
 use Illuminate\Http\JsonResponse;
@@ -36,6 +37,7 @@ class AuthController extends Controller
   }
 
   #[IgnoreResponse(404)]
+  #[Endpoint(title: 'Tenant login', description: 'Authenticate a tenant user or viewer on the tenant_session realm.')]
   public function login(LoginRequest $request): UserResource
   {
     $key = 'tenant-login|'.Str::lower((string) $request->input('email')).'|'.$request->ip();
@@ -74,6 +76,7 @@ class AuthController extends Controller
     ]);
   }
 
+  #[Endpoint(title: 'Register a viewer', description: 'Create a tenant-less viewer account and sign in.')]
   public function register(RegisterRequest $request, PermissionSyncService $permissions): JsonResponse
   {
     $user = new User($request->safe()->only(['name', 'email', 'password']));
@@ -97,6 +100,7 @@ class AuthController extends Controller
     ])->response()->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Logout', description: 'Log out the tenant realm session and close any support access.')]
   public function logout(Request $request): JsonResponse
   {
     $this->closeSupportAccess($request->session()->get('support_access_id'));
@@ -108,6 +112,7 @@ class AuthController extends Controller
     return response()->json(['message' => 'Logged out.']);
   }
 
+  #[Endpoint(title: 'Support login', description: 'Exchange a support ticket for a hidden support session.')]
   public function supportLogin(SupportLoginRequest $request, SupportUserService $supportUsers): JsonResponse
   {
     $ticket = TenantSupportTicket::query()
@@ -155,6 +160,7 @@ class AuthController extends Controller
     ])->response()->setStatusCode(200);
   }
 
+  #[Endpoint(title: 'End support session', description: 'Close the support audit row and return to the owner console.')]
   public function supportEnd(Request $request): JsonResponse
   {
     $accessId = $request->session()->get('support_access_id');
@@ -173,6 +179,7 @@ class AuthController extends Controller
     ]);
   }
 
+  #[Endpoint(title: 'Current user', description: 'Return the authenticated user, tenant, permissions, invitation, and support state.')]
   public function me(Request $request): UserResource
   {
     $user = $request->user();
@@ -192,6 +199,7 @@ class AuthController extends Controller
     ]);
   }
 
+  #[Endpoint(title: 'Update profile', description: 'Update the authenticated user name and email.')]
   public function updateProfile(UpdateProfileRequest $request): UserResource
   {
     $user = $request->user();
@@ -208,6 +216,7 @@ class AuthController extends Controller
     ]);
   }
 
+  #[Endpoint(title: 'Update password', description: 'Change the password after verifying the current password.')]
   public function updatePassword(UpdatePasswordRequest $request): JsonResponse
   {
     $user = $request->user();
@@ -226,6 +235,7 @@ class AuthController extends Controller
     return response()->json(['message' => 'Password updated.']);
   }
 
+  #[Endpoint(title: 'Accept invitation', description: 'Accept a tenant invitation with the raw token and set a password.')]
   public function acceptInvitation(AcceptInvitationRequest $request): JsonResponse
   {
     $invitation = TenantInvitation::query()

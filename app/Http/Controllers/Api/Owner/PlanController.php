@@ -7,14 +7,18 @@ use App\Http\Requests\Owner\StorePlanRequest;
 use App\Http\Requests\Owner\UpdatePlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 
+#[Group('Plans', description: 'Owner plan catalog management.')]
 class PlanController extends Controller
 {
+  #[Endpoint(title: 'List plans', description: 'Return plans with total and active subscription counts.')]
   public function index(): AnonymousResourceCollection
   {
     return PlanResource::collection(
@@ -22,6 +26,7 @@ class PlanController extends Controller
     );
   }
 
+  #[Endpoint(title: 'Create a plan', description: 'Create a subscription plan.')]
   public function store(StorePlanRequest $request): JsonResponse
   {
     $data = $request->validated();
@@ -33,6 +38,7 @@ class PlanController extends Controller
     return (new PlanResource($plan))->response()->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Show a plan', description: 'Return one plan with subscription counts.')]
   public function show(Plan $plan): PlanResource
   {
     return new PlanResource($plan->loadCount([
@@ -41,6 +47,7 @@ class PlanController extends Controller
     ]));
   }
 
+  #[Endpoint(title: 'Update a plan', description: 'Update a plan amount, interval, features, and limits.')]
   public function update(UpdatePlanRequest $request, Plan $plan): PlanResource
   {
     $data = $request->validated();
@@ -59,6 +66,7 @@ class PlanController extends Controller
     return new PlanResource($plan);
   }
 
+  #[Endpoint(title: 'Delete a plan', description: 'Delete an unused plan; reject plans with subscriptions.')]
   public function destroy(Plan $plan): Response
   {
     abort_if($plan->subscriptions()->exists(), 409, 'This plan has subscriptions and cannot be deleted.');

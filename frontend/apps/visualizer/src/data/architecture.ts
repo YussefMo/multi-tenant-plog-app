@@ -117,6 +117,7 @@ export const architectureNodes: Node<ArchitectureNodeData, 'blueprint'>[] = [
         'app/Http/Controllers/Api/Tenant/PermissionCatalogController.php',
         'app/Http/Controllers/Api/Tenant/TenantOverviewController.php',
         'app/Http/Controllers/Api/Tenant/ViewerOverviewController.php',
+        'app/Http/Controllers/Api/SystemController.php',
         'app/Http/Controllers/Api/StripeWebhookController.php',
       ],
     },

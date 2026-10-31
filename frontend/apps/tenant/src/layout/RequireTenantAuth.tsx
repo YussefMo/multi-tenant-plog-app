@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ServerCrash } from 'lucide-react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Spinner, StatePage } from '@multi-tenant-plog/shared/components/components-parts';
@@ -9,13 +9,7 @@ import { useTenantMe } from '@/lib/hooks/auth.hook';
 export default function RequireTenantAuth({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { data, error, isError, isLoading } = useTenantMe();
-  const viewerRedirect = data?.role === 'user' ? data.redirect_url : undefined;
-
-  useEffect(() => {
-    if (viewerRedirect) {
-      window.location.assign(viewerRedirect);
-    }
-  }, [viewerRedirect]);
+  const isViewer = data?.role === 'user';
 
   if (isLoading) {
     return (
@@ -51,11 +45,9 @@ export default function RequireTenantAuth({ children }: { children: ReactNode })
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (viewerRedirect) {
+  if (isViewer) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
-      </div>
+      <Navigate to="/login" replace state={{ from: location.pathname, reason: 'viewer-session' }} />
     );
   }
 

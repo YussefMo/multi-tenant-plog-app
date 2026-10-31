@@ -239,7 +239,7 @@ Every `writes[].table` must exist in the table catalog.
 Successful output:
 
 ```text
-Atlas OK: 72 requests, 179 files, 30 journeys, 14 models, 6 commands, all references valid.
+Atlas OK: 72 requests, 180 files, 30 journeys, 14 models, 6 commands, all references valid.
 ```
 
 ## Adding or changing data

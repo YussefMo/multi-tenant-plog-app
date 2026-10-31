@@ -7,12 +7,16 @@ use App\Models\Owner;
 use App\Models\Tenant;
 use App\Models\TenantSupportTicket;
 use App\Services\FrontendUrlService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+#[Group('Support', description: 'Owner support access tickets.')]
 class SupportAccessController extends Controller
 {
+  #[Endpoint(title: 'Issue a support ticket', description: 'Create a single-use support ticket for an owned tenant with support enabled.')]
   public function store(Request $request, Tenant $tenant, FrontendUrlService $frontends): JsonResponse
   {
     $owner = $request->user('owner');

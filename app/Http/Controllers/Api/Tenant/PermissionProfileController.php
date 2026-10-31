@@ -9,15 +9,19 @@ use App\Http\Requests\Tenant\UpdatePermissionProfileRequest;
 use App\Http\Resources\PermissionProfileResource;
 use App\Models\PermissionProfile;
 use App\Services\PermissionSyncService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
+#[Group('Permission profiles', description: 'Tenant permission profile CRUD and resync.')]
 class PermissionProfileController extends Controller
 {
   use AuthorizesPermissions;
 
+  #[Endpoint(title: 'List profiles', description: 'List tenant permission profiles with search and pagination.')]
   public function index(Request $request): AnonymousResourceCollection
   {
     $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
@@ -39,6 +43,7 @@ class PermissionProfileController extends Controller
     return PermissionProfileResource::collection($profiles);
   }
 
+  #[Endpoint(title: 'Create profile', description: 'Create a tenant permission profile.')]
   public function store(StorePermissionProfileRequest $request): JsonResponse
   {
     $data = $request->validated();
@@ -53,6 +58,7 @@ class PermissionProfileController extends Controller
     ])))->response()->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Show profile', description: 'Return one tenant permission profile.')]
   public function show(Request $request, PermissionProfile $profile): PermissionProfileResource
   {
     $this->ensureTenantProfile($request, $profile);
@@ -62,6 +68,7 @@ class PermissionProfileController extends Controller
     ]));
   }
 
+  #[Endpoint(title: 'Update profile', description: 'Update a profile and resync assigned users.')]
   public function update(
     UpdatePermissionProfileRequest $request,
     PermissionProfile $profile,
@@ -83,6 +90,7 @@ class PermissionProfileController extends Controller
     ]));
   }
 
+  #[Endpoint(title: 'Delete profile', description: 'Delete an unused profile; reject assigned profiles.')]
   public function destroy(Request $request, PermissionProfile $profile): Response
   {
     $this->ensureTenantProfile($request, $profile);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Owner\PlanController;
 use App\Http\Controllers\Api\Owner\SupportAccessController;
 use App\Http\Controllers\Api\Owner\TenantController;
 use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\Api\SystemController;
 use App\Http\Controllers\Api\Tenant\AuthController;
 use App\Http\Controllers\Api\Tenant\BillingController;
 use App\Http\Controllers\Api\Tenant\BillingRedirectController;
@@ -17,16 +18,14 @@ use App\Http\Controllers\Api\Tenant\TenantOverviewController;
 use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
 use App\Http\Controllers\Api\Tenant\ViewerOverviewController;
-use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-  Route::middleware('web')->get('/csrf-token', fn () => response()->json(['csrf_token' => csrf_token()]))
+  Route::middleware('web')->get('/csrf-token', [SystemController::class, 'csrfToken'])
     ->name('api.v1.csrf-token');
 
   Route::prefix('owner')->middleware('web')->group(function () {
-    Route::get('/csrf-token', fn () => response()->json(['csrf_token' => csrf_token()]))
+    Route::get('/csrf-token', [SystemController::class, 'ownerCsrfToken'])
       ->name('api.v1.owner.csrf-token');
 
     Route::post('/auth/login', [OwnerAuthController::class, 'login'])
@@ -108,14 +107,7 @@ Route::prefix('v1')->group(function () {
     });
   });
 
-  Route::get('/health', function () {
-    return response()->json([
-      'status' => 'ok',
-      'app' => config('app.name'),
-      'version' => 'v1',
-      'timestamp' => now()->toIso8601String(),
-    ]);
-  })->name('api.v1.health');
+  Route::get('/health', [SystemController::class, 'health'])->name('api.v1.health');
 
   Route::get('/billing/checkout/success', [BillingRedirectController::class, 'success'])
     ->name('api.v1.billing.checkout.success');
@@ -128,7 +120,7 @@ Route::prefix('v1')->group(function () {
     ->name('api.v1.stripe.webhook');
 
   Route::middleware(['web', 'auth:web', 'support', 'tenant.active', 'tenant.not_due'])->group(function () {
-    Route::get('/user', fn (Request $request) => new UserResource($request->user()->load('tenant', 'profile')))
+    Route::get('/user', [SystemController::class, 'user'])
       ->name('api.v1.user');
 
     Route::get('/tenants', [TenantDirectoryController::class, 'index'])

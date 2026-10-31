@@ -16,14 +16,18 @@ use App\Notifications\TenantInvitationNotification;
 use App\Services\FrontendUrlService;
 use App\Services\TenantProvisioningService;
 use App\Services\TenantPurgeService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 
+#[Group('Tenants', description: 'Owner tenant listing, provisioning, lifecycle, and purge history.')]
 class TenantController extends Controller
 {
+  #[Endpoint(title: 'List tenants', description: 'Filter and paginate owned tenants by search, category, support, due state, and deletion state.')]
   public function index(Request $request): AnonymousResourceCollection
   {
     $owner = $this->currentOwner($request);
@@ -61,6 +65,7 @@ class TenantController extends Controller
     return TenantResource::collection($tenants);
   }
 
+  #[Endpoint(title: 'Create a tenant', description: 'Provision a tenant, its owner admin, and the initial invitation in one transaction.')]
   public function store(StoreTenantRequest $request, TenantProvisioningService $provisioning, FrontendUrlService $frontends): JsonResponse
   {
     $owner = $this->currentOwner($request);
@@ -87,6 +92,7 @@ class TenantController extends Controller
       ->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Show a tenant', description: 'Return the tenant with admin, invitation, subscription, and counts.')]
   public function show(Request $request, Tenant $tenant): TenantDetailResource
   {
     $this->ensureOwned($request, $tenant);
@@ -97,6 +103,7 @@ class TenantController extends Controller
     return new TenantDetailResource($tenant);
   }
 
+  #[Endpoint(title: 'Update a tenant', description: 'Update tenant name, category, and support access.')]
   public function update(UpdateTenantRequest $request, Tenant $tenant): TenantResource
   {
     $this->ensureOwned($request, $tenant);
@@ -105,6 +112,7 @@ class TenantController extends Controller
     return new TenantResource($tenant);
   }
 
+  #[Endpoint(title: 'Delete a tenant', description: 'Soft delete an owned tenant and start the retention clock.')]
   public function destroy(Request $request, Tenant $tenant): Response
   {
     $this->ensureOwned($request, $tenant);
@@ -113,6 +121,7 @@ class TenantController extends Controller
     return response()->noContent();
   }
 
+  #[Endpoint(title: 'Restore a tenant', description: 'Restore a soft-deleted owned tenant.')]
   public function restore(Request $request, Tenant $tenant): TenantResource
   {
     $this->ensureOwned($request, $tenant);
@@ -121,6 +130,7 @@ class TenantController extends Controller
     return new TenantResource($tenant);
   }
 
+  #[Endpoint(title: 'Force delete a tenant', description: 'Permanently purge a trashed tenant and write the audit row.')]
   public function forceDelete(Request $request, Tenant $tenant, TenantPurgeService $purgeService): Response
   {
     $this->ensureOwned($request, $tenant);
@@ -134,6 +144,7 @@ class TenantController extends Controller
     return response()->noContent();
   }
 
+  #[Endpoint(title: 'List purged tenants', description: 'Return the permanently deleted tenant audit history.')]
   public function purged(Request $request): AnonymousResourceCollection
   {
     $owner = $this->currentOwner($request);

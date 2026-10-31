@@ -142,7 +142,7 @@ Add only if the Atlas should show the tenant frontend:
 {
   "path": "frontend/apps/tenant/src/layout/RequireTenantAuth.tsx",
   "layer": "client",
-  "purpose": "Tenant session guard with loading, 401/403 redirects, and viewer redirect.",
+  "purpose": "Tenant session guard with loading, 401/403 redirects, and non-viewer sessions sent to the tenant login.",
   "features": ["tenant-console", "auth", "frontend"]
 },
 {
@@ -426,7 +426,7 @@ tone: cyan
 Suggested steps:
 
 1. `login` — login form, CSRF, `useTenantLogin`, viewer redirect.
-2. `guard` — `RequireTenantAuth`, cached `useTenantMe`, 401/403 handling.
+2. `guard` — `RequireTenantAuth`, cached `useTenantMe`, 401/403 handling; viewer sessions are sent to `/login` with an explanatory callout.
 3. `dashboard` — overview, recent posts, subscription, billing.
 4. `posts` — list, create, edit, publish/unpublish/delete.
 5. `users` — invite checkbox, password fallback, resend invitation.

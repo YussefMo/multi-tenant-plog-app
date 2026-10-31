@@ -980,7 +980,7 @@
   {
     "path": "frontend/apps/tenant/src/layout/RequireTenantAuth.tsx",
     "layer": "client",
-    "purpose": "Tenant session guard with loading, 401/403 redirects, and viewer redirect.",
+    "purpose": "Tenant session guard with loading, 401/403 redirects, and non-viewer sessions sent to the tenant login.",
     "features": ["tenant-console", "auth", "frontend"]
   },
   {
@@ -1072,5 +1072,11 @@
     "layer": "client",
     "purpose": "Viewer settings orchestrator: profile, password, appearance, and sign out.",
     "features": ["user-console", "settings", "frontend"]
+  },
+  {
+    "path": "app/Http/Controllers/Api/SystemController.php",
+    "layer": "controller",
+    "purpose": "Returns realm CSRF tokens, the health payload, and the authenticated user resource.",
+    "features": ["system", "auth", "docs"]
   }
 ]

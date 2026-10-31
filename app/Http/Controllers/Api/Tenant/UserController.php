@@ -14,16 +14,20 @@ use App\Notifications\TenantInvitationNotification;
 use App\Services\FrontendUrlService;
 use App\Services\PermissionSyncService;
 use App\Services\TenantInvitationService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 
+#[Group('Tenant users', description: 'Tenant user management, invitations, and owner protection.')]
 class UserController extends Controller
 {
   use AuthorizesPermissions;
 
+  #[Endpoint(title: 'List users', description: 'List tenant users with search, role, profile, and pagination filters.')]
   public function index(Request $request): AnonymousResourceCollection
   {
     $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
@@ -54,6 +58,7 @@ class UserController extends Controller
     return UserResource::collection($users);
   }
 
+  #[Endpoint(title: 'Create user', description: 'Create a tenant admin or author, optionally with an invitation.')]
   public function store(
     StoreUserRequest $request,
     PermissionSyncService $permissions,
@@ -106,6 +111,7 @@ class UserController extends Controller
       ->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Show user', description: 'Return one tenant user with invitation and profile.')]
   public function show(Request $request, User $user): UserResource
   {
     $this->ensureTenantUser($request, $user);
@@ -113,6 +119,7 @@ class UserController extends Controller
     return new UserResource($user->load('profile', 'latestInvitation'));
   }
 
+  #[Endpoint(title: 'Update user', description: 'Update tenant user identity, role, permissions, or password.')]
   public function update(
     UpdateUserRequest $request,
     User $user,
@@ -154,6 +161,7 @@ class UserController extends Controller
     return new UserResource($user->load('profile', 'latestInvitation'));
   }
 
+  #[Endpoint(title: 'Delete user', description: 'Delete a tenant user subject to owner and admin protection.')]
   public function destroy(Request $request, User $user): Response
   {
     $this->ensureTenantUser($request, $user);
@@ -169,6 +177,7 @@ class UserController extends Controller
     return response()->noContent();
   }
 
+  #[Endpoint(title: 'Resend invitation', description: 'Replace the pending invitation and resend the email.')]
   public function invite(
     Request $request,
     User $user,

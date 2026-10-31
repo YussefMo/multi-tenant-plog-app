@@ -61,6 +61,27 @@ describe('RequireTenantAuth', () => {
     expect(screen.getByText('protected tenant content')).toBeInTheDocument();
   });
 
+  it('sends viewers to the tenant login instead of the user client', () => {
+    useTenantMe.mockReturnValue({
+      data: {
+        id: 2,
+        role: 'user',
+        permissions: ['tenants.view'],
+        name: 'Viewer',
+        email: 'viewer@example.com',
+        redirect_url: 'http://localhost:3002',
+      },
+      error: null,
+      isError: false,
+      isLoading: false,
+    });
+
+    renderGuard();
+
+    expect(screen.getByText('tenant login page')).toBeInTheDocument();
+    expect(screen.queryByText('protected tenant content')).not.toBeInTheDocument();
+  });
+
   it('redirects forbidden sessions to login', () => {
     useTenantMe.mockReturnValue({
       data: undefined,

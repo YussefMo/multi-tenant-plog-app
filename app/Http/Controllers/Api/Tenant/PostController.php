@@ -10,14 +10,18 @@ use App\Http\Requests\Tenant\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
+#[Group('Posts', description: 'Tenant posts, publishing, and visibility rules.')]
 class PostController extends Controller
 {
+  #[Endpoint(title: 'List posts', description: 'List visible posts with search, status, author, and pagination filters.')]
   public function index(Request $request): AnonymousResourceCollection
   {
     $user = $request->user();
@@ -55,6 +59,7 @@ class PostController extends Controller
     return PostResource::collection($posts);
   }
 
+  #[Endpoint(title: 'Create post', description: 'Create a draft post owned by the authenticated tenant user.')]
   public function store(StorePostRequest $request): JsonResponse
   {
     $user = $request->user();
@@ -69,6 +74,7 @@ class PostController extends Controller
     return (new PostResource($post->load(['author', 'tenant'])))->response()->setStatusCode(201);
   }
 
+  #[Endpoint(title: 'Show post', description: 'Return one visible post with author and tenant.')]
   public function show(Post $post): PostResource
   {
     abort_if($post->tenant === null, 404);
@@ -77,6 +83,7 @@ class PostController extends Controller
     return new PostResource($post->load(['author', 'tenant']));
   }
 
+  #[Endpoint(title: 'Update post', description: 'Update a post when the policy allows it.')]
   public function update(UpdatePostRequest $request, Post $post): PostResource
   {
     Gate::authorize('update', $post);
@@ -85,6 +92,7 @@ class PostController extends Controller
     return new PostResource($post->load(['author', 'tenant']));
   }
 
+  #[Endpoint(title: 'Delete post', description: 'Soft delete a post when the policy allows it.')]
   public function destroy(Post $post): Response
   {
     Gate::authorize('delete', $post);
@@ -93,6 +101,7 @@ class PostController extends Controller
     return response()->noContent();
   }
 
+  #[Endpoint(title: 'Publish post', description: 'Publish a post and stamp published_at once.')]
   public function publish(Post $post): PostResource
   {
     Gate::authorize('publish', $post);
@@ -105,6 +114,7 @@ class PostController extends Controller
     return new PostResource($post->load(['author', 'tenant']));
   }
 
+  #[Endpoint(title: 'Unpublish post', description: 'Return a post to draft and clear published_at.')]
   public function unpublish(Post $post): PostResource
   {
     Gate::authorize('publish', $post);
