@@ -1,0 +1,1432 @@
+{
+  "generatedAt": "2026-10-31T19:11:41.730Z",
+  "source": "php artisan route:list --json --except-vendor",
+  "count": 72,
+  "requests": [
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/accept-invitation",
+      "path": "/api/v1/auth/accept-invitation",
+      "name": "api.v1.auth.accept-invitation",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@acceptInvitation",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/login",
+      "path": "/api/v1/auth/login",
+      "name": "api.v1.auth.login",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@login",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/logout",
+      "path": "/api/v1/auth/logout",
+      "name": "api.v1.auth.logout",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@logout",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/auth/me",
+      "path": "/api/v1/auth/me",
+      "name": "api.v1.auth.me",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@me",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active"
+      ]
+    },
+    {
+      "method": "PUT",
+      "uri": "api/v1/auth/password",
+      "path": "/api/v1/auth/password",
+      "name": "api.v1.auth.password",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@updatePassword",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/auth/profile",
+      "path": "/api/v1/auth/profile",
+      "name": "api.v1.auth.profile",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@updateProfile",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/register",
+      "path": "/api/v1/auth/register",
+      "name": "api.v1.auth.register",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@register",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "throttle:10,1"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/support-login",
+      "path": "/api/v1/auth/support-login",
+      "name": "api.v1.auth.support-login",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@supportLogin",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/auth/support/end",
+      "path": "/api/v1/auth/support/end",
+      "name": "api.v1.auth.support-end",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\AuthController@supportEnd",
+      "controller": "AuthController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/AuthController.php",
+      "group": "Auth",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/billing/cancel",
+      "path": "/api/v1/billing/cancel",
+      "name": "api.v1.billing.cancel",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@cancel",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.manage"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.manage"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/billing/checkout",
+      "path": "/api/v1/billing/checkout",
+      "name": "api.v1.billing.checkout",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@checkout",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.manage"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.manage"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/checkout/cancel",
+      "path": "/api/v1/billing/checkout/cancel",
+      "name": "api.v1.billing.checkout.cancel",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingRedirectController@cancel",
+      "controller": "BillingRedirectController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingRedirectController.php",
+      "group": "Billing Redirect",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/checkout/success",
+      "path": "/api/v1/billing/checkout/success",
+      "name": "api.v1.billing.checkout.success",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingRedirectController@success",
+      "controller": "BillingRedirectController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingRedirectController.php",
+      "group": "Billing Redirect",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/invoices",
+      "path": "/api/v1/billing/invoices",
+      "name": "api.v1.billing.invoices",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@invoices",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/payments",
+      "path": "/api/v1/billing/payments",
+      "name": "api.v1.billing.payments",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@payments",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/plans",
+      "path": "/api/v1/billing/plans",
+      "name": "api.v1.billing.plans",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@plans",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.view"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/billing/portal",
+      "path": "/api/v1/billing/portal",
+      "name": "api.v1.billing.portal",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@portal",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.manage"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.manage"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/portal/return",
+      "path": "/api/v1/billing/portal/return",
+      "name": "api.v1.billing.portal.return",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingRedirectController@portalReturn",
+      "controller": "BillingRedirectController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingRedirectController.php",
+      "group": "Billing Redirect",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/billing/subscription",
+      "path": "/api/v1/billing/subscription",
+      "name": "api.v1.billing.subscription",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@subscription",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.view"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/billing/trial",
+      "path": "/api/v1/billing/trial",
+      "name": "api.v1.billing.trial",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\BillingController@trial",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/BillingController.php",
+      "group": "Billing",
+      "realm": "tenant",
+      "permissions": [
+        "billing.manage"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:billing.manage"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/csrf-token",
+      "path": "/api/v1/csrf-token",
+      "name": "api.v1.csrf-token",
+      "action": "App\\Http\\Controllers\\Api\\SystemController@csrfToken",
+      "controller": "SystemController",
+      "controllerFile": "app/Http/Controllers/Api/SystemController.php",
+      "group": "System",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/health",
+      "path": "/api/v1/health",
+      "name": "api.v1.health",
+      "action": "App\\Http\\Controllers\\Api\\SystemController@health",
+      "controller": "SystemController",
+      "controllerFile": "app/Http/Controllers/Api/SystemController.php",
+      "group": "System",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/auth/login",
+      "path": "/api/v1/owner/auth/login",
+      "name": "api.v1.owner.login",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\OwnerAuthController@login",
+      "controller": "OwnerAuthController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+      "group": "Owner Auth",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/auth/logout",
+      "path": "/api/v1/owner/auth/logout",
+      "name": "api.v1.owner.logout",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\OwnerAuthController@logout",
+      "controller": "OwnerAuthController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+      "group": "Owner Auth",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/auth/me",
+      "path": "/api/v1/owner/auth/me",
+      "name": "api.v1.owner.me",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\OwnerAuthController@me",
+      "controller": "OwnerAuthController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+      "group": "Owner Auth",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "PUT",
+      "uri": "api/v1/owner/auth/password",
+      "path": "/api/v1/owner/auth/password",
+      "name": "api.v1.owner.password",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\OwnerAuthController@updatePassword",
+      "controller": "OwnerAuthController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+      "group": "Owner Auth",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/owner/auth/profile",
+      "path": "/api/v1/owner/auth/profile",
+      "name": "api.v1.owner.profile",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\OwnerAuthController@updateProfile",
+      "controller": "OwnerAuthController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/OwnerAuthController.php",
+      "group": "Owner Auth",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/billing/metrics",
+      "path": "/api/v1/owner/billing/metrics",
+      "name": "api.v1.owner.billing.metrics",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\BillingController@metrics",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/BillingController.php",
+      "group": "Billing",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/billing/transactions",
+      "path": "/api/v1/owner/billing/transactions",
+      "name": "api.v1.owner.billing.transactions",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\BillingController@transactions",
+      "controller": "BillingController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/BillingController.php",
+      "group": "Billing",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/csrf-token",
+      "path": "/api/v1/owner/csrf-token",
+      "name": "api.v1.owner.csrf-token",
+      "action": "App\\Http\\Controllers\\Api\\SystemController@ownerCsrfToken",
+      "controller": "SystemController",
+      "controllerFile": "app/Http/Controllers/Api/SystemController.php",
+      "group": "System",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/plans",
+      "path": "/api/v1/owner/plans",
+      "name": "api.v1.owner.plans.index",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\PlanController@index",
+      "controller": "PlanController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/PlanController.php",
+      "group": "Plan",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/plans",
+      "path": "/api/v1/owner/plans",
+      "name": "api.v1.owner.plans.store",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\PlanController@store",
+      "controller": "PlanController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/PlanController.php",
+      "group": "Plan",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/owner/plans/{plan}",
+      "path": "/api/v1/owner/plans/{plan}",
+      "name": "api.v1.owner.plans.destroy",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\PlanController@destroy",
+      "controller": "PlanController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/PlanController.php",
+      "group": "Plan",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/plans/{plan}",
+      "path": "/api/v1/owner/plans/{plan}",
+      "name": "api.v1.owner.plans.show",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\PlanController@show",
+      "controller": "PlanController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/PlanController.php",
+      "group": "Plan",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "PUT",
+      "uri": "api/v1/owner/plans/{plan}",
+      "path": "/api/v1/owner/plans/{plan}",
+      "name": "api.v1.owner.plans.update",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\PlanController@update",
+      "controller": "PlanController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/PlanController.php",
+      "group": "Plan",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/tenants",
+      "path": "/api/v1/owner/tenants",
+      "name": "api.v1.owner.tenants.index",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@index",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/tenants",
+      "path": "/api/v1/owner/tenants",
+      "name": "api.v1.owner.tenants.store",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@store",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/owner/tenants/{tenant}",
+      "path": "/api/v1/owner/tenants/{tenant}",
+      "name": "api.v1.owner.tenants.destroy",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@destroy",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/tenants/{tenant}",
+      "path": "/api/v1/owner/tenants/{tenant}",
+      "name": "api.v1.owner.tenants.show",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@show",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "PUT",
+      "uri": "api/v1/owner/tenants/{tenant}",
+      "path": "/api/v1/owner/tenants/{tenant}",
+      "name": "api.v1.owner.tenants.update",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@update",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/tenants/{tenant}/access",
+      "path": "/api/v1/owner/tenants/{tenant}/access",
+      "name": "api.v1.owner.tenants.access",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\SupportAccessController@store",
+      "controller": "SupportAccessController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/SupportAccessController.php",
+      "group": "Support Access",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/owner/tenants/{tenant}/force",
+      "path": "/api/v1/owner/tenants/{tenant}/force",
+      "name": "api.v1.owner.tenants.force-delete",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@forceDelete",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/owner/tenants/{tenant}/restore",
+      "path": "/api/v1/owner/tenants/{tenant}/restore",
+      "name": "api.v1.owner.tenants.restore",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@restore",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/owner/tenants/purged",
+      "path": "/api/v1/owner/tenants/purged",
+      "name": "api.v1.owner.tenants.purged",
+      "action": "App\\Http\\Controllers\\Api\\Owner\\TenantController@purged",
+      "controller": "TenantController",
+      "controllerFile": "app/Http/Controllers/Api/Owner/TenantController.php",
+      "group": "Tenant",
+      "realm": "owner",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:owner"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/permissions",
+      "path": "/api/v1/permissions",
+      "name": "api.v1.permissions.index",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionCatalogController@index",
+      "controller": "PermissionCatalogController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionCatalogController.php",
+      "group": "Permission Catalog",
+      "realm": "tenant",
+      "permissions": [
+        "users.view",
+        "profiles.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.view,profiles.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/posts",
+      "path": "/api/v1/posts",
+      "name": "api.v1.posts.index",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@index",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.view.any",
+        "posts.view.own",
+        "posts.view.published"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.view.any,posts.view.own,posts.view.published"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/posts",
+      "path": "/api/v1/posts",
+      "name": "api.v1.posts.store",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@store",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.create"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.create"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/posts/{post}",
+      "path": "/api/v1/posts/{post}",
+      "name": "api.v1.posts.destroy",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@destroy",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.delete.any",
+        "posts.delete.own"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.delete.any,posts.delete.own"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/posts/{post}",
+      "path": "/api/v1/posts/{post}",
+      "name": "api.v1.posts.show",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@show",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.view.any",
+        "posts.view.own",
+        "posts.view.published"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.view.any,posts.view.own,posts.view.published"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/posts/{post}",
+      "path": "/api/v1/posts/{post}",
+      "name": "api.v1.posts.update",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@update",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.update.any",
+        "posts.update.own"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.update.any,posts.update.own"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/posts/{post}/publish",
+      "path": "/api/v1/posts/{post}/publish",
+      "name": "api.v1.posts.publish",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@publish",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.publish"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.publish"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/posts/{post}/unpublish",
+      "path": "/api/v1/posts/{post}/unpublish",
+      "name": "api.v1.posts.unpublish",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PostController@unpublish",
+      "controller": "PostController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PostController.php",
+      "group": "Post",
+      "realm": "tenant",
+      "permissions": [
+        "posts.publish"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:posts.publish"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/profiles",
+      "path": "/api/v1/profiles",
+      "name": "api.v1.profiles.index",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionProfileController@index",
+      "controller": "PermissionProfileController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+      "group": "Permission Profile",
+      "realm": "tenant",
+      "permissions": [
+        "profiles.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:profiles.view"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/profiles",
+      "path": "/api/v1/profiles",
+      "name": "api.v1.profiles.store",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionProfileController@store",
+      "controller": "PermissionProfileController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+      "group": "Permission Profile",
+      "realm": "tenant",
+      "permissions": [
+        "profiles.create"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:profiles.create"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/profiles/{profile}",
+      "path": "/api/v1/profiles/{profile}",
+      "name": "api.v1.profiles.destroy",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionProfileController@destroy",
+      "controller": "PermissionProfileController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+      "group": "Permission Profile",
+      "realm": "tenant",
+      "permissions": [
+        "profiles.delete"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:profiles.delete"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/profiles/{profile}",
+      "path": "/api/v1/profiles/{profile}",
+      "name": "api.v1.profiles.show",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionProfileController@show",
+      "controller": "PermissionProfileController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+      "group": "Permission Profile",
+      "realm": "tenant",
+      "permissions": [
+        "profiles.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:profiles.view"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/profiles/{profile}",
+      "path": "/api/v1/profiles/{profile}",
+      "name": "api.v1.profiles.update",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\PermissionProfileController@update",
+      "controller": "PermissionProfileController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/PermissionProfileController.php",
+      "group": "Permission Profile",
+      "realm": "tenant",
+      "permissions": [
+        "profiles.update"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:profiles.update"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/stripe/webhook",
+      "path": "/api/v1/stripe/webhook",
+      "name": "api.v1.stripe.webhook",
+      "action": "App\\Http\\Controllers\\Api\\StripeWebhookController",
+      "controller": "StripeWebhookController",
+      "controllerFile": "routes/api.php",
+      "group": "Stripe Webhook",
+      "realm": "public",
+      "permissions": [],
+      "middleware": [
+        "api"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/tenant",
+      "path": "/api/v1/tenant",
+      "name": "api.v1.tenant.show",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantSettingsController@show",
+      "controller": "TenantSettingsController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantSettingsController.php",
+      "group": "Tenant Settings",
+      "realm": "tenant",
+      "permissions": [
+        "tenant.settings.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenant.settings.view"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/tenant",
+      "path": "/api/v1/tenant",
+      "name": "api.v1.tenant.update",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantSettingsController@update",
+      "controller": "TenantSettingsController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantSettingsController.php",
+      "group": "Tenant Settings",
+      "realm": "tenant",
+      "permissions": [
+        "tenant.settings.update"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenant.settings.update"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/tenant/overview",
+      "path": "/api/v1/tenant/overview",
+      "name": "api.v1.tenant.overview",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantOverviewController@show",
+      "controller": "TenantOverviewController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantOverviewController.php",
+      "group": "Tenant Overview",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/tenants",
+      "path": "/api/v1/tenants",
+      "name": "api.v1.tenants.index",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantDirectoryController@index",
+      "controller": "TenantDirectoryController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantDirectoryController.php",
+      "group": "Tenant Directory",
+      "realm": "tenant",
+      "permissions": [
+        "tenants.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenants.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/tenants/{tenant}",
+      "path": "/api/v1/tenants/{tenant}",
+      "name": "api.v1.tenants.show",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantDirectoryController@show",
+      "controller": "TenantDirectoryController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantDirectoryController.php",
+      "group": "Tenant Directory",
+      "realm": "tenant",
+      "permissions": [
+        "tenants.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenants.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/tenants/{tenant}/posts",
+      "path": "/api/v1/tenants/{tenant}/posts",
+      "name": "api.v1.tenants.posts",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\TenantDirectoryController@posts",
+      "controller": "TenantDirectoryController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/TenantDirectoryController.php",
+      "group": "Tenant Directory",
+      "realm": "tenant",
+      "permissions": [
+        "tenants.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenants.view"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/user",
+      "path": "/api/v1/user",
+      "name": "api.v1.user",
+      "action": "App\\Http\\Controllers\\Api\\SystemController@user",
+      "controller": "SystemController",
+      "controllerFile": "app/Http/Controllers/Api/SystemController.php",
+      "group": "System",
+      "realm": "tenant",
+      "permissions": [],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/users",
+      "path": "/api/v1/users",
+      "name": "api.v1.users.index",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@index",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.view"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/users",
+      "path": "/api/v1/users",
+      "name": "api.v1.users.store",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@store",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.create"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.create"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "uri": "api/v1/users/{user}",
+      "path": "/api/v1/users/{user}",
+      "name": "api.v1.users.destroy",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@destroy",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.delete"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.delete"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/users/{user}",
+      "path": "/api/v1/users/{user}",
+      "name": "api.v1.users.show",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@show",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.view"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "uri": "api/v1/users/{user}",
+      "path": "/api/v1/users/{user}",
+      "name": "api.v1.users.update",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@update",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.update"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.update"
+      ]
+    },
+    {
+      "method": "POST",
+      "uri": "api/v1/users/{user}/invite",
+      "path": "/api/v1/users/{user}/invite",
+      "name": "api.v1.users.invite",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\UserController@invite",
+      "controller": "UserController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/UserController.php",
+      "group": "User",
+      "realm": "tenant",
+      "permissions": [
+        "users.update"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:users.update"
+      ]
+    },
+    {
+      "method": "GET",
+      "uri": "api/v1/viewer/overview",
+      "path": "/api/v1/viewer/overview",
+      "name": "api.v1.viewer.overview",
+      "action": "App\\Http\\Controllers\\Api\\Tenant\\ViewerOverviewController@show",
+      "controller": "ViewerOverviewController",
+      "controllerFile": "app/Http/Controllers/Api/Tenant/ViewerOverviewController.php",
+      "group": "Viewer Overview",
+      "realm": "tenant",
+      "permissions": [
+        "tenants.view"
+      ],
+      "middleware": [
+        "api",
+        "web",
+        "auth:web",
+        "support",
+        "tenant.active",
+        "tenant.not_due",
+        "permission:tenants.view"
+      ]
+    }
+  ]
+}

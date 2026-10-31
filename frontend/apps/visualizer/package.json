@@ -7,6 +7,7 @@
     "dev": "vite --port 3003 --strictPort",
     "predev": "pnpm generate:requests",
     "build": "pnpm generate:requests && tsgo --noEmit && vite build",
+    "build:vercel": "tsgo --noEmit && vite build",
     "preview": "vite preview --port 3003 --strictPort",
     "pretypecheck": "pnpm generate:requests",
     "typecheck": "tsgo --noEmit",
