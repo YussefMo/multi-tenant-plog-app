@@ -92,6 +92,8 @@ class DemoSeederApiTest extends TestCase
     $this->actingAs($this->adminThree)
       ->postJson('/api/v1/posts', ['title' => 'Blocked', 'body' => 'Body'])
       ->assertStatus(402);
+
+    $this->assertTrue($this->tenantThree->is_due);
   }
 
   public function test_owner_billing_endpoints_return_seeded_data(): void

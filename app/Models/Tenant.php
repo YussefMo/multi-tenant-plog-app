@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property-read \Illuminate\Support\Carbon|null $trial_used_at
+ * @property \Illuminate\Support\Carbon|null $trial_used_at
  * @property-read int|null $published_posts_count
  */
 #[Fillable(['name', 'category', 'allow_support', 'is_due'])]

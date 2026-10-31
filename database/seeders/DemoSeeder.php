@@ -26,8 +26,6 @@ class DemoSeeder extends Seeder
 {
   private const DEMO_PASSWORD = 'password';
 
-  private const BILLING_MONTHS = 12;
-
   public function run(): void
   {
     $this->call(PlanSeeder::class);

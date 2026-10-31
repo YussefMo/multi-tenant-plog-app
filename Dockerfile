@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1
+
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer config platform.php 8.3 \
+    && composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --no-scripts \
+    --optimize-autoloader
+
+COPY . .
+RUN composer dump-autoload --no-dev --optimize --no-scripts
+
+
+FROM php:8.3-fpm-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx \
+    supervisor \
+    curl \
+    gettext-base \
+    libicu-dev \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo_mysql bcmath intl zip opcache mbstring curl \
+    && docker-php-ext-enable opcache \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /var/www/html
+
+COPY --from=vendor /app /var/www/html
+COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+    && mkdir -p \
+        storage/logs \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && rm -f /etc/nginx/sites-enabled/default
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${PORT:-8080}/up" || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
