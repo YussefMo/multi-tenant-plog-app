@@ -17,6 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property-read PostStatus $status
  * @property-read \Illuminate\Support\Carbon|null $published_at
  * @property-read User|null $author
+ * @property-read \App\Models\Tenant|null $tenant
  * @property-read \Illuminate\Support\Carbon|null $created_at
  * @property-read \Illuminate\Support\Carbon|null $updated_at
  */
@@ -38,6 +39,13 @@ class PostResource extends JsonResource
           'id' => $this->author->id,
           'name' => $this->author->name,
           'role' => $this->author->role?->value,
+        ] : null,
+      ),
+      'tenant' => $this->whenLoaded(
+        'tenant',
+        fn () => $this->tenant ? [
+          'id' => $this->tenant->id,
+          'name' => $this->tenant->name,
         ] : null,
       ),
       'created_at' => $this->created_at?->toIso8601String(),

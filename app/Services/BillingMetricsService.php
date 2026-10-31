@@ -134,7 +134,7 @@ class BillingMetricsService
    */
   private function timeline(?Carbon $from, ?Carbon $to): array
   {
-    $start = ($from?->copy() ?? now()->subMonths(11))->startOfMonth();
+    $start = ($from?->copy() ?? now()->startOfMonth()->subMonths(11))->startOfMonth();
     $end = ($to?->copy() ?? now())->endOfMonth();
 
     if ($start->greaterThan($end)) {

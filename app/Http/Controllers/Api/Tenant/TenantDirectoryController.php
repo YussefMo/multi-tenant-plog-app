@@ -20,7 +20,16 @@ class TenantDirectoryController extends Controller
   {
     $this->ensureViewer($request);
 
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+    $search = trim((string) $request->query('search', ''));
+
     $tenants = Tenant::query()
+      ->when($search !== '', function ($query) use ($search): void {
+        $query->where(function ($query) use ($search): void {
+          $query->where('name', 'like', "%{$search}%")
+            ->orWhere('category', 'like', "%{$search}%");
+        });
+      })
       ->when(
         $request->filled('name'),
         fn ($query) => $query->where('name', 'like', '%'.$request->string('name')->toString().'%'),
@@ -35,22 +44,46 @@ class TenantDirectoryController extends Controller
           ->where('status', PostStatus::Published->value),
       ])
       ->orderBy('name')
-      ->paginate(15);
+      ->paginate($perPage)
+      ->withQueryString();
 
     return TenantDirectoryResource::collection($tenants);
+  }
+
+  public function show(Request $request, Tenant $tenant): TenantDirectoryResource
+  {
+    $this->ensureViewer($request);
+
+    $tenant->loadCount([
+      'posts as published_posts_count' => fn ($query) => $query
+        ->withoutGlobalScope(TenantScope::class)
+        ->where('status', PostStatus::Published->value),
+    ]);
+
+    return new TenantDirectoryResource($tenant);
   }
 
   public function posts(Request $request, Tenant $tenant): AnonymousResourceCollection
   {
     $this->ensureViewer($request);
 
+    $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+    $search = trim((string) $request->query('search', ''));
+
     $posts = Post::query()
       ->withoutGlobalScope(TenantScope::class)
       ->where('tenant_id', $tenant->id)
       ->where('status', PostStatus::Published->value)
-      ->with('author')
+      ->with(['author', 'tenant'])
+      ->when($search !== '', function ($query) use ($search): void {
+        $query->where(function ($query) use ($search): void {
+          $query->where('title', 'like', "%{$search}%")
+            ->orWhere('slug', 'like', "%{$search}%");
+        });
+      })
       ->orderByDesc('published_at')
-      ->paginate(15);
+      ->paginate($perPage)
+      ->withQueryString();
 
     return PostResource::collection($posts);
   }

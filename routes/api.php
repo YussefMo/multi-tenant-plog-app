@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Tenant\TenantDirectoryController;
 use App\Http\Controllers\Api\Tenant\TenantOverviewController;
 use App\Http\Controllers\Api\Tenant\TenantSettingsController;
 use App\Http\Controllers\Api\Tenant\UserController;
+use App\Http\Controllers\Api\Tenant\ViewerOverviewController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -133,9 +134,16 @@ Route::prefix('v1')->group(function () {
     Route::get('/tenants', [TenantDirectoryController::class, 'index'])
       ->middleware('permission:tenants.view')
       ->name('api.v1.tenants.index');
+    Route::get('/tenants/{tenant}', [TenantDirectoryController::class, 'show'])
+      ->middleware('permission:tenants.view')
+      ->name('api.v1.tenants.show');
     Route::get('/tenants/{tenant}/posts', [TenantDirectoryController::class, 'posts'])
       ->middleware('permission:tenants.view')
       ->name('api.v1.tenants.posts');
+
+    Route::get('/viewer/overview', [ViewerOverviewController::class, 'show'])
+      ->middleware('permission:tenants.view')
+      ->name('api.v1.viewer.overview');
 
     Route::get('/tenant', [TenantSettingsController::class, 'show'])
       ->middleware('permission:tenant.settings.view')
