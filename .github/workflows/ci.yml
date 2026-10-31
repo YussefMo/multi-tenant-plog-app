@@ -68,6 +68,9 @@ jobs:
       - name: Frontend build
         run: pnpm --dir frontend build
 
+      - name: Atlas validation
+        run: pnpm --dir frontend atlas:validate
+
   tests:
     name: Tests
     runs-on: ubuntu-latest

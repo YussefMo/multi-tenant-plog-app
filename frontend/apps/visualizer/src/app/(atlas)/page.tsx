@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ArchitectureMap from '@/components/ArchitectureMap';
 import Inspector from '@/components/Inspector';
 import StatCard from '@/components/StatCard';
-import { commands, files, journeys, models, requestsDocument } from '@/data';
+import { commands, files, journeys, models, requestsDocument, securityMeasures } from '@/data';
 import { architectureNodes } from '@/data/architecture';
 
 const serviceCount = files.filter((file) => file.layer === 'service').length;
@@ -34,12 +34,15 @@ export default function OverviewPage() {
             <Link className="ghost-button" to="/present">
               Start presenter mode
             </Link>
+            <Link className="ghost-button" to="/security">
+              Open security measures
+            </Link>
           </div>
         </div>
         <div className="hero-stamp">
           <span>ATLAS</span>
-          <strong>06</strong>
-          <small>complete</small>
+          <strong>07</strong>
+          <small>sections</small>
         </div>
       </section>
 
@@ -81,12 +84,16 @@ export default function OverviewPage() {
       <section className="phase-grid">
         <article>
           <span className="section-label">What is navigable</span>
-          <h3>Six surfaces, one system</h3>
+          <h3>Seven surfaces, one system</h3>
           <ul>
             <li>Generated request catalog for all {requestsDocument.count} API operations.</li>
             <li>{journeys.length} playable journeys and cross-cutting systems with SQL impact.</li>
             <li>{models.length} models, an ERD, and a table explorer with readers and writers.</li>
             <li>{commands.length} commands with options, writes, external calls, and schedules.</li>
+            <li>
+              {securityMeasures.length} security measures with threats, controls, rationale, and
+              references.
+            </li>
             <li>{files.length} catalogued files, each with a purpose.</li>
             <li>Presenter mode with keyboard navigation and live collection switching.</li>
           </ul>

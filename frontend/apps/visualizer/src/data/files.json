@@ -1078,5 +1078,59 @@
     "layer": "controller",
     "purpose": "Returns realm CSRF tokens, the health payload, and the authenticated user resource.",
     "features": ["system", "auth", "docs"]
+  },
+  {
+    "path": "config/database.php",
+    "layer": "config",
+    "purpose": "Defines the application and owner MySQL connections, strict mode, and the separate owners database.",
+    "features": ["database", "owner", "isolation"]
+  },
+  {
+    "path": "tests/Feature/SessionRealmTest.php",
+    "layer": "test",
+    "purpose": "Covers realm CSRF cookies for owner and tenant sessions.",
+    "features": ["auth", "session", "tests"]
+  },
+  {
+    "path": "tests/Feature/UserManagementTest.php",
+    "layer": "test",
+    "purpose": "Covers tenant user CRUD, role restrictions, owner protection, and self-delete guards.",
+    "features": ["tenant-users", "authorization", "tests"]
+  },
+  {
+    "path": "tests/Feature/ApiErrorTest.php",
+    "layer": "test",
+    "purpose": "Covers the JSON error envelope and status mapping.",
+    "features": ["errors", "transport", "tests"]
+  },
+  {
+    "path": "tests/Feature/BillingCheckoutTest.php",
+    "layer": "test",
+    "purpose": "Covers checkout guards, plan validation, and Stripe customer setup.",
+    "features": ["billing", "checkout", "tests"]
+  },
+  {
+    "path": "tests/Feature/BillingHistoryTest.php",
+    "layer": "test",
+    "purpose": "Covers tenant invoice and payment history scoping.",
+    "features": ["billing", "isolation", "tests"]
+  },
+  {
+    "path": "tests/Feature/HealthTest.php",
+    "layer": "test",
+    "purpose": "Covers the public health endpoint payload.",
+    "features": ["system", "health", "tests"]
+  },
+  {
+    "path": "frontend/shared/lib/env.ts",
+    "layer": "client",
+    "purpose": "Resolves the API base URL, version, and app name from Vite environment variables.",
+    "features": ["frontend", "config", "security"]
+  },
+  {
+    "path": "tests/Feature/PlanManagementTest.php",
+    "layer": "test",
+    "purpose": "Covers owner plan CRUD, subscription counts, and the delete guard.",
+    "features": ["owner", "plans", "tests"]
   }
 ]

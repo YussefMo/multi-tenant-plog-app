@@ -159,3 +159,49 @@ export interface CommandRecord {
   output: string[];
   notes: string;
 }
+
+export type SecurityCategoryId =
+  | 'identity'
+  | 'authorization'
+  | 'isolation'
+  | 'input'
+  | 'secrets'
+  | 'transport'
+  | 'billing'
+  | 'lifecycle'
+  | 'operations';
+
+export type SecurityPosture = 'enforced' | 'configurable' | 'defense-in-depth';
+
+export type SecurityRisk = 'critical' | 'high' | 'medium' | 'low';
+
+export interface SecurityCategory {
+  id: SecurityCategoryId;
+  label: string;
+  description: string;
+  tone: Tone;
+}
+
+export interface SecurityEndpoint {
+  method: string;
+  path: string;
+}
+
+export interface SecurityMeasure {
+  id: string;
+  title: string;
+  category: SecurityCategoryId;
+  realm: 'owner' | 'tenant' | 'public' | 'cross-cutting';
+  posture: SecurityPosture;
+  risk: SecurityRisk;
+  summary: string;
+  threat: string;
+  control: string;
+  why: string;
+  implementation: string[];
+  files: string[];
+  endpoints?: SecurityEndpoint[];
+  tests?: string[];
+  journeys?: string[];
+  notes?: string;
+}

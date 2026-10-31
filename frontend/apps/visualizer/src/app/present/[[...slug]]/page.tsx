@@ -4,16 +4,27 @@ import CommandDetail from '@/components/CommandDetail';
 import JourneyPlayer from '@/components/JourneyPlayer';
 import ModelDetail from '@/components/ModelDetail';
 import RequestDetail from '@/components/RequestDetail';
+import SecurityDetail from '@/components/SecurityDetail';
 import { ThemeToggle } from '@multi-tenant-plog/shared/ui/theme-toggle';
-import { commands, journeys, journeysById, models, modelsByName, requestsDocument } from '@/data';
+import {
+  commands,
+  journeys,
+  journeysById,
+  models,
+  modelsByName,
+  requestsDocument,
+  securityById,
+  securityMeasures,
+} from '@/data';
 
-type Collection = 'journeys' | 'models' | 'commands' | 'requests';
+type Collection = 'journeys' | 'models' | 'commands' | 'requests' | 'security';
 
 const collections: { id: Collection; label: string; count: number }[] = [
   { id: 'journeys', label: 'Journeys', count: journeys.length },
   { id: 'models', label: 'Models', count: models.length },
   { id: 'commands', label: 'Commands', count: commands.length },
   { id: 'requests', label: 'Requests', count: requestsDocument.count },
+  { id: 'security', label: 'Security', count: securityMeasures.length },
 ];
 
 function parseCollection(value: string | undefined): Collection {
@@ -37,11 +48,13 @@ export default function PresentPage() {
   const request =
     requestsDocument.requests.find((item) => item.name === params.itemId) ??
     requestsDocument.requests[0];
+  const security = securityById.get(params.itemId ?? '') ?? securityMeasures[0];
 
   const journeyPosition = journeys.findIndex((item) => item.id === journey.id);
   const modelPosition = models.findIndex((item) => item.name === model.name);
   const commandPosition = commands.findIndex((item) => item.name === command.name);
   const requestPosition = requestsDocument.requests.findIndex((item) => item.name === request.name);
+  const securityPosition = securityMeasures.findIndex((item) => item.id === security.id);
 
   const goNext = useCallback(() => {
     if (collection === 'journeys') {
@@ -67,6 +80,12 @@ export default function PresentPage() {
       return;
     }
 
+    if (collection === 'security') {
+      const next = securityMeasures[(securityPosition + 1) % securityMeasures.length];
+      navigate(`/present/security/${encodeURIComponent(next.id)}`);
+      return;
+    }
+
     const next =
       requestsDocument.requests[(requestPosition + 1) % requestsDocument.requests.length];
     navigate(`/present/requests/${encodeURIComponent(next.name)}`);
@@ -77,6 +96,7 @@ export default function PresentPage() {
     journeyPosition,
     modelPosition,
     requestPosition,
+    securityPosition,
     stepIndex,
   ]);
 
@@ -106,6 +126,15 @@ export default function PresentPage() {
       return;
     }
 
+    if (collection === 'security') {
+      const previous =
+        securityMeasures[
+          (securityPosition - 1 + securityMeasures.length) % securityMeasures.length
+        ];
+      navigate(`/present/security/${encodeURIComponent(previous.id)}`);
+      return;
+    }
+
     const previous =
       requestsDocument.requests[
         (requestPosition - 1 + requestsDocument.requests.length) % requestsDocument.requests.length
@@ -118,6 +147,7 @@ export default function PresentPage() {
     journeyPosition,
     modelPosition,
     requestPosition,
+    securityPosition,
     stepIndex,
   ]);
 
@@ -129,11 +159,13 @@ export default function PresentPage() {
         navigate(`/present/models/${encodeURIComponent(model.name)}`);
       } else if (next === 'commands') {
         navigate(`/present/commands/${encodeURIComponent(command.name)}`);
+      } else if (next === 'security') {
+        navigate(`/present/security/${encodeURIComponent(security.id)}`);
       } else {
         navigate(`/present/requests/${encodeURIComponent(request.name)}`);
       }
     },
-    [command.name, journey, model.name, navigate, request.name, stepIndex],
+    [command.name, journey, model.name, navigate, request.name, security.id, stepIndex],
   );
 
   useEffect(() => {
@@ -164,6 +196,8 @@ export default function PresentPage() {
         switchCollection('commands');
       } else if (event.key === '4') {
         switchCollection('requests');
+      } else if (event.key === '5') {
+        switchCollection('security');
       } else if (event.key.toLowerCase() === 'f') {
         setFocus((value) => !value);
       } else if (event.key === 'Escape') {
@@ -183,7 +217,9 @@ export default function PresentPage() {
         ? modelPosition
         : collection === 'commands'
           ? commandPosition
-          : requestPosition;
+          : collection === 'security'
+            ? securityPosition
+            : requestPosition;
   const total =
     collection === 'journeys'
       ? journeys.length
@@ -191,7 +227,9 @@ export default function PresentPage() {
         ? models.length
         : collection === 'commands'
           ? commands.length
-          : requestsDocument.count;
+          : collection === 'security'
+            ? securityMeasures.length
+            : requestsDocument.count;
   const stepTotal = collection === 'journeys' ? journey.steps.length : 1;
   const stepCurrent = collection === 'journeys' ? stepIndex + 1 : 1;
   const progress =
@@ -211,7 +249,9 @@ export default function PresentPage() {
                 ? model.name
                 : collection === 'commands'
                   ? command.name
-                  : request.path}
+                  : collection === 'security'
+                    ? security.title
+                    : request.path}
           </strong>
         </div>
 
@@ -258,6 +298,7 @@ export default function PresentPage() {
         )}
         {collection === 'models' && <ModelDetail model={model} />}
         {collection === 'commands' && <CommandDetail command={command} />}
+        {collection === 'security' && <SecurityDetail measure={security} />}
         {collection === 'requests' && <RequestDetail request={request} />}
       </main>
 
@@ -286,7 +327,7 @@ export default function PresentPage() {
             →
           </button>
         </div>
-        <p className="presenter-hint">← → steps · 1–4 switch collection · F focus · Esc exit</p>
+        <p className="presenter-hint">← → steps · 1–5 switch collection · F focus · Esc exit</p>
       </footer>
     </div>
   );

@@ -22,6 +22,7 @@ Requests are regenerated from Laravel on `predev`, `pretypecheck`, `prebuild`, a
 | `/journeys` | Playable feature journeys and cross-cutting systems    |
 | `/models`   | ERD, model explorer, and table explorer                |
 | `/commands` | Artisan command atlas and daily schedule               |
+| `/security` | 48 backend security measures with references           |
 | `/present`  | Presenter mode                                         |
 
 Deep links are stable:
@@ -31,6 +32,7 @@ Deep links are stable:
 /models?model=Subscription
 /models?tab=tables&table=posts
 /commands?command=tenants%3Apurge
+/security?measure=tenant-active-gate
 /requests?path=%2Fapi%2Fv1%2Fposts
 /present/journeys/stripe-webhook/invoices
 ```
@@ -133,7 +135,8 @@ Journey steps show speaker notes. Switching collections keeps the current journe
 18. Billing metrics: MRR, revenue, refunds, disputes, timeline.
 19. Tenant lifecycle: soft delete, blocked traffic, restore, force delete, purged history.
 20. Cross-cutting systems: session realms, tenant isolation, error envelope, docs.
-21. Models and commands: finish on the ERD, purge audit, and mark-due command.
+21. Security: walk the 48 controls by category, threat, and rationale.
+22. Models and commands: finish on the ERD, purge audit, and mark-due command.
 
 ## Static build
 

@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { ThemeToggle } from '@multi-tenant-plog/shared/ui/theme-toggle';
-import { files, journeys, models, requestsDocument } from '@/data';
+import { files, journeys, models, requestsDocument, securityMeasures } from '@/data';
 import { usePathname } from '@/lib/router';
 
 const navigation = [
@@ -10,7 +10,8 @@ const navigation = [
   { to: '/journeys', label: 'Journeys', code: '04' },
   { to: '/models', label: 'Models + DB', code: '05' },
   { to: '/commands', label: 'Commands', code: '06' },
-  { to: '/present', label: 'Presenter', code: '07' },
+  { to: '/security', label: 'Security', code: '07' },
+  { to: '/present', label: 'Presenter', code: '08' },
 ];
 
 function sectionFor(pathname: string): string {
@@ -19,6 +20,7 @@ function sectionFor(pathname: string): string {
   if (pathname.startsWith('/journeys')) return 'Journey player';
   if (pathname.startsWith('/models')) return 'Models and database';
   if (pathname.startsWith('/commands')) return 'Command atlas';
+  if (pathname.startsWith('/security')) return 'Security measures';
   if (pathname.startsWith('/present')) return 'Presenter mode';
   return 'System overview';
 }
@@ -40,7 +42,7 @@ export default function AtlasLayout() {
 
         <div className="phase-pill">
           <span className="pulse-dot" />
-          Atlas complete · 6 phases
+          Atlas complete · 7 sections
         </div>
 
         <nav className="nav" aria-label="Atlas sections">
@@ -74,6 +76,10 @@ export default function AtlasLayout() {
           <div>
             <span>Catalogued files</span>
             <strong>{files.length}</strong>
+          </div>
+          <div>
+            <span>Security measures</span>
+            <strong>{securityMeasures.length}</strong>
           </div>
           <p>Public locally · blueprint mode</p>
         </div>

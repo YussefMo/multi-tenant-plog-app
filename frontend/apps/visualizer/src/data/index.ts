@@ -3,6 +3,12 @@ import requestsJson from '@/data/generated/requests.generated.json';
 import { commands, commandsByName, schedules } from '@/data/commands';
 import { journeys, journeysById } from '@/data/journeys';
 import { erdEdges, models, modelsByName, tables, tablesByName } from '@/data/models';
+import {
+  securityByCategory,
+  securityById,
+  securityCategories,
+  securityMeasures,
+} from '@/data/security';
 import type { FileRecord, RequestsDocument } from '@/types';
 
 export const files = filesJson as FileRecord[];
@@ -21,6 +27,10 @@ export {
   models,
   modelsByName,
   schedules,
+  securityByCategory,
+  securityById,
+  securityCategories,
+  securityMeasures,
   tables,
   tablesByName,
 };

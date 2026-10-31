@@ -225,6 +225,33 @@ ERD edges are derived automatically from `relations`. Relation targets must exis
 
 Every `writes[].table` must exist in the table catalog.
 
+### Security measures — `src/data/security.ts`
+
+```ts
+{
+  id: 'tenant-active-gate',
+  title: 'Tenant active gate',
+  category: 'identity',              // 9 known category ids
+  realm: 'tenant',                   // owner | tenant | public | cross-cutting
+  posture: 'enforced',               // enforced | configurable | defense-in-depth
+  risk: 'critical',                  // critical | high | medium | low
+  summary: 'Soft-deleted tenants cannot keep using the API.',
+  threat: 'A valid cookie could outlive the tenant.',
+  control: 'EnsureTenantActive logs out and invalidates the session.',
+  why: 'Soft delete must revoke access immediately.',
+  implementation: ['Check the tenant with trashed.', 'Invalidate the session.'],
+  files: ['app/Http/Middleware/EnsureTenantActive.php', 'routes/api.php'],
+  endpoints: [{ method: 'GET', path: '/api/v1/posts' }],
+  tests: ['tests/Feature/TenantLifecycleTest.php'],
+  journeys: ['tenant-lifecycle'],
+  notes: 'Optional operational caveat.'
+}
+```
+
+Each measure needs a category, realm, posture, risk, summary, threat, control, why, at least two implementation steps, and at least two reference files. Every file and test must be catalogued, every endpoint must exist in the generated request catalog, and every journey id must exist.
+
+The validator also checks coverage: every middleware, policy, scope, security service, security config, security migration, and security test must be referenced by at least one measure.
+
 ## Validation contract
 
 `pnpm atlas:validate` fails when:
@@ -235,11 +262,14 @@ Every `writes[].table` must exist in the table catalog.
 - A journey or step id is duplicated.
 - A model relates to an unknown model or has an unknown table.
 - A command writes to an unknown table.
+- A security measure has an unknown category, realm, posture, risk, file, endpoint, test, or journey.
+- A security measure is missing threat, control, why, implementation, or reference files.
+- A security-critical backend file is not referenced by any measure.
 
 Successful output:
 
 ```text
-Atlas OK: 72 requests, 180 files, 30 journeys, 14 models, 6 commands, all references valid.
+Atlas OK: 72 requests, 189 files, 30 journeys, 14 models, 6 commands, 48 security measures, 9 categories, 77/77 critical files covered, all references valid.
 ```
 
 ## Adding or changing data
@@ -247,7 +277,7 @@ Atlas OK: 72 requests, 180 files, 30 journeys, 14 models, 6 commands, all refere
 1. Change Laravel routes or controllers.
 2. Run `pnpm generate:requests`.
 3. Update `files.json` for any new backend file.
-4. Update journeys, models, or commands for the new behavior.
+4. Update journeys, models, commands, or security measures for the new behavior.
 5. Run `pnpm atlas:validate`.
 6. Run `pnpm typecheck:frontend`.
 7. Run `pnpm build:visualizer` if you need the static build.

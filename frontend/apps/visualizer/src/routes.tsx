@@ -44,6 +44,7 @@ const routes: RouteObject[] = [
           },
           { path: 'models', lazy: page(() => import('@/app/(atlas)/models/page')) },
           { path: 'commands', lazy: page(() => import('@/app/(atlas)/commands/page')) },
+          { path: 'security', lazy: page(() => import('@/app/(atlas)/security/page')) },
         ],
       },
       {
