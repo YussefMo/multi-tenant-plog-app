@@ -17,6 +17,10 @@ class DemoSeederApiTest extends TestCase
 
   private User $admin;
 
+  private Tenant $tenantThree;
+
+  private User $adminThree;
+
   private User $viewer;
 
   private Owner $owner;
@@ -30,6 +34,8 @@ class DemoSeederApiTest extends TestCase
 
     $this->tenantOne = Tenant::query()->where('name', 'Demo Tenant')->firstOrFail();
     $this->admin = User::query()->where('email', 'admin@demo.test')->firstOrFail();
+    $this->tenantThree = Tenant::query()->where('name', 'Northwind Labs')->firstOrFail();
+    $this->adminThree = User::query()->where('email', 'admin3@demo.test')->firstOrFail();
     $this->viewer = User::query()->where('email', 'viewer@demo.test')->firstOrFail();
     $this->owner = Owner::query()->where('email', 'owner@demo.test')->firstOrFail();
   }
@@ -44,12 +50,12 @@ class DemoSeederApiTest extends TestCase
     $this->actingAs($this->admin)
       ->getJson('/api/v1/users')
       ->assertOk()
-      ->assertJsonCount(2, 'data');
+      ->assertJsonCount(5, 'data');
 
     $this->actingAs($this->admin)
       ->getJson('/api/v1/profiles')
       ->assertOk()
-      ->assertJsonCount(1, 'data');
+      ->assertJsonCount(2, 'data');
 
     $this->actingAs($this->admin)
       ->getJson('/api/v1/billing/subscription')
@@ -69,12 +75,23 @@ class DemoSeederApiTest extends TestCase
     $this->actingAs($this->viewer)
       ->getJson('/api/v1/tenants')
       ->assertOk()
-      ->assertJsonCount(2, 'data');
+      ->assertJsonCount(4, 'data');
 
     $this->actingAs($this->viewer)
       ->getJson("/api/v1/tenants/{$this->tenantOne->id}/posts")
       ->assertOk()
       ->assertJsonCount(15, 'data');
+
+    $pending = User::query()->where('email', 'pending@demo.test')->firstOrFail();
+
+    $this->actingAs($this->admin)
+      ->getJson("/api/v1/users/{$pending->id}")
+      ->assertOk()
+      ->assertJsonPath('data.invitation.status', 'pending');
+
+    $this->actingAs($this->adminThree)
+      ->postJson('/api/v1/posts', ['title' => 'Blocked', 'body' => 'Body'])
+      ->assertStatus(402);
   }
 
   public function test_owner_billing_endpoints_return_seeded_data(): void
@@ -82,7 +99,17 @@ class DemoSeederApiTest extends TestCase
     $this->actingAs($this->owner, 'owner')
       ->getJson('/api/v1/owner/tenants')
       ->assertOk()
-      ->assertJsonCount(2, 'data');
+      ->assertJsonCount(4, 'data');
+
+    $this->actingAs($this->owner, 'owner')
+      ->getJson('/api/v1/owner/tenants?state=trashed')
+      ->assertOk()
+      ->assertJsonCount(1, 'data');
+
+    $this->actingAs($this->owner, 'owner')
+      ->getJson('/api/v1/owner/tenants/purged')
+      ->assertOk()
+      ->assertJsonCount(1, 'data');
 
     $this->actingAs($this->owner, 'owner')
       ->getJson('/api/v1/owner/plans')
@@ -97,10 +124,13 @@ class DemoSeederApiTest extends TestCase
     $response = $this->actingAs($this->owner, 'owner')
       ->getJson('/api/v1/owner/billing/metrics')
       ->assertOk()
-      ->assertJsonPath('data.mrr', 25000)
-      ->assertJsonPath('data.arr', 300000)
-      ->assertJsonPath('data.subscriptions.active', 1)
-      ->assertJsonPath('data.subscriptions.trialing', 1);
+      ->assertJsonPath('data.mrr', 45000)
+      ->assertJsonPath('data.arr', 540000)
+      ->assertJsonPath('data.subscriptions.active', 2)
+      ->assertJsonPath('data.subscriptions.trialing', 1)
+      ->assertJsonPath('data.subscriptions.past_due', 1)
+      ->assertJsonPath('data.subscriptions.canceled', 1)
+      ->assertJsonPath('data.subscriptions.total', 5);
 
     $this->assertCount(12, $response->json('data.timeline'));
     $this->assertNotEmpty($response->json('data.payment_status_counts'));

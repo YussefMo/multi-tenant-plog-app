@@ -202,7 +202,7 @@ Before relying on a package's API, confirm its installed version:
 # CI
 
 - `.github/workflows/ci.yml` runs on every push to `master`.
-- It checks formatting, types, tests against MariaDB, and a production build.
+- It checks formatting, types, tests against MySQL, and a production build.
 - Keep CI green before merging.
 
 === project IDE rules ===

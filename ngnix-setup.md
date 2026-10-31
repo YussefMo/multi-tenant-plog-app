@@ -120,7 +120,7 @@ Edit the environment file:
 nano .env
 ```
 
-Example values for a local MariaDB/MySQL database:
+Example values for a local MySQL database:
 
 ```dotenv
 APP_NAME=LaravelApi
