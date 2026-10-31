@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError } from '@multi-tenant-plog/shared/lib/http';
 import { notify } from '@multi-tenant-plog/shared/lib/toast';
+import { InfoCallout } from '@multi-tenant-plog/shared/components/components-parts';
 import { Button } from '@multi-tenant-plog/shared/ui/button';
 import {
   Card,
@@ -40,7 +41,9 @@ function validate(values: LoginValues): Record<string, string> {
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const login = useViewerLogin();
+  const tenantSession = (location.state as { reason?: string } | null)?.reason === 'tenant-session';
   const [values, setValues] = useState<LoginValues>({ email: '', password: '', remember: false });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -90,6 +93,14 @@ export default function LoginForm() {
         <CardDescription>Discover tenants and read their published posts.</CardDescription>
       </CardHeader>
       <CardContent>
+        {tenantSession ? (
+          <div className="mb-4">
+            <InfoCallout>
+              You are signed in as a tenant user. Sign in with a viewer account to use this app.
+            </InfoCallout>
+          </div>
+        ) : null}
+
         <form className="space-y-4" onSubmit={submit} noValidate>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

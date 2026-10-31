@@ -53,4 +53,14 @@ describe('viewer LoginForm', () => {
       expect.any(Object),
     );
   });
+
+  it('explains when a tenant session is active', () => {
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/login', state: { reason: 'tenant-session' } }]}>
+        <LoginForm />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/signed in as a tenant user/i)).toBeInTheDocument();
+  });
 });

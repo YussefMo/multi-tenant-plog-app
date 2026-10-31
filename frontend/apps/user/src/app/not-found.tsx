@@ -1,15 +1,20 @@
+import { Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { StatePage } from '@multi-tenant-plog/shared/components/components-parts';
+import { Button } from '@multi-tenant-plog/shared/ui/button';
 
 export default function NotFound() {
   return (
-    <main className="placeholder">
-      <div className="grid" aria-hidden="true" />
-      <section className="panel">
-        <p className="eyebrow">404 · User web</p>
-        <h1>Page not found</h1>
-        <p className="lede">This user route does not exist yet.</p>
-        <Link to="/">Back to the console →</Link>
-      </section>
-    </main>
+    <StatePage
+      icon={Compass}
+      title="Page not found"
+      description="This user route does not exist."
+      meta="404 · User web"
+      actions={
+        <Button asChild>
+          <Link to="/">Back to discover</Link>
+        </Button>
+      }
+    />
   );
 }

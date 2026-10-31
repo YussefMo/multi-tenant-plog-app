@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@multi-tenant-plog/shared/lib/http';
 
 const { useViewerMe } = vi.hoisted(() => ({ useViewerMe: vi.fn() }));
@@ -8,22 +8,6 @@ const { useViewerMe } = vi.hoisted(() => ({ useViewerMe: vi.fn() }));
 vi.mock('@/lib/hooks/auth.hook', () => ({ useViewerMe }));
 
 import RequireViewerAuth from '@/layout/RequireViewerAuth';
-
-const originalLocation = window.location;
-
-function mockLocation(assign: ReturnType<typeof vi.fn>) {
-  Object.defineProperty(window, 'location', {
-    configurable: true,
-    value: { assign },
-  });
-}
-
-afterEach(() => {
-  Object.defineProperty(window, 'location', {
-    configurable: true,
-    value: originalLocation,
-  });
-});
 
 function renderGuard() {
   return render(
@@ -77,10 +61,7 @@ describe('RequireViewerAuth', () => {
     expect(screen.getByText('protected viewer content')).toBeInTheDocument();
   });
 
-  it('sends tenant admins and authors to the tenant client', () => {
-    const assign = vi.fn();
-    mockLocation(assign);
-
+  it('sends tenant admins and authors to the viewer login instead of the tenant client', () => {
     useViewerMe.mockReturnValue({
       data: {
         id: 2,
@@ -97,7 +78,7 @@ describe('RequireViewerAuth', () => {
 
     renderGuard();
 
-    expect(assign).toHaveBeenCalledWith('http://localhost:3001');
+    expect(screen.getByText('viewer login page')).toBeInTheDocument();
     expect(screen.queryByText('protected viewer content')).not.toBeInTheDocument();
   });
 

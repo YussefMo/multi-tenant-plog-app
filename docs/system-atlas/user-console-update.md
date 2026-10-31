@@ -80,7 +80,7 @@ User client (add when the client is represented in the Atlas):
 {
   "path": "frontend/apps/user/src/layout/RequireViewerAuth.tsx",
   "layer": "client",
-  "purpose": "Viewer session guard with loading, 401/403 redirects, and tenant-client redirect for admins/authors.",
+  "purpose": "Viewer session guard with loading, 401/403 redirects, and non-viewer sessions sent to the viewer login.",
   "features": ["user-console", "auth", "frontend"]
 },
 {
@@ -279,7 +279,7 @@ Suggested steps:
 
 1. `login` — login form, CSRF, `useViewerLogin`, tenant-user redirect.
 2. `register` — name/email/password confirmation, auto sign-in.
-3. `guard` — `RequireViewerAuth`, cached `useViewerMe` for 10 minutes.
+3. `guard` — `RequireViewerAuth`, cached `useViewerMe` for 10 minutes; non-viewer sessions are sent to `/login` with an explanatory callout.
 4. `discover` — overview metrics, search, category filter, tenant cards, recent posts.
 5. `tenant` — tenant header, published posts, search, pagination.
 6. `feed` — global published feed and post detail.
