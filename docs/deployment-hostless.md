@@ -138,7 +138,7 @@ Use a **Docker** application.
 
 Hostless sets `PORT` and expects the process to bind `0.0.0.0`. The Nginx template listens on `0.0.0.0:${PORT}`.
 
-The root filesystem is read-only at runtime. The image sends Laravel runtime caches to `/tmp`:
+The root filesystem is read-only at runtime and the container runs as a non-root user, so nothing in the entrypoint writes to the image. Laravel runtime caches go to `/tmp`:
 
 ```text
 APP_CONFIG_CACHE=/tmp/laravel/cache/config.php
@@ -149,6 +149,8 @@ APP_SERVICES_CACHE=/tmp/laravel/cache/services.php
 VIEW_COMPILED_PATH=/tmp/laravel/views
 LOG_CHANNEL=stderr
 ```
+
+Nginx follows the same rule: the entrypoint renders the virtual host into `/tmp/nginx/conf.d/default.conf`, and `/etc/nginx/nginx-main.conf` keeps its pid and temp paths under `/tmp/nginx`. The entrypoint never calls `chown`; it creates the `/tmp` directories it owns and makes them world-writable instead.
 
 No persistent volume is required because the app has no uploads. Logs go to stdout/stderr.
 
@@ -470,15 +472,17 @@ If login succeeds but requests return 419, check:
 
 ## 11. Common Hostless pitfalls
 
-| Problem               | Fix                                                          |
-| --------------------- | ------------------------------------------------------------ |
-| 502 from Nginx        | Set the internal port to `8080` or let `PORT` be injected.   |
-| App does not start    | Nginx must bind `0.0.0.0:$PORT`; do not hardcode a port.     |
-| Migrations fail       | Confirm PostgreSQL is reachable and `OWNER_DB_*` is correct. |
-| 419 CSRF              | `SESSION_DOMAIN` and CORS origins are wrong.                 |
-| Cookies missing       | API must be HTTPS and `SESSION_SECURE_COOKIE=true`.          |
-| Write errors          | Keep the `/tmp` cache paths or mount a volume at `storage`.  |
-| Mixed content blocked | Use `https://api.ymdev.me`, not `http://`.                   |
-| 500 after deploy      | Check `LOG_CHANNEL=stderr` output and `APP_KEY`.             |
-| Stripe webhook 400    | `STRIPE_WEBHOOK_SECRET` does not match the endpoint.         |
-| Scramble docs 503     | `DOCS_USERNAME` / `DOCS_PASSWORD` are missing.               |
+| Problem                          | Fix                                                          |
+| -------------------------------- | ------------------------------------------------------------ |
+| 502 from Nginx                   | Set the internal port to `8080` or let `PORT` be injected.   |
+| App does not start               | Nginx must bind `0.0.0.0:$PORT`; do not hardcode a port.     |
+| `chown: Operation not permitted` | Container is non-root; never `chown` at runtime.             |
+| `Read-only file system`          | Put runtime state in `/tmp` (caches, nginx config, pid).     |
+| Migrations fail                  | Confirm PostgreSQL is reachable and `OWNER_DB_*` is correct. |
+| 419 CSRF                         | `SESSION_DOMAIN` and CORS origins are wrong.                 |
+| Cookies missing                  | API must be HTTPS and `SESSION_SECURE_COOKIE=true`.          |
+| Write errors                     | Keep the `/tmp` cache paths or mount a volume at `storage`.  |
+| Mixed content blocked            | Use `https://api.ymdev.me`, not `http://`.                   |
+| 500 after deploy                 | Check `LOG_CHANNEL=stderr` output and `APP_KEY`.             |
+| Stripe webhook 400               | `STRIPE_WEBHOOK_SECRET` does not match the endpoint.         |
+| Scramble docs 503                | `DOCS_USERNAME` / `DOCS_PASSWORD` are missing.               |

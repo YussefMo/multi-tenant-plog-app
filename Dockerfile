@@ -45,6 +45,7 @@ ENV APP_CONFIG_CACHE=/tmp/laravel/cache/config.php \
 
 COPY --from=vendor /app /var/www/html
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY docker/nginx-main.conf /etc/nginx/nginx-main.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 

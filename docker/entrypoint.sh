@@ -10,19 +10,25 @@ fi
 
 export PORT="${PORT:-8080}"
 
+# Hostless runs the container as a non-root user with a read-only root filesystem.
+# /tmp is the only writable path, so runtime caches and the nginx config live there.
 mkdir -p /tmp/laravel/cache /tmp/laravel/views
-chown -R www-data:www-data /tmp/laravel
+mkdir -p /tmp/nginx/conf.d \
+    /tmp/nginx/client_temp \
+    /tmp/nginx/proxy_temp \
+    /tmp/nginx/fastcgi_temp \
+    /tmp/nginx/uwsgi_temp \
+    /tmp/nginx/scgi_temp
+chmod -R 0777 /tmp/laravel /tmp/nginx
 
 envsubst '$PORT' \
     < /etc/nginx/templates/default.conf.template \
-    > /etc/nginx/conf.d/default.conf
+    > /tmp/nginx/conf.d/default.conf
 
 php artisan package:discover --ansi
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-
-chown -R www-data:www-data /tmp/laravel
 
 attempt=0
 until php artisan migrate --force; do
