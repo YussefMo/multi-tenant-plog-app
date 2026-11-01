@@ -39,8 +39,8 @@ class UserController extends Controller
       ->with('profile', 'latestInvitation')
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('name', 'like', "%{$search}%")
-            ->orWhere('email', 'like', "%{$search}%");
+          $query->whereLike('name', "%{$search}%")
+            ->orWhereLike('email', "%{$search}%");
         });
       })
       ->when(

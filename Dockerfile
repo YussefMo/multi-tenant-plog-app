@@ -27,14 +27,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
     libzip-dev \
     libonig-dev \
-    libxml2-dev \
-    libcurl4-openssl-dev \
-    && docker-php-ext-install pdo_mysql bcmath intl zip opcache mbstring curl \
+    libpq-dev \
+    && docker-php-ext-install pdo_mysql pdo_pgsql bcmath intl zip opcache mbstring \
     && docker-php-ext-enable opcache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
+
+ENV APP_CONFIG_CACHE=/tmp/laravel/cache/config.php \
+    APP_ROUTES_CACHE=/tmp/laravel/cache/routes-v7.php \
+    APP_EVENTS_CACHE=/tmp/laravel/cache/events.php \
+    APP_PACKAGES_CACHE=/tmp/laravel/cache/packages.php \
+    APP_SERVICES_CACHE=/tmp/laravel/cache/services.php \
+    VIEW_COMPILED_PATH=/tmp/laravel/views \
+    LOG_CHANNEL=stderr
 
 COPY --from=vendor /app /var/www/html
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template

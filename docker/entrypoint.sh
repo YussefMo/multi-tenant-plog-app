@@ -10,6 +10,9 @@ fi
 
 export PORT="${PORT:-8080}"
 
+mkdir -p /tmp/laravel/cache /tmp/laravel/views
+chown -R www-data:www-data /tmp/laravel
+
 envsubst '$PORT' \
     < /etc/nginx/templates/default.conf.template \
     > /etc/nginx/conf.d/default.conf
@@ -18,6 +21,8 @@ php artisan package:discover --ansi
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+chown -R www-data:www-data /tmp/laravel
 
 attempt=0
 until php artisan migrate --force; do

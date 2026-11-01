@@ -30,13 +30,13 @@ class TenantDirectoryController extends Controller
     $tenants = Tenant::query()
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('name', 'like', "%{$search}%")
-            ->orWhere('category', 'like', "%{$search}%");
+          $query->whereLike('name', "%{$search}%")
+            ->orWhereLike('category', "%{$search}%");
         });
       })
       ->when(
         $request->filled('name'),
-        fn ($query) => $query->where('name', 'like', '%'.$request->string('name')->toString().'%'),
+        fn ($query) => $query->whereLike('name', '%'.$request->string('name')->toString().'%'),
       )
       ->when(
         $request->filled('category'),
@@ -83,8 +83,8 @@ class TenantDirectoryController extends Controller
       ->with(['author', 'tenant'])
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('title', 'like', "%{$search}%")
-            ->orWhere('slug', 'like', "%{$search}%");
+          $query->whereLike('title', "%{$search}%")
+            ->orWhereLike('slug', "%{$search}%");
         });
       })
       ->orderByDesc('published_at')

@@ -9,7 +9,7 @@ Backend-only Laravel 13 API application. No application Blade views, no frontend
 - PHP 8.3+
 - Composer 2
 - Node.js 24+ and pnpm 12+ (for Prettier and frontend apps)
-- MySQL / MariaDB
+- PostgreSQL 16
 
 ## Setup
 
@@ -22,31 +22,34 @@ php artisan key:generate
 Create the databases and point `.env` at them:
 
 ```sql
-CREATE DATABASE multi_tenant_plog_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE multi_tenant_plog_app_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE multi_tenant_plog_owner CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE multi_tenant_plog_owner_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE multi_tenant_plog_app;
+CREATE DATABASE multi_tenant_plog_app_test;
+CREATE DATABASE multi_tenant_plog_owner_test;
 ```
 
 ```dotenv
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_DATABASE=multi_tenant_plog_app
-DB_USERNAME=root
-DB_PASSWORD=
+DB_USERNAME=youssef
+DB_PASSWORD=1234
+DB_SSLMODE=prefer
+DB_SCHEMA=public
 
-OWNER_DB_CONNECTION=mysql
+OWNER_DB_CONNECTION=pgsql
 OWNER_DB_HOST=127.0.0.1
-OWNER_DB_PORT=3306
-OWNER_DB_DATABASE=multi_tenant_plog_owner
-OWNER_DB_USERNAME=root
-OWNER_DB_PASSWORD=
+OWNER_DB_PORT=5432
+OWNER_DB_DATABASE=multi_tenant_plog_app
+OWNER_DB_USERNAME=youssef
+OWNER_DB_PASSWORD=1234
+OWNER_DB_SCHEMA=owner
+OWNER_DB_SSLMODE=prefer
 
 PUBLIC_API_URL=http://multi-tenant-plog.test
 ```
 
-Then migrate both databases:
+Owner tables live in the `owner` schema of the app database. The `create_owner_schema` migration creates it, so migrate the app first, then the owner path:
 
 ```bash
 php artisan migrate
@@ -268,7 +271,7 @@ curl http://multi-tenant-plog.test/api/v1/health
 
 ## Tests
 
-Tests run against the MySQL test database configured in `phpunit.xml`.
+Tests run against the PostgreSQL test databases configured in `phpunit.xml`.
 
 ```bash
 php artisan test
@@ -351,7 +354,7 @@ It includes:
 - The full generated request catalog with search, method/realm/group filters, permissions, middleware, and controller files.
 - A purpose catalog for every relevant file, with deep links from journeys and details.
 - 16 playable journeys and cross-cutting systems with middleware, request classes, services, models, tables, DB operations, responses, error branches, and speaker notes.
-- An ERD for the application and owner databases, a model explorer for all 13 models, and a table explorer with readers and writers.
+- An ERD for the application and owner schemas, a model explorer for all 13 models, and a table explorer with readers and writers.
 - A command atlas for `owner:create`, `permissions:sync`, `tenants:purge`, `stripe:sync-plans`, and `stripe:sync-billing`, plus the daily purge schedule.
 - Presenter mode with keyboard navigation, focus mode, deep links, and live switching between journeys, models, commands, and requests.
 

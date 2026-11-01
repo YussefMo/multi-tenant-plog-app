@@ -36,8 +36,8 @@ class PostController extends Controller
       ->with(['author', 'tenant'])
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('title', 'like', "%{$search}%")
-            ->orWhere('slug', 'like', "%{$search}%");
+          $query->whereLike('title', "%{$search}%")
+            ->orWhereLike('slug', "%{$search}%");
         });
       })
       ->when(

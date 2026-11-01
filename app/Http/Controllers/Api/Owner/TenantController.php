@@ -42,8 +42,8 @@ class TenantController extends Controller
       ->when($state === 'all', fn ($query) => $query->withTrashed())
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('name', 'like', "%{$search}%")
-            ->orWhere('category', 'like', "%{$search}%");
+          $query->whereLike('name', "%{$search}%")
+            ->orWhereLike('category', "%{$search}%");
         });
       })
       ->when(

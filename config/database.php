@@ -3,6 +3,9 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+$ownerDriver = env('OWNER_DB_CONNECTION', env('DB_CONNECTION', 'pgsql'));
+$ownerUsesPostgres = $ownerDriver === 'pgsql';
+
 return [
 
   /*
@@ -65,20 +68,22 @@ return [
     ],
 
     'owner' => [
-      'driver' => env('OWNER_DB_CONNECTION', 'mysql'),
+      'driver' => $ownerDriver,
       'url' => env('OWNER_DB_URL'),
       'host' => env('OWNER_DB_HOST', '127.0.0.1'),
-      'port' => env('OWNER_DB_PORT', '3306'),
+      'port' => env('OWNER_DB_PORT', $ownerUsesPostgres ? '5432' : '3306'),
       'database' => env('OWNER_DB_DATABASE', 'multi_tenant_plog_owner'),
       'username' => env('OWNER_DB_USERNAME', 'root'),
       'password' => env('OWNER_DB_PASSWORD', ''),
       'unix_socket' => env('OWNER_DB_SOCKET', ''),
-      'charset' => env('OWNER_DB_CHARSET', 'utf8mb4'),
+      'charset' => env('OWNER_DB_CHARSET', $ownerUsesPostgres ? 'utf8' : 'utf8mb4'),
       'collation' => env('OWNER_DB_COLLATION', 'utf8mb4_unicode_ci'),
       'prefix' => '',
       'prefix_indexes' => true,
       'strict' => true,
       'engine' => null,
+      'search_path' => env('OWNER_DB_SCHEMA', $ownerUsesPostgres ? 'owner' : 'public'),
+      'sslmode' => env('OWNER_DB_SSLMODE', env('DB_SSLMODE', 'prefer')),
       'options' => extension_loaded('pdo_mysql') ? array_filter([
         Mysql::ATTR_SSL_CA => env('OWNER_MYSQL_ATTR_SSL_CA'),
       ]) : [],
@@ -115,7 +120,7 @@ return [
       'charset' => env('DB_CHARSET', 'utf8'),
       'prefix' => '',
       'prefix_indexes' => true,
-      'search_path' => 'public',
+      'search_path' => env('DB_SCHEMA', 'public'),
       'sslmode' => env('DB_SSLMODE', 'prefer'),
     ],
 

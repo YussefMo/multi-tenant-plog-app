@@ -32,8 +32,8 @@ class PermissionProfileController extends Controller
       ->withCount(['users' => fn ($query) => $query->where('is_support', false)])
       ->when($search !== '', function ($query) use ($search): void {
         $query->where(function ($query) use ($search): void {
-          $query->where('name', 'like', "%{$search}%")
-            ->orWhere('description', 'like', "%{$search}%");
+          $query->whereLike('name', "%{$search}%")
+            ->orWhereLike('description', "%{$search}%");
         });
       })
       ->latest()

@@ -12,18 +12,17 @@ return new class () extends Migration {
       $table->boolean('is_tenant_owner')->default(false)->after('is_support');
     });
 
-    DB::statement(
-      <<<'SQL'
-        UPDATE users
-        INNER JOIN (
-          SELECT tenant_id, MIN(id) AS id
-          FROM users
-          WHERE tenant_id IS NOT NULL AND role = 'admin' AND is_support = 0
-          GROUP BY tenant_id
-        ) AS first_admin ON first_admin.id = users.id
-        SET users.is_tenant_owner = 1
-      SQL,
-    );
+    $ownerIds = DB::table('users')
+      ->selectRaw('MIN(id) as owner_id')
+      ->whereNotNull('tenant_id')
+      ->where('role', 'admin')
+      ->where('is_support', false)
+      ->groupBy('tenant_id')
+      ->pluck('owner_id');
+
+    if ($ownerIds->isNotEmpty()) {
+      DB::table('users')->whereIn('id', $ownerIds)->update(['is_tenant_owner' => true]);
+    }
   }
 
   public function down(): void

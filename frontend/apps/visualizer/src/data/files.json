@@ -912,6 +912,12 @@
     "features": ["tenant-users", "protection", "database"]
   },
   {
+    "path": "database/migrations/2026_11_01_073632_create_owner_schema.php",
+    "layer": "database",
+    "purpose": "Creates the PostgreSQL owner schema so owner tables share the app database without collisions.",
+    "features": ["database", "owner", "isolation"]
+  },
+  {
     "path": "app/Http/Controllers/Api/Tenant/ViewerOverviewController.php",
     "layer": "controller",
     "purpose": "Returns viewer directory counts, categories, recent tenants, and recent published posts for the Discover dashboard.",
@@ -1082,7 +1088,7 @@
   {
     "path": "config/database.php",
     "layer": "config",
-    "purpose": "Defines the application and owner MySQL connections, strict mode, and the separate owners database.",
+    "purpose": "Defines the application and owner PostgreSQL connections, strict mode, and the separate owners schema.",
     "features": ["database", "owner", "isolation"]
   },
   {

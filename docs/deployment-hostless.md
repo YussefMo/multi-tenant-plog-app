@@ -1,4 +1,4 @@
-# Deploy Laravel to Hostless (Docker + MySQL)
+# Deploy Laravel to Hostless (Docker + PostgreSQL)
 
 > API: `https://api.ymdev.me`
 >
@@ -31,8 +31,7 @@ The image contains:
 - PHP 8.3 FPM
 - Nginx on the `PORT` provided by Hostless (default `8080`)
 - Supervisor
-- MySQL extensions: `pdo_mysql`, `bcmath`, `intl`, `zip`, `opcache`
-- Laravel scheduler via `php artisan schedule:work`
+- Database extensions: `pdo_pgsql`, `pdo_mysql`, `bcmath`, `intl`, `zip`, `opcache`
 
 The entrypoint runs:
 
@@ -46,33 +45,114 @@ php artisan migrate --force --database=owner --path=database/migrations/owner
 
 It retries migrations while the database starts.
 
-## 1. Create the MySQL databases
+## 1. Database
 
-Preferred: two databases on the Hostless MySQL instance.
+Create a managed **PostgreSQL 16** database in Hostless and link it to this app. The app and the database then run on the same platform, which keeps query latency low.
+
+### One database, two schemas
+
+Hostless gives you one database. The app does not use a second database for owner data; it keeps owner tables in a dedicated `owner` schema:
 
 ```text
-multi_tenant_plog_app
-multi_tenant_plog_owner
+public  → tenants, users, posts, sessions, cache, billing mirrors
+owner   → owners, owner password resets, owner migrations
 ```
 
-The app database holds tenants, users, posts, billing mirrors, sessions, and cache. The owner database holds the `owners` table.
+The app migration `2026_11_01_073632_create_owner_schema` creates the `owner` schema on the owner connection, so the entrypoint only needs:
 
-If Hostless only allows one database, use the same database for both connections. There is no table collision for the current owner migration, which only creates `owners`.
+```bash
+php artisan migrate --force
+php artisan migrate --force --database=owner --path=database/migrations/owner
+```
+
+Each migration set keeps its own `migrations` table (`public.migrations` and `owner.migrations`), so the two sets never collide.
+
+### Hostless environment variables
+
+Copy the values from the Hostless database page (**Databases → your database → Connection Information**) and keep TLS on:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=your-db.db.hostless.cloud
+DB_PORT=5432
+DB_DATABASE=your-db-name
+DB_USERNAME=your-db-user
+DB_PASSWORD=your-db-password
+DB_SSLMODE=require
+DB_SCHEMA=public
+
+OWNER_DB_CONNECTION=pgsql
+OWNER_DB_HOST=your-db.db.hostless.cloud
+OWNER_DB_PORT=5432
+OWNER_DB_DATABASE=your-db-name
+OWNER_DB_USERNAME=your-db-user
+OWNER_DB_PASSWORD=your-db-password
+OWNER_DB_SCHEMA=owner
+OWNER_DB_SSLMODE=require
+```
+
+Both connections point at the same database. Only `OWNER_DB_SCHEMA` differs.
+
+Hostless PostgreSQL runs behind PgBouncer, so keep the connection count modest; the Laravel defaults are fine for a single container.
+
+### Local development parity
+
+Local development uses the same layout:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=multi_tenant_plog_app
+DB_USERNAME=youssef
+DB_PASSWORD=1234
+DB_SSLMODE=prefer
+DB_SCHEMA=public
+
+OWNER_DB_CONNECTION=pgsql
+OWNER_DB_HOST=127.0.0.1
+OWNER_DB_PORT=5432
+OWNER_DB_DATABASE=multi_tenant_plog_app
+OWNER_DB_USERNAME=youssef
+OWNER_DB_PASSWORD=1234
+OWNER_DB_SCHEMA=owner
+OWNER_DB_SSLMODE=prefer
+```
+
+The test suite uses separate databases (`multi_tenant_plog_app_test` and `multi_tenant_plog_owner_test`) with the default `public` schema, so tests never touch development data.
 
 ## 2. Create the Hostless app
 
 Use a **Docker** application.
 
-| Setting           | Value                              |
-| ----------------- | ---------------------------------- |
-| Repository        | this repo                          |
-| Dockerfile        | `Dockerfile`                       |
-| Build context     | repository root                    |
-| Internal port     | `8080` (or let `PORT` override it) |
-| Health check      | `GET /up`                          |
-| Persistent volume | not required                       |
+| Setting                 | Value                            |
+| ----------------------- | -------------------------------- |
+| Build system            | Docker                           |
+| Repository              | this repo                        |
+| Working Directory       | `/`                              |
+| Build Context Directory | `/`                              |
+| Dockerfile Path         | `Dockerfile`                     |
+| Internal port           | Hostless `PORT` (default `8080`) |
+| Health check            | HTTP `GET /up`                   |
+| Persistent volume       | not required                     |
+
+Hostless sets `PORT` and expects the process to bind `0.0.0.0`. The Nginx template listens on `0.0.0.0:${PORT}`.
+
+The root filesystem is read-only at runtime. The image sends Laravel runtime caches to `/tmp`:
+
+```text
+APP_CONFIG_CACHE=/tmp/laravel/cache/config.php
+APP_ROUTES_CACHE=/tmp/laravel/cache/routes-v7.php
+APP_EVENTS_CACHE=/tmp/laravel/cache/events.php
+APP_PACKAGES_CACHE=/tmp/laravel/cache/packages.php
+APP_SERVICES_CACHE=/tmp/laravel/cache/services.php
+VIEW_COMPILED_PATH=/tmp/laravel/views
+LOG_CHANNEL=stderr
+```
 
 No persistent volume is required because the app has no uploads. Logs go to stdout/stderr.
+
+If Hostless reports write failures under `storage`, attach a volume at `/var/www/html/storage` and keep the `/tmp` cache paths above.
 
 Add the domain:
 
@@ -97,19 +177,23 @@ PUBLIC_API_URL=https://api.ymdev.me
 LOG_CHANNEL=stderr
 LOG_LEVEL=info
 
-DB_CONNECTION=mysql
-DB_HOST=HOSTLESS_MYSQL_HOST
-DB_PORT=3306
-DB_DATABASE=multi_tenant_plog_app
-DB_USERNAME=HOSTLESS_MYSQL_USER
-DB_PASSWORD=HOSTLESS_MYSQL_PASSWORD
+DB_CONNECTION=pgsql
+DB_HOST=HOSTLESS_DB_HOST
+DB_PORT=5432
+DB_DATABASE=HOSTLESS_DB_NAME
+DB_USERNAME=HOSTLESS_DB_USER
+DB_PASSWORD=HOSTLESS_DB_PASSWORD
+DB_SSLMODE=require
+DB_SCHEMA=public
 
-OWNER_DB_CONNECTION=mysql
-OWNER_DB_HOST=HOSTLESS_MYSQL_HOST
-OWNER_DB_PORT=3306
-OWNER_DB_DATABASE=multi_tenant_plog_owner
-OWNER_DB_USERNAME=HOSTLESS_MYSQL_USER
-OWNER_DB_PASSWORD=HOSTLESS_MYSQL_PASSWORD
+OWNER_DB_CONNECTION=pgsql
+OWNER_DB_HOST=HOSTLESS_DB_HOST
+OWNER_DB_PORT=5432
+OWNER_DB_DATABASE=HOSTLESS_DB_NAME
+OWNER_DB_USERNAME=HOSTLESS_DB_USER
+OWNER_DB_PASSWORD=HOSTLESS_DB_PASSWORD
+OWNER_DB_SCHEMA=owner
+OWNER_DB_SSLMODE=require
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -186,20 +270,21 @@ php artisan key:generate --show
 
 Copy the `base64:...` value into Hostless. Do not generate it on every container start.
 
-If Hostless provides a single database URL, you can use:
+If Hostless gives you the full connection string, you can use it instead of the separate fields:
 
 ```env
-DB_URL=mysql://user:password@host:3306/multi_tenant_plog_app
-OWNER_DB_URL=mysql://user:password@host:3306/multi_tenant_plog_owner
+DB_URL=postgresql://user:password@host:5432/database?sslmode=require
+OWNER_DB_URL=postgresql://user:password@host:5432/database?sslmode=require
+OWNER_DB_SCHEMA=owner
 ```
 
-Keep the explicit `DB_*` / `OWNER_DB_*` variables if Hostless gives separate fields.
+Keep the explicit `DB_*` / `OWNER_DB_*` variables if Hostless gives separate fields. `OWNER_DB_SCHEMA` is always required so owner tables stay out of `public`.
 
 ## 4. Deploy
 
 1. Push the repository.
 2. Create the Hostless Docker app.
-3. Add the MySQL connection values.
+3. Create the Hostless PostgreSQL database and copy its connection values.
 4. Add the environment variables.
 5. Add `api.ymdev.me` and enable SSL.
 6. Deploy.
@@ -247,6 +332,8 @@ For a showcase deployment, run once:
 ```bash
 php artisan db:seed --class=DemoSeeder --force
 ```
+
+On Hostless PostgreSQL this takes a few seconds. Run it from the Hostless terminal or a one-off cron job rather than with `RUN_DEMO_SEED=true` on every boot.
 
 Use the Hostless console/exec feature.
 
@@ -318,19 +405,24 @@ Redeploy the frontends after changing the API URL.
 
 ## 8. Scheduler
 
-The container runs:
+Create a Hostless **embedded cron job** for the app:
 
-```bash
-php artisan schedule:work
+```text
+Command:  php artisan schedule:run
+Schedule: * * * * *
+Timezone: UTC
 ```
 
-This executes `tenants:purge` and `tenants:mark-due` daily.
+This runs `tenants:purge` and `tenants:mark-due` when they are due.
 
-If Hostless provides cron jobs, you can remove the `[program:scheduler]` block from `docker/supervisord.conf` and add a one-minute cron:
+You can also create two direct cron jobs instead:
 
-```bash
-php artisan schedule:run
+```text
+php artisan tenants:purge      0 0 * * *
+php artisan tenants:mark-due   0 0 * * *
 ```
+
+The container no longer runs a scheduler process; Hostless owns the schedule.
 
 ## 9. Queue
 
@@ -378,13 +470,15 @@ If login succeeds but requests return 419, check:
 
 ## 11. Common Hostless pitfalls
 
-| Problem               | Fix                                                        |
-| --------------------- | ---------------------------------------------------------- |
-| 502 from Nginx        | Set the internal port to `8080` or let `PORT` be injected. |
-| Migrations fail       | Confirm MySQL is reachable and `OWNER_DB_*` is correct.    |
-| 419 CSRF              | `SESSION_DOMAIN` and CORS origins are wrong.               |
-| Cookies missing       | API must be HTTPS and `SESSION_SECURE_COOKIE=true`.        |
-| Mixed content blocked | Use `https://api.ymdev.me`, not `http://`.                 |
-| 500 after deploy      | Check `LOG_CHANNEL=stderr` output and `APP_KEY`.           |
-| Stripe webhook 400    | `STRIPE_WEBHOOK_SECRET` does not match the endpoint.       |
-| Scramble docs 503     | `DOCS_USERNAME` / `DOCS_PASSWORD` are missing.             |
+| Problem               | Fix                                                          |
+| --------------------- | ------------------------------------------------------------ |
+| 502 from Nginx        | Set the internal port to `8080` or let `PORT` be injected.   |
+| App does not start    | Nginx must bind `0.0.0.0:$PORT`; do not hardcode a port.     |
+| Migrations fail       | Confirm PostgreSQL is reachable and `OWNER_DB_*` is correct. |
+| 419 CSRF              | `SESSION_DOMAIN` and CORS origins are wrong.                 |
+| Cookies missing       | API must be HTTPS and `SESSION_SECURE_COOKIE=true`.          |
+| Write errors          | Keep the `/tmp` cache paths or mount a volume at `storage`.  |
+| Mixed content blocked | Use `https://api.ymdev.me`, not `http://`.                   |
+| 500 after deploy      | Check `LOG_CHANNEL=stderr` output and `APP_KEY`.             |
+| Stripe webhook 400    | `STRIPE_WEBHOOK_SECRET` does not match the endpoint.         |
+| Scramble docs 503     | `DOCS_USERNAME` / `DOCS_PASSWORD` are missing.               |
