@@ -152,6 +152,11 @@ LOG_CHANNEL=stderr
 
 Nginx follows the same rule: the entrypoint renders the virtual host into `/tmp/nginx/conf.d/default.conf`, and `/etc/nginx/nginx-main.conf` keeps its pid and temp paths under `/tmp/nginx`. The entrypoint never calls `chown`; it creates the `/tmp` directories it owns and makes them world-writable instead.
 
+Hostless runs the container as root **without** `CAP_SETUID`, `CAP_SETGID`, or `CAP_CHOWN`, so the image does not drop privileges:
+
+- `docker/php-fpm.conf` overrides the pool to `user = root` / `group = root`, and Supervisor starts FPM with `php-fpm -F -R`. Without this, FPM workers die with `failed to setgid(33): Operation not permitted`.
+- `docker/nginx-main.conf` runs Nginx with `master_process off` and `user root`, which avoids worker `setuid`/`initgroups` calls that also need those capabilities.
+
 No persistent volume is required because the app has no uploads. Logs go to stdout/stderr.
 
 If Hostless reports write failures under `storage`, attach a volume at `/var/www/html/storage` and keep the `/tmp` cache paths above.
@@ -476,7 +481,8 @@ If login succeeds but requests return 419, check:
 | -------------------------------- | ------------------------------------------------------------ |
 | 502 from Nginx                   | Set the internal port to `8080` or let `PORT` be injected.   |
 | App does not start               | Nginx must bind `0.0.0.0:$PORT`; do not hardcode a port.     |
-| `chown: Operation not permitted` | Container is non-root; never `chown` at runtime.             |
+| `chown: Operation not permitted` | Root without `CAP_CHOWN`; never `chown` at runtime.          |
+| `failed to setgid(33)`           | No `CAP_SETGID`; run the FPM pool as root with `php-fpm -R`. |
 | `Read-only file system`          | Put runtime state in `/tmp` (caches, nginx config, pid).     |
 | Migrations fail                  | Confirm PostgreSQL is reachable and `OWNER_DB_*` is correct. |
 | 419 CSRF                         | `SESSION_DOMAIN` and CORS origins are wrong.                 |
