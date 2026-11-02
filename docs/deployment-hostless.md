@@ -47,7 +47,7 @@ It retries migrations while the database starts.
 
 ## 1. Database
 
-Create a managed **PostgreSQL 16** database in Hostless and link it to this app. The app and the database then run on the same platform, which keeps query latency low.
+Create a managed **PostgreSQL 17** database in Hostless and link it to this app. The app and the database then run on the same platform, which keeps query latency low.
 
 ### One database, two schemas
 
@@ -264,6 +264,7 @@ BILLING_TRIAL_DAYS=14
 
 DOCS_USERNAME=docs
 DOCS_PASSWORD=CHANGE_THIS
+DOCS_PUBLIC=true
 SCRAMBLE_DEV_TOOLS=false
 
 RUN_DEMO_SEED=false
@@ -412,24 +413,33 @@ Redeploy the frontends after changing the API URL.
 
 ## 8. Scheduler
 
-Create a Hostless **embedded cron job** for the app:
+The app schedules two daily commands in `routes/console.php`:
 
 ```text
-Command:  php artisan schedule:run
-Schedule: * * * * *
-Timezone: UTC
+tenants:mark-due   0 0 * * *   (UTC)
+tenants:purge      0 0 * * *   (UTC)
 ```
 
-This runs `tenants:purge` and `tenants:mark-due` when they are due.
+Create one Hostless **embedded cron job** for the app that runs Laravel's scheduler:
 
-You can also create two direct cron jobs instead:
+| Field     | Value                                    |
+| --------- | ---------------------------------------- |
+| Name      | `scheduler`                              |
+| Command   | `php /var/www/html/artisan schedule:run` |
+| Schedule  | `* * * * *`                              |
+| Timezone  | UTC (offset `0`)                         |
+| Resources | smallest that runs the command           |
+
+Use the absolute artisan path so the command works regardless of the container working directory. The image entrypoint passes the command straight through, so an embedded job never starts nginx or Supervisor.
+
+If you prefer one job per command and no every-minute runs, create two direct cron jobs instead:
 
 ```text
-php artisan tenants:purge      0 0 * * *
-php artisan tenants:mark-due   0 0 * * *
+php /var/www/html/artisan tenants:mark-due   0 0 * * *
+php /var/www/html/artisan tenants:purge     15 0 * * *
 ```
 
-The container no longer runs a scheduler process; Hostless owns the schedule.
+The container does not run a scheduler process; Hostless owns the schedule.
 
 ## 9. Queue
 
@@ -460,7 +470,7 @@ Docs:
 https://api.ymdev.me/docs/api
 ```
 
-Use `DOCS_USERNAME` / `DOCS_PASSWORD`.
+Set `DOCS_PUBLIC=true` to let reviewers read the documentation without the shared credentials. Only `GET`/`HEAD` requests are allowed in public mode; every application endpoint keeps its own authentication. With `DOCS_PUBLIC=false`, the docs fall back to HTTP Basic auth using `DOCS_USERNAME` / `DOCS_PASSWORD`.
 
 CORS check from the frontend:
 

@@ -121,6 +121,35 @@ class SupportAccessTest extends TestCase
       ->assertJsonValidationErrors('ticket');
   }
 
+  public function test_expired_ticket_is_not_consumed_and_creates_no_support_access(): void
+  {
+    $tenant = $this->tenant();
+    $ticket = $this->ticket($tenant);
+
+    TenantSupportTicket::query()->update(['expires_at' => now()->subMinute()]);
+
+    $this->postJson('/api/v1/auth/support-login', ['ticket' => $ticket])
+      ->assertStatus(422);
+
+    $this->assertNull(TenantSupportTicket::query()->firstOrFail()->used_at);
+    $this->assertSame(0, TenantSupportAccess::query()->count());
+    $this->assertGuest('web');
+  }
+
+  public function test_replayed_ticket_does_not_create_a_second_support_session(): void
+  {
+    $tenant = $this->tenant();
+    $ticket = $this->ticket($tenant);
+
+    $this->postJson('/api/v1/auth/support-login', ['ticket' => $ticket])->assertOk();
+
+    $this->postJson('/api/v1/auth/support-login', ['ticket' => $ticket])
+      ->assertStatus(422);
+
+    $this->assertSame(1, TenantSupportAccess::query()->count());
+    $this->assertSame(1, User::query()->where('is_support', true)->count());
+  }
+
   public function test_ticket_is_rejected_if_support_is_disabled_after_issue(): void
   {
     $tenant = $this->tenant();

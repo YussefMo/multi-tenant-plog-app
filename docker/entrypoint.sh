@@ -3,6 +3,21 @@ set -e
 
 cd /var/www/html
 
+# Hostless runs the container as root without CAP_SETUID / CAP_SETGID / CAP_CHOWN,
+# and with a read-only root filesystem. /tmp is the only writable path.
+mkdir -p /tmp/laravel/cache /tmp/laravel/views
+chmod -R 0777 /tmp/laravel
+
+# One-off commands (embedded cron jobs, ad-hoc artisan runs) replace the web stack.
+# The platform may pass the command as one shell string or as separate arguments.
+if [ "$#" -eq 1 ]; then
+    exec /bin/sh -c "$1"
+fi
+
+if [ "$#" -gt 1 ]; then
+    exec "$@"
+fi
+
 if [ -z "${APP_KEY:-}" ]; then
     echo "APP_KEY is required. Generate it with: php artisan key:generate --show" >&2
     exit 1
@@ -10,16 +25,13 @@ fi
 
 export PORT="${PORT:-8080}"
 
-# Hostless runs the container as a non-root user with a read-only root filesystem.
-# /tmp is the only writable path, so runtime caches and the nginx config live there.
-mkdir -p /tmp/laravel/cache /tmp/laravel/views
 mkdir -p /tmp/nginx/conf.d \
     /tmp/nginx/client_temp \
     /tmp/nginx/proxy_temp \
     /tmp/nginx/fastcgi_temp \
     /tmp/nginx/uwsgi_temp \
     /tmp/nginx/scgi_temp
-chmod -R 0777 /tmp/laravel /tmp/nginx
+chmod -R 0777 /tmp/nginx
 
 envsubst '$PORT' \
     < /etc/nginx/templates/default.conf.template \

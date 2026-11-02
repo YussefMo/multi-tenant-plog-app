@@ -25,6 +25,50 @@ class ApiDocsTest extends TestCase
       ->assertHeader('WWW-Authenticate', 'Basic realm="API Docs"');
   }
 
+  public function test_docs_reject_wrong_credentials(): void
+  {
+    $this->withHeaders([
+      'Authorization' => 'Basic '.base64_encode('docs:wrong-password'),
+    ])
+      ->get('/docs/api')
+      ->assertUnauthorized();
+  }
+
+  public function test_docs_are_readable_without_credentials_when_public_mode_is_enabled(): void
+  {
+    config(['scramble.public' => true]);
+
+    $this->get('/docs/api')
+      ->assertOk()
+      ->assertSee('Multi Tenant Plog API', false);
+
+    $this->getJson('/docs/api.json')
+      ->assertOk()
+      ->assertJsonPath('openapi', '3.1.2');
+
+    $this->getJson('/api/v1/tenants')->assertUnauthorized();
+  }
+
+  public function test_public_mode_does_not_bypass_basic_auth_when_it_is_disabled(): void
+  {
+    config(['scramble.public' => false]);
+
+    $this->get('/docs/api')->assertUnauthorized();
+  }
+
+  public function test_docs_report_misconfiguration_when_credentials_are_missing(): void
+  {
+    config([
+      'scramble.public' => false,
+      'scramble.auth.username' => null,
+      'scramble.auth.password' => null,
+    ]);
+
+    $this->getJson('/docs/api.json')
+      ->assertStatus(503)
+      ->assertJsonPath('status', 503);
+  }
+
   public function test_openapi_docs_are_available_with_basic_auth(): void
   {
     $this->withDocsAuth()

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T07:41:03.344Z",
+  "generatedAt": "2026-11-02T15:22:44.538Z",
   "source": "php artisan route:list --json --except-vendor",
   "count": 72,
   "requests": [

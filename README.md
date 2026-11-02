@@ -9,7 +9,7 @@ Backend-only Laravel 13 API application. No application Blade views, no frontend
 - PHP 8.3+
 - Composer 2
 - Node.js 24+ and pnpm 12+ (for Prettier and frontend apps)
-- PostgreSQL 16
+- PostgreSQL 16+ (CI and the Hostless database run PostgreSQL 17)
 
 ## Setup
 

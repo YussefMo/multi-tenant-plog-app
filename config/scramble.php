@@ -169,8 +169,18 @@ MARKDOWN,
 
   'middleware' => [
     'web',
+    'throttle:60,1',
     ProtectDocsAccess::class,
   ],
+
+  /*
+     * Allow anonymous, read-only access to the generated documentation.
+     *
+     * Keep this disabled when the API is not public. Enable it for review or showcase
+     * environments so reviewers can read `/docs/api` without the shared basic-auth
+     * credentials. Only safe (GET/HEAD) requests are allowed through.
+     */
+  'public' => (bool) env('DOCS_PUBLIC', false),
 
   'auth' => [
     'username' => env('DOCS_USERNAME'),

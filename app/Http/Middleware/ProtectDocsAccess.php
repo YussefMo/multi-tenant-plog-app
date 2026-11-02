@@ -10,6 +10,12 @@ class ProtectDocsAccess
 {
   public function handle(Request $request, Closure $next): Response
   {
+    // Read-only documentation access for reviewers when explicitly enabled.
+    // Application endpoints keep their own authentication and authorization.
+    if (config('scramble.public') === true && $request->isMethodSafe()) {
+      return $next($request);
+    }
+
     $username = (string) config('scramble.auth.username', '');
     $password = (string) config('scramble.auth.password', '');
 

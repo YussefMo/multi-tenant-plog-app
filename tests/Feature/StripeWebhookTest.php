@@ -10,6 +10,7 @@ use App\Services\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Mockery;
+use RuntimeException;
 use Stripe\WebhookSignature;
 use Tests\TestCase;
 
@@ -325,6 +326,66 @@ class StripeWebhookTest extends TestCase
     $record = StripeWebhookEvent::query()->where('stripe_event_id', 'evt_unknown')->firstOrFail();
 
     $this->assertNotNull($record->processed_at);
+  }
+
+  public function test_invalid_signature_does_not_persist_the_event_or_mirror_it(): void
+  {
+    $payload = json_encode(
+      $this->event('evt_forged', 'customer.subscription.updated', $this->subscriptionObject()),
+      JSON_THROW_ON_ERROR,
+    );
+
+    $this->call('POST', '/api/v1/stripe/webhook', [], [], [], [
+      'CONTENT_TYPE' => 'application/json',
+      'HTTP_STRIPE_SIGNATURE' => 't=1,v1=deadbeef',
+    ], $payload)->assertStatus(400);
+
+    $this->assertSame(0, StripeWebhookEvent::query()->count());
+    $this->assertSame(0, Subscription::query()->count());
+  }
+
+  public function test_failed_processing_is_retried_until_it_succeeds(): void
+  {
+    $failing = Mockery::mock(StripeGateway::class);
+    $failing->shouldReceive('retrieveSubscription')
+      ->once()
+      ->andThrow(new RuntimeException('Stripe is unavailable.'));
+
+    $this->app->instance(StripeGateway::class, $failing);
+
+    $event = $this->event('evt_retry', 'checkout.session.completed', [
+      'id' => 'cs_retry',
+      'subscription' => 'sub_123',
+    ]);
+
+    $this->webhook($event)->assertStatus(500);
+
+    $record = StripeWebhookEvent::query()->where('stripe_event_id', 'evt_retry')->firstOrFail();
+
+    $this->assertNull($record->processed_at);
+    $this->assertSame(0, Subscription::query()->count());
+
+    $recovered = Mockery::mock(StripeGateway::class);
+    $recovered->shouldReceive('retrieveSubscription')
+      ->once()
+      ->andReturn($this->subscriptionObject());
+
+    $this->app->instance(StripeGateway::class, $recovered);
+
+    $this->webhook($event)
+      ->assertOk()
+      ->assertJsonPath('duplicate', false)
+      ->assertJsonPath('processed', true);
+
+    $this->assertNotNull($record->fresh()->processed_at);
+    $this->assertSame(1, Subscription::query()->count());
+
+    $this->webhook($event)
+      ->assertOk()
+      ->assertJsonPath('duplicate', true)
+      ->assertJsonPath('processed', false);
+
+    $this->assertDatabaseCount('subscriptions', 1);
   }
 
   private function webhook(array $event, ?string $secret = null): TestResponse
